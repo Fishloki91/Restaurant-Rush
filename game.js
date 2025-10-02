@@ -28,6 +28,8 @@ class RestaurantGame {
         this.maxActiveOrders = 8; // Maximum active orders at once
         this.unlockedRecipes = []; // Track unlocked recipes
         this.totalOrdersCompleted = 0; // Track total orders completed for unlocks
+        this.previousDayRevenue = 0; // Track previous day's revenue for trend
+        this.revenueTrend = 0; // Revenue trend (positive or negative)
         
         // Initialize Audio Context for sound effects
         this.audioContext = null;
@@ -364,6 +366,15 @@ class RestaurantGame {
     }
     
     continueToNextDay() {
+        // Calculate revenue trend
+        const currentRevenue = this.revenue;
+        if (this.previousDayRevenue > 0) {
+            this.revenueTrend = ((currentRevenue - this.previousDayRevenue) / this.previousDayRevenue) * 100;
+        } else {
+            this.revenueTrend = 0;
+        }
+        this.previousDayRevenue = currentRevenue;
+        
         // Apply bonus
         const bonus = Math.floor(this.revenue * 0.1);
         this.revenue += bonus;
@@ -848,7 +859,20 @@ class RestaurantGame {
             progressBar.style.width = `${dayProgress}%`;
         }
         
-        document.getElementById('revenue').textContent = `$${this.revenue}`;
+        // Update revenue display with trend indicator
+        const revenueEl = document.getElementById('revenue');
+        let trendIndicator = '';
+        if (this.day > 1 && this.previousDayRevenue > 0) {
+            const trendValue = Math.abs(this.revenueTrend).toFixed(1);
+            if (this.revenueTrend > 0) {
+                trendIndicator = ` <span style="color: #28a745; font-size: 0.8rem;">▲ ${trendValue}%</span>`;
+            } else if (this.revenueTrend < 0) {
+                trendIndicator = ` <span style="color: #dc3545; font-size: 0.8rem;">▼ ${trendValue}%</span>`;
+            } else {
+                trendIndicator = ` <span style="color: #666; font-size: 0.8rem;">━ 0%</span>`;
+            }
+        }
+        revenueEl.innerHTML = `$${this.revenue}${trendIndicator}`;
         
         const avgRating = this.calculateAverageRating();
         document.getElementById('overall-rating').textContent = avgRating.toFixed(1);
