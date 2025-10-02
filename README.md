@@ -30,6 +30,14 @@ Balance quick order fulfillment, staff workload, inventory management, and custo
 
 ## Updates
 
+### v1.1.0 - Staff Upgrade System
+**Major Feature:** Staff upgrade system - Invest in your team! Upgrade staff members up to Level 3 to boost their efficiency by 5% per level, helping you handle busier days.
+
+**Quality of Life Improvements:**
+- Auto-assign toggle - Automatically assign orders to available staff with one click
+- Day progress bar - Visual indicator showing progress through the current day
+- Keyboard shortcuts - Quick access to all major actions (P=Pause, O=Order, R=Restock, A=Auto-assign, S=Sound, ?=Help)
+
 ### v1.0.0 - Day Progression System
 **Major Feature:** Day progression system with increasing difficulty - Your restaurant now advances through 3-minute business days with increasing order frequency and end-of-day bonuses.
 
