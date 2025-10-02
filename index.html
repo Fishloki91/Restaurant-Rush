@@ -188,6 +188,45 @@
             <button id="new-order-btn" class="btn btn-primary" disabled>Generate Order</button>
             <button id="auto-assign-btn" class="btn btn-secondary">🤖 Auto: OFF</button>
             <button id="sound-toggle-btn" class="btn btn-secondary">🔊 Sound On</button>
+            <button id="shortcuts-help-btn" class="btn btn-secondary">⌨️ Shortcuts</button>
+        </div>
+    </div>
+
+    <!-- Keyboard Shortcuts Help Modal -->
+    <div id="shortcuts-modal" class="modal">
+        <div class="modal-content shortcuts-modal-content">
+            <h2>⌨️ Keyboard Shortcuts</h2>
+            <div class="shortcuts-grid">
+                <div class="shortcut-item">
+                    <span class="shortcut-key">P</span>
+                    <span class="shortcut-desc">Pause/Resume game</span>
+                </div>
+                <div class="shortcut-item">
+                    <span class="shortcut-key">O</span>
+                    <span class="shortcut-desc">Generate new order</span>
+                </div>
+                <div class="shortcut-item">
+                    <span class="shortcut-key">R</span>
+                    <span class="shortcut-desc">Restock all inventory</span>
+                </div>
+                <div class="shortcut-item">
+                    <span class="shortcut-key">A</span>
+                    <span class="shortcut-desc">Toggle auto-assign</span>
+                </div>
+                <div class="shortcut-item">
+                    <span class="shortcut-key">S</span>
+                    <span class="shortcut-desc">Toggle sound</span>
+                </div>
+                <div class="shortcut-item">
+                    <span class="shortcut-key">ESC</span>
+                    <span class="shortcut-desc">Return to overview</span>
+                </div>
+                <div class="shortcut-item">
+                    <span class="shortcut-key">?</span>
+                    <span class="shortcut-desc">Show shortcuts hint</span>
+                </div>
+            </div>
+            <button class="btn btn-primary btn-large" onclick="game.toggleShortcutsModal()">Got it!</button>
         </div>
     </div>
 

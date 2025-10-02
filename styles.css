@@ -654,6 +654,66 @@ body {
     border-radius: 3px;
 }
 
+/* Staff Wellbeing Indicators */
+.staff-wellbeing {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.wellbeing-item {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.wellbeing-label {
+    font-size: 0.75rem;
+    color: #666;
+    font-weight: 500;
+}
+
+.wellbeing-bar-container {
+    width: 100%;
+    height: 5px;
+    background: #EDE6DF;
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.wellbeing-bar {
+    height: 100%;
+    transition: width 0.3s ease, background-color 0.3s ease;
+    border-radius: 3px;
+}
+
+.rest-btn {
+    flex: 0 0 auto;
+    padding: 8px 12px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    min-height: 40px;
+    box-shadow: 0 2px 6px rgba(102, 126, 234, 0.3);
+}
+
+.rest-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(102, 126, 234, 0.4);
+    background: linear-gradient(135deg, #7e94ff 0%, #8d61be 100%);
+}
+
+.staff-status.resting {
+    background: #667eea;
+    color: white;
+}
+
 /* Touch devices */
 @media (hover: none) and (pointer: coarse) {
     .upgrade-btn:hover:not(:disabled) {
@@ -1429,6 +1489,54 @@ body {
     background: linear-gradient(90deg, #D89E54, #C17B5B);
     transition: width 0.3s ease;
     border-radius: 3px;
+}
+
+/* Keyboard Shortcuts Modal */
+.shortcuts-modal-content {
+    max-width: 500px;
+}
+
+.shortcuts-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 15px;
+    margin: 20px 0;
+}
+
+.shortcut-item {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 12px;
+    background: #EDE6DF;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.shortcut-item:hover {
+    background: #E5DDD5;
+    transform: translateX(5px);
+}
+
+.shortcut-key {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 50px;
+    padding: 8px 12px;
+    background: linear-gradient(135deg, #C17B5B 0%, #8B5A3C 100%);
+    color: white;
+    font-weight: bold;
+    border-radius: 6px;
+    font-size: 1rem;
+    box-shadow: 0 2px 4px rgba(139, 90, 60, 0.3);
+    font-family: 'Courier New', monospace;
+}
+
+.shortcut-desc {
+    flex: 1;
+    color: #333;
+    font-size: 0.95rem;
 }
 
 

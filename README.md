@@ -41,6 +41,14 @@ Balance quick order fulfillment, staff workload, inventory management, and custo
 
 ## Updates
 
+### v1.7.0 - Staff Fatigue & Morale System
+**Major Feature:** Staff fatigue & morale system - Keep your team happy and rested! Staff now experience fatigue as they work (0-100%), and their morale affects performance. Send tired staff on breaks to rapidly recover fatigue and maintain peak efficiency.
+
+**Quality of Life Improvements:**
+- **Keyboard shortcuts display panel** - Dedicated help modal showing all 7 keyboard shortcuts with visual key indicators
+- **Order completion sound effects** - Pleasant audio chimes for successful orders and error tones for failures using Web Audio API
+- **Revenue trend indicator** - Track day-to-day performance with trend arrows (▲/▼) and percentage changes displayed in the header
+
 ### v1.6.0 - Warm Matte Theme Redesign
 **Major Feature:** Warm matte theme redesign - A complete visual overhaul with warm earth tones (terracotta, burnt sienna, golden browns) and subtle matte texture effects for a more inviting, restaurant-like atmosphere. All UI elements now use the cohesive warm color palette with better contrast.
 
