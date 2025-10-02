@@ -18,6 +18,7 @@ class RestaurantGame {
         this.dayDuration = 180; // 3 minutes per day
         this.orderGenerationChance = 0.4; // Base chance
         this.soundEnabled = true;
+        this.autoAssignEnabled = false; // Auto-assign toggle
         
         this.initializeInventory();
         this.initializeStaff();
@@ -57,11 +58,14 @@ class RestaurantGame {
                 name: member.name,
                 role: member.role,
                 efficiency: member.efficiency,
+                baseEfficiency: member.efficiency, // Store base efficiency
                 speciality: member.speciality,
                 status: 'available',
                 ordersCompleted: 0,
                 currentOrder: null,
-                performance: 100
+                performance: 100,
+                upgradeLevel: 0, // Track upgrade level
+                maxUpgradeLevel: 3 // Maximum upgrade level
             });
         });
     }
@@ -210,6 +214,14 @@ class RestaurantGame {
             if (order.status === 'pending') {
                 order.timeRemaining--;
                 
+                // Auto-assign if enabled and staff available
+                if (this.autoAssignEnabled && order.status === 'pending') {
+                    const availableStaff = this.staff.filter(s => s.status === 'available');
+                    if (availableStaff.length > 0) {
+                        this.assignOrderToStaff(order.id);
+                    }
+                }
+                
                 // Auto-assign if time is running out
                 if (order.timeRemaining < order.timeLimit * 0.3 && order.status === 'pending') {
                     this.assignOrderToStaff(order.id);
@@ -312,6 +324,41 @@ class RestaurantGame {
         this.addFeedback(`Sound ${this.soundEnabled ? 'enabled' : 'disabled'}`, true);
     }
     
+    toggleAutoAssign() {
+        this.autoAssignEnabled = !this.autoAssignEnabled;
+        const btn = document.getElementById('auto-assign-btn');
+        btn.textContent = this.autoAssignEnabled ? '🤖 Auto: ON' : '🤖 Auto: OFF';
+        btn.classList.toggle('btn-success', this.autoAssignEnabled);
+        btn.classList.toggle('btn-secondary', !this.autoAssignEnabled);
+        this.addFeedback(`Auto-assign ${this.autoAssignEnabled ? 'enabled' : 'disabled'}`, true);
+    }
+    
+    upgradeStaff(staffId) {
+        const staff = this.staff.find(s => s.id === staffId);
+        if (!staff) return;
+        
+        if (staff.upgradeLevel >= staff.maxUpgradeLevel) {
+            this.addFeedback('⚠️ Staff is already at maximum upgrade level!', false);
+            return;
+        }
+        
+        // Calculate upgrade cost (increases with level)
+        const upgradeCost = 100 + (staff.upgradeLevel * 50);
+        
+        if (this.revenue < upgradeCost) {
+            this.addFeedback('⚠️ Not enough revenue to upgrade staff!', false);
+            return;
+        }
+        
+        // Apply upgrade
+        this.revenue -= upgradeCost;
+        staff.upgradeLevel++;
+        staff.efficiency = staff.baseEfficiency + (staff.upgradeLevel * 0.05); // +5% per level
+        
+        this.addFeedback(`⭐ ${staff.name} upgraded to Level ${staff.upgradeLevel}! Efficiency: ${(staff.efficiency * 100).toFixed(0)}%`, true);
+        this.render();
+    }
+    
     addFeedback(message, isPositive) {
         const feedbackContainer = document.getElementById('feedback-container');
         const feedbackItem = document.createElement('div');
@@ -340,6 +387,13 @@ class RestaurantGame {
         const dayProgress = (this.dayTimer / this.dayDuration) * 100;
         document.getElementById('game-day').textContent = this.day;
         document.getElementById('game-day').title = `Day ${this.day} - ${Math.floor(dayProgress)}% complete`;
+        
+        // Update day progress bar
+        const progressBar = document.getElementById('day-progress-bar');
+        if (progressBar) {
+            progressBar.style.width = `${dayProgress}%`;
+        }
+        
         document.getElementById('revenue').textContent = `$${this.revenue}`;
         
         const avgRating = this.calculateAverageRating();
@@ -429,11 +483,15 @@ class RestaurantGame {
             staffCard.className = 'staff-card';
             staffCard.title = `Speciality: ${staff.speciality} | Orders Completed: ${staff.ordersCompleted}`;
             
+            const upgradeCost = 100 + (staff.upgradeLevel * 50);
+            const canUpgrade = staff.upgradeLevel < staff.maxUpgradeLevel;
+            const upgradeStars = '⭐'.repeat(staff.upgradeLevel);
+            
             staffCard.innerHTML = `
                 <div class="staff-header">
                     <div>
-                        <div class="staff-name">${staff.name}</div>
-                        <div class="staff-role">${staff.role}</div>
+                        <div class="staff-name">${staff.name} ${upgradeStars}</div>
+                        <div class="staff-role">${staff.role} ${canUpgrade ? `(Level ${staff.upgradeLevel}/${staff.maxUpgradeLevel})` : '(MAX)'}</div>
                     </div>
                     <span class="staff-status ${staff.status}">${staff.status.toUpperCase()}</span>
                 </div>
@@ -451,6 +509,11 @@ class RestaurantGame {
                         <span class="metric-value">${staff.ordersCompleted}</span>
                     </div>
                 </div>
+                ${canUpgrade ? `
+                    <button class="upgrade-btn" onclick="game.upgradeStaff(${staff.id})" ${this.revenue < upgradeCost ? 'disabled' : ''}>
+                        ⬆️ Upgrade ($${upgradeCost})
+                    </button>
+                ` : '<div style="text-align: center; margin-top: 10px; color: #28a745; font-weight: bold;">✓ MAX LEVEL</div>'}
             `;
             
             container.appendChild(staffCard);
@@ -542,6 +605,44 @@ document.addEventListener('DOMContentLoaded', () => {
     
     document.getElementById('sound-toggle-btn').addEventListener('click', () => {
         game.toggleSound();
+    });
+    
+    document.getElementById('auto-assign-btn').addEventListener('click', () => {
+        game.toggleAutoAssign();
+    });
+    
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+        // Only handle shortcuts if game is running
+        if (!game.isRunning) return;
+        
+        // Prevent shortcuts when typing in input fields
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+        
+        switch(e.key.toLowerCase()) {
+            case 'p': // Pause/Resume
+                document.getElementById('pause-game-btn').click();
+                break;
+            case 'o': // Generate Order
+                if (!game.isPaused) {
+                    document.getElementById('new-order-btn').click();
+                }
+                break;
+            case 'r': // Restock
+                if (!game.isPaused) {
+                    document.getElementById('restock-btn').click();
+                }
+                break;
+            case 'a': // Toggle Auto-assign
+                document.getElementById('auto-assign-btn').click();
+                break;
+            case 's': // Toggle Sound
+                document.getElementById('sound-toggle-btn').click();
+                break;
+            case '?': // Show help
+                game.addFeedback('⌨️ Shortcuts: P=Pause, O=Order, R=Restock, A=Auto-assign, S=Sound', true);
+                break;
+        }
     });
     
     // Initial render
