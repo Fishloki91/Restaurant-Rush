@@ -5,15 +5,11 @@
 ## 🎯 Core Gameplay
 - **Real-time management**: Handle incoming orders with countdown timers
 - **Staff coordination**: Hire and manage staff members with random efficiency levels (60-90%)
-- **Resource management**: Monitor and restock 12 ingredient types when supplies run low
+- **Resource management**: Monitor and restock 8 ingredient types when supplies run low
 - **Customer satisfaction**: Maintain high ratings by completing orders on time
 - **Daily progression**: Complete 3-minute business days with performance summaries
 
 ## 🎮 Key Features
-- **Dynamic Food System** with 40+ dishes across mains, soups, appetizers, and desserts
-- **Order Prioritization** to focus on VIP or high-value orders
-- **Multi-Staff Assignment** allowing team collaboration on challenging orders
-- **Purchase Confirmations** to prevent risky financial decisions
 - **Dynamic Staff Hiring** system to expand your team with randomly-generated employees
 - **End-of-Day Summaries** with detailed performance metrics and bonus rewards
 - **Multi-View Navigation** with dedicated screens for each management area and smooth transitions
@@ -27,15 +23,12 @@
 ## 🎲 Game Mechanics
 - Starting revenue of $200 to begin your restaurant journey
 - Orders auto-generate every 5 seconds (40% base chance, increases with each day)
-- 40+ different dishes ranging from $6-$25 with varying completion times across 4 categories
+- 7 different dishes ranging from $14-$25 with varying completion times
 - Staff efficiency affects order speed; performance changes based on success/failure
 - Failed orders hurt satisfaction (-10 points), completed orders boost it (+2 points)
 - Ingredients are consumed when orders are assigned, requiring strategic restocking ($50 cost)
 - Hire new staff members for $150 with random efficiency stats (60-90%)
-- Assign multiple staff to orders for faster completion (50% efficiency bonus per additional staff)
 - Upgrade staff up to Level 3 for increased efficiency
-- Prioritize orders to focus on high-value or urgent customers
-- Purchase warnings when transactions would leave you with low funds
 - Each day lasts 3 minutes with 10% end-of-day revenue bonus
 - Game over occurs when revenue reaches $0 or below
 
@@ -47,15 +40,6 @@ Balance quick order fulfillment, staff workload, inventory management, and custo
 **Display**: Optimized for 1920x1080 screens with no scrolling
 
 ## Updates
-
-### v1.4.0 - Dynamic Food System & Enhanced Orders
-**Major Feature:**
-- **Dynamic food system** - 40+ dishes across 4 categories (mains, soups, appetizers, desserts) with centralized management and 4 new ingredients (Flour, Cream, Sugar, Spices)
-
-**Quality of Life Improvements:**
-- **Purchase confirmation warnings** - Alert modal when buying staff, upgrades, or inventory would leave you with very low funds (at or below $0)
-- **Multi-staff order assignment** - Assign helper staff to in-progress orders for faster completion (50% efficiency bonus per additional staff)
-- **Enhanced orders display** - Individual item prices shown, priority system with ☆/⭐ buttons to focus on important orders, prioritized orders sort to top with visual indicators
 
 ### v1.3.0 - Staff Hiring & Daily Progression System
 **Major Features:**
