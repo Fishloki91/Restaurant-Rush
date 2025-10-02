@@ -29,9 +29,66 @@ class RestaurantGame {
         this.unlockedRecipes = []; // Track unlocked recipes
         this.totalOrdersCompleted = 0; // Track total orders completed for unlocks
         
+        // Initialize Audio Context for sound effects
+        this.audioContext = null;
+        this.initializeAudio();
+        
         this.initializeInventory();
         this.initializeStaff();
         this.initializeRecipes();
+    }
+    
+    initializeAudio() {
+        try {
+            // Create AudioContext on user interaction (required by browsers)
+            this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        } catch (e) {
+            console.warn('Web Audio API not supported', e);
+        }
+    }
+    
+    playSuccessSound() {
+        if (!this.soundEnabled || !this.audioContext) return;
+        
+        const now = this.audioContext.currentTime;
+        const oscillator = this.audioContext.createOscillator();
+        const gainNode = this.audioContext.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(this.audioContext.destination);
+        
+        // Play a pleasant success chime (C-E-G chord)
+        oscillator.frequency.setValueAtTime(523.25, now); // C5
+        oscillator.frequency.setValueAtTime(659.25, now + 0.1); // E5
+        oscillator.frequency.setValueAtTime(783.99, now + 0.2); // G5
+        
+        gainNode.gain.setValueAtTime(0.2, now);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+        
+        oscillator.start(now);
+        oscillator.stop(now + 0.4);
+    }
+    
+    playFailSound() {
+        if (!this.soundEnabled || !this.audioContext) return;
+        
+        const now = this.audioContext.currentTime;
+        const oscillator = this.audioContext.createOscillator();
+        const gainNode = this.audioContext.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(this.audioContext.destination);
+        
+        // Play a descending error sound
+        oscillator.frequency.setValueAtTime(400, now);
+        oscillator.frequency.exponentialRampToValueAtTime(200, now + 0.3);
+        oscillator.type = 'sawtooth';
+        
+        gainNode.gain.setValueAtTime(0.15, now);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+        
+        oscillator.start(now);
+        oscillator.stop(now + 0.3);
     }
     
     initializeInventory() {
@@ -530,6 +587,9 @@ class RestaurantGame {
             this.customerSatisfaction = Math.min(100, this.customerSatisfaction + satisfactionChange);
             const vipLabel = order.isVIP ? ' ⭐ VIP' : '';
             this.addFeedback(`✅ Order #${order.id}${vipLabel} completed! Customer is happy! +$${order.totalPrice}`, true);
+            
+            // Play success sound
+            this.playSuccessSound();
         } else {
             order.status = 'failed';
             this.unhappyCustomers++;
@@ -544,6 +604,9 @@ class RestaurantGame {
             this.customerSatisfaction = Math.max(0, this.customerSatisfaction - penaltyChange);
             const vipLabel = order.isVIP ? ' ⭐ VIP' : '';
             this.addFeedback(`❌ Order #${order.id}${vipLabel} failed! Customer is unhappy!`, false);
+            
+            // Play fail sound
+            this.playFailSound();
         }
         
         this.completedOrders.push(order);
@@ -1153,6 +1216,11 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Button event listeners
     document.getElementById('start-game-btn').addEventListener('click', () => {
+        // Resume AudioContext on user interaction
+        if (game.audioContext && game.audioContext.state === 'suspended') {
+            game.audioContext.resume();
+        }
+        
         game.start();
         document.getElementById('start-game-btn').disabled = true;
         document.getElementById('pause-game-btn').disabled = false;
