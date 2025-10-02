@@ -1418,7 +1418,7 @@ body {
 
 .unlock-progress {
     height: 6px;
-    background: #e9ecef;
+    background: #EDE6DF;
     border-radius: 3px;
     overflow: hidden;
     margin: 8px 0;
@@ -1426,7 +1426,7 @@ body {
 
 .unlock-progress-bar {
     height: 100%;
-    background: linear-gradient(90deg, #ffc107, #ff9800);
+    background: linear-gradient(90deg, #D89E54, #C17B5B);
     transition: width 0.3s ease;
     border-radius: 3px;
 }
