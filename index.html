@@ -236,6 +236,18 @@
         </div>
     </div>
 
+    <!-- Purchase Confirmation Modal -->
+    <div id="purchase-confirmation-modal" class="modal">
+        <div class="modal-content">
+            <h2 style="color: #ffc107;">⚠️ Confirm Purchase</h2>
+            <p id="purchase-confirmation-message" style="font-size: 1.1rem; margin: 20px 0; line-height: 1.6;"></p>
+            <div style="display: flex; gap: 10px; justify-content: center; margin-top: 20px;">
+                <button class="btn btn-secondary" onclick="game.cancelPurchaseConfirmation()">Cancel</button>
+                <button id="purchase-confirm-btn" class="btn btn-primary">Confirm Purchase</button>
+            </div>
+        </div>
+    </div>
+
     <script src="game.js"></script>
 </body>
 </html>
