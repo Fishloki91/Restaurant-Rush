@@ -4,7 +4,7 @@ class RestaurantGame {
         this.isRunning = false;
         this.isPaused = false;
         this.day = 1;
-        this.revenue = 0;
+        this.revenue = 200; // Starting revenue
         this.orders = [];
         this.staff = [];
         this.inventory = {};
@@ -20,6 +20,10 @@ class RestaurantGame {
         this.soundEnabled = true;
         this.autoAssignEnabled = false; // Auto-assign toggle
         this.currentView = 'overview'; // Track current view
+        this.dayStartRevenue = 200; // Track revenue at day start
+        this.dayStartHappyCustomers = 0; // Track happy customers at day start
+        this.dayStartUnhappyCustomers = 0; // Track unhappy customers at day start
+        this.isGameOver = false; // Track game over state
         
         this.initializeInventory();
         this.initializeStaff();
@@ -47,19 +51,20 @@ class RestaurantGame {
     
     initializeStaff() {
         const staffMembers = [
-            { name: 'Chef Mario', role: 'Head Chef', efficiency: 0.9, speciality: 'Italian' },
-            { name: 'Chef Lisa', role: 'Sous Chef', efficiency: 0.8, speciality: 'Asian' },
-            { name: 'Cook Tom', role: 'Line Cook', efficiency: 0.7, speciality: 'Grill' },
-            { name: 'Cook Sarah', role: 'Line Cook', efficiency: 0.7, speciality: 'Prep' }
+            { name: 'Chef Mario', role: 'Head Chef', speciality: 'Italian' },
+            { name: 'Chef Lisa', role: 'Sous Chef', speciality: 'Asian' },
+            { name: 'Cook Tom', role: 'Line Cook', speciality: 'Grill' },
+            { name: 'Cook Sarah', role: 'Line Cook', speciality: 'Prep' }
         ];
         
         staffMembers.forEach(member => {
+            const randomEfficiency = 0.6 + Math.random() * 0.3; // Random efficiency between 0.6 and 0.9
             this.staff.push({
                 id: this.nextStaffId++,
                 name: member.name,
                 role: member.role,
-                efficiency: member.efficiency,
-                baseEfficiency: member.efficiency, // Store base efficiency
+                efficiency: randomEfficiency,
+                baseEfficiency: randomEfficiency, // Store base efficiency
                 speciality: member.speciality,
                 status: 'available',
                 ordersCompleted: 0,
@@ -71,9 +76,54 @@ class RestaurantGame {
         });
     }
     
+    generateRandomStaff() {
+        const firstNames = ['Alex', 'Jordan', 'Sam', 'Taylor', 'Morgan', 'Casey', 'Jamie', 'Riley', 'Quinn', 'Blake'];
+        const lastNames = ['Smith', 'Johnson', 'Brown', 'Davis', 'Wilson', 'Martinez', 'Garcia', 'Lee', 'Wang', 'Chen'];
+        const roles = ['Line Cook', 'Prep Cook', 'Sous Chef', 'Head Chef'];
+        const specialities = ['Italian', 'Asian', 'Grill', 'Prep', 'Mexican', 'French', 'Pastry', 'Seafood'];
+        
+        const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
+        const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
+        const role = roles[Math.floor(Math.random() * roles.length)];
+        const speciality = specialities[Math.floor(Math.random() * specialities.length)];
+        const randomEfficiency = 0.6 + Math.random() * 0.3; // Random efficiency between 0.6 and 0.9
+        
+        return {
+            id: this.nextStaffId++,
+            name: `${firstName} ${lastName}`,
+            role: role,
+            efficiency: randomEfficiency,
+            baseEfficiency: randomEfficiency,
+            speciality: speciality,
+            status: 'available',
+            ordersCompleted: 0,
+            currentOrder: null,
+            performance: 100,
+            upgradeLevel: 0,
+            maxUpgradeLevel: 3
+        };
+    }
+    
+    hireStaff() {
+        const hireCost = 150;
+        if (this.revenue < hireCost) {
+            this.addFeedback('⚠️ Not enough revenue to hire new staff! Cost: $150', false);
+            return;
+        }
+        
+        this.revenue -= hireCost;
+        const newStaff = this.generateRandomStaff();
+        this.staff.push(newStaff);
+        this.addFeedback(`✅ Hired ${newStaff.name} (${newStaff.role}) - Efficiency: ${(newStaff.efficiency * 100).toFixed(0)}%`, true);
+        this.render();
+    }
+    
     start() {
         this.isRunning = true;
         this.isPaused = false;
+        this.dayStartRevenue = this.revenue;
+        this.dayStartHappyCustomers = this.happyCustomers;
+        this.dayStartUnhappyCustomers = this.unhappyCustomers;
         this.startGameLoop();
     }
     
@@ -85,6 +135,7 @@ class RestaurantGame {
         // Update game state every second
         this.gameInterval = setInterval(() => {
             if (!this.isPaused && this.isRunning) {
+                this.checkGameOver();
                 this.updateOrders();
                 this.updateStaff();
                 this.checkCustomerSatisfaction();
@@ -103,23 +154,127 @@ class RestaurantGame {
         }, 5000); // Check every 5 seconds
     }
     
+    checkGameOver() {
+        if (this.revenue <= 0 && !this.isGameOver) {
+            this.isGameOver = true;
+            this.isPaused = true;
+            this.showGameOver();
+        }
+    }
+    
+    showGameOver() {
+        const modal = document.getElementById('game-over-modal');
+        document.getElementById('gameover-day-reached').textContent = this.day;
+        document.getElementById('gameover-total-customers').textContent = this.happyCustomers + this.unhappyCustomers;
+        document.getElementById('gameover-happy-customers').textContent = this.happyCustomers;
+        document.getElementById('gameover-rating').textContent = this.calculateAverageRating().toFixed(1);
+        modal.classList.add('modal-active');
+    }
+    
+    restartGame() {
+        // Clear intervals
+        if (this.gameInterval) clearInterval(this.gameInterval);
+        if (this.orderInterval) clearInterval(this.orderInterval);
+        
+        // Reset game state
+        this.isRunning = false;
+        this.isPaused = false;
+        this.isGameOver = false;
+        this.day = 1;
+        this.revenue = 200;
+        this.orders = [];
+        this.staff = [];
+        this.inventory = {};
+        this.customerSatisfaction = 100;
+        this.happyCustomers = 0;
+        this.unhappyCustomers = 0;
+        this.completedOrders = [];
+        this.nextOrderId = 1;
+        this.nextStaffId = 1;
+        this.dayTimer = 0;
+        this.orderGenerationChance = 0.4;
+        this.dayStartRevenue = 200;
+        this.dayStartHappyCustomers = 0;
+        this.dayStartUnhappyCustomers = 0;
+        
+        this.initializeInventory();
+        this.initializeStaff();
+        
+        // Hide modal
+        const modal = document.getElementById('game-over-modal');
+        modal.classList.remove('modal-active');
+        
+        // Reset UI
+        document.getElementById('start-game-btn').disabled = false;
+        document.getElementById('pause-game-btn').disabled = true;
+        document.getElementById('new-order-btn').disabled = true;
+        
+        this.switchView('overview');
+        this.render();
+    }
+    
     updateDayProgression() {
         this.dayTimer++;
         
         if (this.dayTimer >= this.dayDuration) {
-            // Advance to next day
-            this.day++;
-            this.dayTimer = 0;
-            
-            // Increase difficulty gradually
-            this.orderGenerationChance = Math.min(0.8, 0.4 + (this.day - 1) * 0.05);
-            
-            // End of day bonus
-            const bonus = Math.floor(this.revenue * 0.1);
-            this.revenue += bonus;
-            
-            this.addFeedback(`🌅 Day ${this.day} begins! Difficulty increased. Bonus: $${bonus}`, true);
+            // Show end of day summary
+            this.showDaySummary();
         }
+    }
+    
+    showDaySummary() {
+        this.isPaused = true;
+        
+        // Calculate day statistics
+        const revenueEarned = this.revenue - this.dayStartRevenue;
+        const customersServed = (this.happyCustomers - this.dayStartHappyCustomers) + 
+                                (this.unhappyCustomers - this.dayStartUnhappyCustomers);
+        const happyToday = this.happyCustomers - this.dayStartHappyCustomers;
+        const unhappyToday = this.unhappyCustomers - this.dayStartUnhappyCustomers;
+        const successRate = customersServed > 0 ? ((happyToday / customersServed) * 100).toFixed(1) : '100.0';
+        
+        // End of day bonus
+        const bonus = Math.floor(this.revenue * 0.1);
+        
+        // Show modal
+        const modal = document.getElementById('day-summary-modal');
+        document.getElementById('summary-day-number').textContent = this.day;
+        document.getElementById('next-day-number').textContent = this.day + 1;
+        document.getElementById('summary-revenue-earned').textContent = `$${revenueEarned}`;
+        document.getElementById('summary-bonus').textContent = `$${bonus}`;
+        document.getElementById('summary-total-revenue').textContent = `$${this.revenue + bonus}`;
+        document.getElementById('summary-customers-served').textContent = customersServed;
+        document.getElementById('summary-happy-customers').textContent = happyToday;
+        document.getElementById('summary-unhappy-customers').textContent = unhappyToday;
+        document.getElementById('summary-success-rate').textContent = `${successRate}%`;
+        
+        modal.classList.add('modal-active');
+    }
+    
+    continueToNextDay() {
+        // Apply bonus
+        const bonus = Math.floor(this.revenue * 0.1);
+        this.revenue += bonus;
+        
+        // Advance to next day
+        this.day++;
+        this.dayTimer = 0;
+        
+        // Store starting values for next day
+        this.dayStartRevenue = this.revenue;
+        this.dayStartHappyCustomers = this.happyCustomers;
+        this.dayStartUnhappyCustomers = this.unhappyCustomers;
+        
+        // Increase difficulty gradually
+        this.orderGenerationChance = Math.min(0.8, 0.4 + (this.day - 1) * 0.05);
+        
+        // Hide modal
+        const modal = document.getElementById('day-summary-modal');
+        modal.classList.remove('modal-active');
+        
+        this.isPaused = false;
+        this.addFeedback(`🌅 Day ${this.day} begins! Difficulty increased.`, true);
+        this.render();
     }
     
     generateOrder() {
@@ -497,6 +652,15 @@ class RestaurantGame {
             
             const itemsList = order.items.map(item => `• ${item.name}`).join('<br>');
             
+            // Get assigned staff name
+            let assignedStaffInfo = '';
+            if (order.assignedStaff) {
+                const assignedStaff = this.staff.find(s => s.id === order.assignedStaff);
+                if (assignedStaff) {
+                    assignedStaffInfo = `<div style="margin: 5px 0; font-size: 0.85rem; color: #667eea;">👨‍🍳 ${assignedStaff.name}</div>`;
+                }
+            }
+            
             orderCard.innerHTML = `
                 <div class="order-header">
                     <span class="order-number">Order #${order.id}</span>
@@ -504,6 +668,7 @@ class RestaurantGame {
                 </div>
                 <div class="order-items">${itemsList}</div>
                 <div style="margin: 5px 0; font-weight: bold; color: #28a745;">Total: $${order.totalPrice}</div>
+                ${assignedStaffInfo}
                 <div class="order-status">
                     <div class="order-progress">
                         <div class="order-progress-bar" style="width: ${order.progress}%"></div>
@@ -566,6 +731,22 @@ class RestaurantGame {
             
             container.appendChild(staffCard);
         });
+        
+        // Add hire staff button
+        const hireCard = document.createElement('div');
+        hireCard.className = 'staff-card hire-staff-card';
+        const hireCost = 150;
+        hireCard.innerHTML = `
+            <div style="text-align: center; padding: 20px;">
+                <div style="font-size: 3rem; margin-bottom: 10px;">➕</div>
+                <div style="font-size: 1.2rem; font-weight: bold; margin-bottom: 10px;">Hire New Staff</div>
+                <div style="color: #666; margin-bottom: 15px;">Expand your team with random stats</div>
+                <button class="upgrade-btn" onclick="game.hireStaff()" ${this.revenue < hireCost ? 'disabled' : ''}>
+                    💼 Hire ($${hireCost})
+                </button>
+            </div>
+        `;
+        container.appendChild(hireCard);
     }
     
     renderInventory() {
