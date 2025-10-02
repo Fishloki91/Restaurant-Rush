@@ -76,7 +76,10 @@ class RestaurantGame {
                 currentOrder: null,
                 performance: 100,
                 upgradeLevel: 0, // Track upgrade level
-                maxUpgradeLevel: 3 // Maximum upgrade level
+                maxUpgradeLevel: 3, // Maximum upgrade level
+                fatigue: 0, // Fatigue level (0-100)
+                morale: 100, // Morale level (0-100)
+                lastRestTime: 0 // Track when staff last rested
             });
         });
     }
@@ -105,7 +108,10 @@ class RestaurantGame {
             currentOrder: null,
             performance: 100,
             upgradeLevel: 0,
-            maxUpgradeLevel: 3
+            maxUpgradeLevel: 3,
+            fatigue: 0, // Fatigue level (0-100)
+            morale: 100, // Morale level (0-100)
+            lastRestTime: 0 // Track when staff last rested
         };
     }
     
@@ -546,6 +552,42 @@ class RestaurantGame {
     updateStaff() {
         // Gradually recover performance for available staff
         this.staff.forEach(staff => {
+            // Update fatigue
+            if (staff.status === 'busy') {
+                // Increase fatigue while working (0.5 per second)
+                staff.fatigue = Math.min(100, staff.fatigue + 0.5);
+            } else if (staff.status === 'available') {
+                // Decrease fatigue while idle (0.3 per second)
+                staff.fatigue = Math.max(0, staff.fatigue - 0.3);
+            } else if (staff.status === 'resting') {
+                // Rapid fatigue recovery while resting (2.0 per second)
+                staff.fatigue = Math.max(0, staff.fatigue - 2.0);
+                
+                // Return to available status when fatigue is low enough
+                if (staff.fatigue <= 10) {
+                    staff.status = 'available';
+                    this.addFeedback(`${staff.name} has finished resting and is back to work!`, true);
+                }
+            }
+            
+            // Update morale based on fatigue and performance
+            if (staff.fatigue > 80) {
+                // High fatigue decreases morale
+                staff.morale = Math.max(0, staff.morale - 0.3);
+            } else if (staff.fatigue < 20 && staff.performance > 80) {
+                // Low fatigue and good performance increases morale
+                staff.morale = Math.min(100, staff.morale + 0.2);
+            }
+            
+            // Adjust efficiency based on fatigue and morale
+            const fatigueMultiplier = 1 - (staff.fatigue / 200); // Max 50% reduction
+            const moraleMultiplier = 0.5 + (staff.morale / 200); // Between 50% and 100%
+            
+            // Calculate effective efficiency including upgrades
+            const upgradeBonus = staff.upgradeLevel * 0.05;
+            staff.efficiency = staff.baseEfficiency * (1 + upgradeBonus) * fatigueMultiplier * moraleMultiplier;
+            
+            // Gradually recover performance for available staff
             if (staff.status === 'available' && staff.performance < 100) {
                 staff.performance = Math.min(100, staff.performance + 0.5);
             }
@@ -626,6 +668,26 @@ class RestaurantGame {
         staff.efficiency = staff.baseEfficiency + (staff.upgradeLevel * 0.05); // +5% per level
         
         this.addFeedback(`⭐ ${staff.name} upgraded to Level ${staff.upgradeLevel}! Efficiency: ${(staff.efficiency * 100).toFixed(0)}%`, true);
+        this.render();
+    }
+    
+    sendStaffToRest(staffId) {
+        const staff = this.staff.find(s => s.id === staffId);
+        if (!staff) return;
+        
+        if (staff.status === 'busy') {
+            this.addFeedback('⚠️ Staff is currently working on an order!', false);
+            return;
+        }
+        
+        if (staff.status === 'resting') {
+            this.addFeedback('⚠️ Staff is already resting!', false);
+            return;
+        }
+        
+        staff.status = 'resting';
+        staff.lastRestTime = this.dayTimer;
+        this.addFeedback(`😴 ${staff.name} is taking a break to recover...`, true);
         this.render();
     }
     
@@ -860,6 +922,24 @@ class RestaurantGame {
                 performanceColor = '#ffc107'; // yellow
             }
             
+            // Fatigue bar color
+            let fatigueColor = '#28a745'; // green (low fatigue is good)
+            if (staff.fatigue > 70) {
+                fatigueColor = '#dc3545'; // red
+            } else if (staff.fatigue > 40) {
+                fatigueColor = '#ffc107'; // yellow
+            }
+            
+            // Morale bar color
+            let moraleColor = '#28a745'; // green
+            if (staff.morale < 50) {
+                moraleColor = '#dc3545'; // red
+            } else if (staff.morale < 75) {
+                moraleColor = '#ffc107'; // yellow
+            }
+            
+            const canRest = staff.status === 'available' && staff.fatigue > 30;
+            
             staffCard.innerHTML = `
                 <div class="staff-header">
                     <div>
@@ -882,14 +962,35 @@ class RestaurantGame {
                         <span class="metric-value">${staff.ordersCompleted}</span>
                     </div>
                 </div>
-                <div class="performance-bar-container">
+                <div class="performance-bar-container" title="Performance">
                     <div class="performance-bar" style="width: ${staff.performance}%; background-color: ${performanceColor};"></div>
                 </div>
-                ${canUpgrade ? `
-                    <button class="upgrade-btn" onclick="game.upgradeStaff(${staff.id})" ${this.revenue < upgradeCost ? 'disabled' : ''}>
-                        ⬆️ Upgrade ($${upgradeCost})
-                    </button>
-                ` : '<div style="text-align: center; margin-top: 10px; color: #28a745; font-weight: bold;">✓ MAX LEVEL</div>'}
+                <div class="staff-wellbeing">
+                    <div class="wellbeing-item">
+                        <span class="wellbeing-label">😴 Fatigue: ${staff.fatigue.toFixed(0)}%</span>
+                        <div class="wellbeing-bar-container">
+                            <div class="wellbeing-bar" style="width: ${staff.fatigue}%; background-color: ${fatigueColor};"></div>
+                        </div>
+                    </div>
+                    <div class="wellbeing-item">
+                        <span class="wellbeing-label">😊 Morale: ${staff.morale.toFixed(0)}%</span>
+                        <div class="wellbeing-bar-container">
+                            <div class="wellbeing-bar" style="width: ${staff.morale}%; background-color: ${moraleColor};"></div>
+                        </div>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 5px; margin-top: 10px;">
+                    ${canUpgrade ? `
+                        <button class="upgrade-btn" onclick="game.upgradeStaff(${staff.id})" ${this.revenue < upgradeCost ? 'disabled' : ''}>
+                            ⬆️ Upgrade ($${upgradeCost})
+                        </button>
+                    ` : '<div style="flex: 1; text-align: center; padding: 8px; color: #28a745; font-weight: bold; font-size: 0.9rem;">✓ MAX LEVEL</div>'}
+                    ${canRest ? `
+                        <button class="rest-btn" onclick="game.sendStaffToRest(${staff.id})" title="Send staff to rest">
+                            😴 Rest
+                        </button>
+                    ` : ''}
+                </div>
             `;
             
             container.appendChild(staffCard);
