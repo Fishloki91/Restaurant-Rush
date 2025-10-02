@@ -352,12 +352,6 @@ body {
     animation: pulse 1s infinite;
 }
 
-.order-card.priority {
-    border-left-color: #ffc107;
-    border-left-width: 6px;
-    background: linear-gradient(to right, #fffbf0 0%, white 10%);
-}
-
 @keyframes pulse {
     0%, 100% { opacity: 1; }
     50% { opacity: 0.8; }
@@ -433,39 +427,6 @@ body {
     font-size: 0.85rem;
     min-height: 36px; /* Touch-friendly */
     min-width: 80px;
-}
-
-.assign-btn:hover {
-    background: #5568d3;
-}
-
-.assign-btn:disabled {
-    background: #ccc;
-    cursor: not-allowed;
-}
-
-.priority-btn {
-    padding: 5px 12px;
-    background: #f8f9fa;
-    color: #666;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 0.85rem;
-    transition: all 0.2s ease;
-}
-
-.priority-btn:hover {
-    background: #fff3cd;
-    border-color: #ffc107;
-    color: #856404;
-}
-
-.priority-btn.active {
-    background: #ffc107;
-    border-color: #ffc107;
-    color: #fff;
-    font-weight: bold;
 }
 
 .assign-btn:hover {
