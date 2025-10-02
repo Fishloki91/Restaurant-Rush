@@ -1,3 +1,41 @@
+// Centralized Dishes Data
+const DISHES = {
+    mains: [
+        { name: 'Beef Steak', ingredients: ['Beef', 'Vegetables'], price: 25, time: 180 },
+        { name: 'Grilled Fish', ingredients: ['Fish', 'Vegetables'], price: 22, time: 150 },
+        { name: 'Chicken Pasta', ingredients: ['Chicken', 'Pasta', 'Tomatoes'], price: 18, time: 120 },
+        { name: 'Chicken Rice Bowl', ingredients: ['Chicken', 'Rice', 'Vegetables'], price: 16, time: 100 },
+        { name: 'Vegetable Stir Fry', ingredients: ['Vegetables', 'Rice'], price: 15, time: 90 },
+        { name: 'Pasta Primavera', ingredients: ['Pasta', 'Vegetables', 'Cheese'], price: 17, time: 110 },
+        { name: 'Cheese Pizza', ingredients: ['Cheese', 'Tomatoes', 'Flour'], price: 14, time: 120 },
+        { name: 'Beef Burger', ingredients: ['Beef', 'Flour', 'Vegetables'], price: 12, time: 80 },
+        { name: 'Fish Tacos', ingredients: ['Fish', 'Flour', 'Vegetables'], price: 13, time: 90 },
+        { name: 'Chicken Curry', ingredients: ['Chicken', 'Rice', 'Spices'], price: 19, time: 130 },
+        { name: 'Vegetable Lasagna', ingredients: ['Pasta', 'Vegetables', 'Cheese'], price: 16, time: 140 },
+        { name: 'Beef Tacos', ingredients: ['Beef', 'Flour', 'Cheese'], price: 14, time: 85 }
+    ],
+    soups: [
+        { name: 'Tomato Soup', ingredients: ['Tomatoes', 'Cream'], price: 8, time: 60 },
+        { name: 'Chicken Noodle Soup', ingredients: ['Chicken', 'Pasta', 'Vegetables'], price: 10, time: 70 },
+        { name: 'Beef Stew', ingredients: ['Beef', 'Vegetables', 'Spices'], price: 12, time: 90 },
+        { name: 'Fish Chowder', ingredients: ['Fish', 'Cream', 'Vegetables'], price: 11, time: 80 }
+    ],
+    appetizers: [
+        { name: 'Garlic Bread', ingredients: ['Flour', 'Cheese'], price: 6, time: 40 },
+        { name: 'Chicken Wings', ingredients: ['Chicken', 'Spices'], price: 9, time: 50 },
+        { name: 'Mozzarella Sticks', ingredients: ['Cheese', 'Flour'], price: 7, time: 45 },
+        { name: 'Spring Rolls', ingredients: ['Vegetables', 'Flour'], price: 8, time: 50 },
+        { name: 'Bruschetta', ingredients: ['Tomatoes', 'Flour'], price: 7, time: 35 }
+    ],
+    desserts: [
+        { name: 'Chocolate Cake', ingredients: ['Flour', 'Cream', 'Sugar'], price: 8, time: 60 },
+        { name: 'Ice Cream Sundae', ingredients: ['Cream', 'Sugar'], price: 6, time: 30 },
+        { name: 'Cheesecake', ingredients: ['Cheese', 'Cream', 'Sugar'], price: 9, time: 70 },
+        { name: 'Apple Pie', ingredients: ['Flour', 'Sugar'], price: 7, time: 80 },
+        { name: 'Tiramisu', ingredients: ['Cream', 'Sugar'], price: 10, time: 65 }
+    ]
+};
+
 // Game State Management
 class RestaurantGame {
     constructor() {
@@ -38,7 +76,11 @@ class RestaurantGame {
             { name: 'Pasta', max: 100, current: 100 },
             { name: 'Rice', max: 100, current: 100 },
             { name: 'Cheese', max: 80, current: 80 },
-            { name: 'Tomatoes', max: 80, current: 80 }
+            { name: 'Tomatoes', max: 80, current: 80 },
+            { name: 'Flour', max: 80, current: 80 },
+            { name: 'Cream', max: 60, current: 60 },
+            { name: 'Sugar', max: 60, current: 60 },
+            { name: 'Spices', max: 60, current: 60 }
         ];
         
         ingredients.forEach(ingredient => {
@@ -111,6 +153,18 @@ class RestaurantGame {
             return;
         }
         
+        // Check if purchase would drop revenue below or to 0
+        if (this.revenue - hireCost <= 0) {
+            this.showPurchaseConfirmation('hire', hireCost, () => {
+                this.executeHireStaff(hireCost);
+            });
+            return;
+        }
+        
+        this.executeHireStaff(hireCost);
+    }
+    
+    executeHireStaff(hireCost) {
         this.revenue -= hireCost;
         const newStaff = this.generateRandomStaff();
         this.staff.push(newStaff);
@@ -277,16 +331,17 @@ class RestaurantGame {
         this.render();
     }
     
+    getAllDishes() {
+        // Dynamically fetch all dishes from the centralized DISHES object
+        const allDishes = [];
+        for (const category in DISHES) {
+            allDishes.push(...DISHES[category]);
+        }
+        return allDishes;
+    }
+    
     generateOrder() {
-        const dishes = [
-            { name: 'Beef Steak', ingredients: ['Beef', 'Vegetables'], price: 25, time: 180 },
-            { name: 'Chicken Pasta', ingredients: ['Chicken', 'Pasta', 'Tomatoes'], price: 18, time: 120 },
-            { name: 'Grilled Fish', ingredients: ['Fish', 'Vegetables'], price: 22, time: 150 },
-            { name: 'Vegetable Stir Fry', ingredients: ['Vegetables', 'Rice'], price: 15, time: 90 },
-            { name: 'Chicken Rice Bowl', ingredients: ['Chicken', 'Rice', 'Vegetables'], price: 16, time: 100 },
-            { name: 'Cheese Pizza', ingredients: ['Cheese', 'Tomatoes'], price: 14, time: 120 },
-            { name: 'Pasta Primavera', ingredients: ['Pasta', 'Vegetables', 'Cheese'], price: 17, time: 110 }
-        ];
+        const dishes = this.getAllDishes(); // Use dynamic dish fetching
         
         const numItems = Math.floor(Math.random() * 3) + 1; // 1-3 items per order
         const orderItems = [];
@@ -330,8 +385,10 @@ class RestaurantGame {
             timeRemaining: maxTime + 30,
             status: 'pending', // pending, in-progress, completed, failed
             assignedStaff: null,
+            assignedStaffIds: [], // Track multiple assigned staff
             progress: 0,
-            requiredIngredients: requiredIngredients
+            requiredIngredients: requiredIngredients,
+            isPriority: false // Track priority status
         };
         
         this.orders.push(order);
@@ -359,9 +416,44 @@ class RestaurantGame {
         
         order.status = 'in-progress';
         order.assignedStaff = staffMember.id;
+        order.assignedStaffIds = [staffMember.id]; // Initialize with first staff
         staffMember.status = 'busy';
         staffMember.currentOrder = orderId;
         
+        this.render();
+    }
+    
+    assignAdditionalStaff(orderId, staffId) {
+        const order = this.orders.find(o => o.id === orderId);
+        if (!order || order.status !== 'in-progress') return;
+        
+        const staff = this.staff.find(s => s.id === staffId);
+        if (!staff || staff.status !== 'available') {
+            this.addFeedback('⚠️ Staff is not available!', false);
+            return;
+        }
+        
+        // Check if staff is already assigned
+        if (order.assignedStaffIds.includes(staffId)) {
+            this.addFeedback('⚠️ Staff already assigned to this order!', false);
+            return;
+        }
+        
+        // Assign additional staff
+        order.assignedStaffIds.push(staffId);
+        staff.status = 'busy';
+        staff.currentOrder = orderId;
+        
+        this.addFeedback(`✅ ${staff.name} assigned to Order #${orderId}`, true);
+        this.render();
+    }
+    
+    toggleOrderPriority(orderId) {
+        const order = this.orders.find(o => o.id === orderId);
+        if (!order) return;
+        
+        order.isPriority = !order.isPriority;
+        this.addFeedback(`${order.isPriority ? '⭐' : '✓'} Order #${orderId} ${order.isPriority ? 'prioritized' : 'unprioritized'}`, true);
         this.render();
     }
     
@@ -385,14 +477,29 @@ class RestaurantGame {
             } else if (order.status === 'in-progress') {
                 order.timeRemaining--;
                 
-                const staff = this.staff.find(s => s.id === order.assignedStaff);
-                if (staff) {
-                    // Progress based on staff efficiency
-                    order.progress += staff.efficiency * 1.5; // Progress per second
-                    
-                    if (order.progress >= 100) {
-                        this.completeOrder(order.id, true);
+                // Calculate combined efficiency from all assigned staff
+                let combinedEfficiency = 0;
+                if (order.assignedStaffIds && order.assignedStaffIds.length > 0) {
+                    order.assignedStaffIds.forEach(staffId => {
+                        const staff = this.staff.find(s => s.id === staffId);
+                        if (staff) {
+                            // Each additional staff adds 50% of their efficiency
+                            combinedEfficiency += staff.efficiency * (combinedEfficiency === 0 ? 1 : 0.5);
+                        }
+                    });
+                } else if (order.assignedStaff) {
+                    // Backwards compatibility for single staff assignment
+                    const staff = this.staff.find(s => s.id === order.assignedStaff);
+                    if (staff) {
+                        combinedEfficiency = staff.efficiency;
                     }
+                }
+                
+                // Progress based on combined staff efficiency
+                order.progress += combinedEfficiency * 1.5; // Progress per second
+                
+                if (order.progress >= 100) {
+                    this.completeOrder(order.id, true);
                 }
             }
             
@@ -410,19 +517,25 @@ class RestaurantGame {
         const order = this.orders.find(o => o.id === orderId);
         if (!order) return;
         
-        const staff = this.staff.find(s => s.id === order.assignedStaff);
+        // Handle all assigned staff
+        const assignedStaffList = order.assignedStaffIds && order.assignedStaffIds.length > 0 
+            ? order.assignedStaffIds 
+            : (order.assignedStaff ? [order.assignedStaff] : []);
         
         if (success) {
             order.status = 'completed';
             this.revenue += order.totalPrice;
             this.happyCustomers++;
             
-            if (staff) {
-                staff.ordersCompleted++;
-                staff.performance = Math.min(100, staff.performance + 2);
-                staff.status = 'available';
-                staff.currentOrder = null;
-            }
+            assignedStaffList.forEach(staffId => {
+                const staff = this.staff.find(s => s.id === staffId);
+                if (staff) {
+                    staff.ordersCompleted++;
+                    staff.performance = Math.min(100, staff.performance + 2);
+                    staff.status = 'available';
+                    staff.currentOrder = null;
+                }
+            });
             
             this.customerSatisfaction = Math.min(100, this.customerSatisfaction + 2);
             this.addFeedback(`✅ Order #${order.id} completed! Customer is happy! +$${order.totalPrice}`, true);
@@ -430,11 +543,14 @@ class RestaurantGame {
             order.status = 'failed';
             this.unhappyCustomers++;
             
-            if (staff) {
-                staff.performance = Math.max(0, staff.performance - 5);
-                staff.status = 'available';
-                staff.currentOrder = null;
-            }
+            assignedStaffList.forEach(staffId => {
+                const staff = this.staff.find(s => s.id === staffId);
+                if (staff) {
+                    staff.performance = Math.max(0, staff.performance - 5);
+                    staff.status = 'available';
+                    staff.currentOrder = null;
+                }
+            });
             
             this.customerSatisfaction = Math.max(0, this.customerSatisfaction - 10);
             this.addFeedback(`❌ Order #${order.id} failed! Customer is unhappy!`, false);
@@ -461,6 +577,19 @@ class RestaurantGame {
     
     restockInventory() {
         const restockCost = 50;
+        
+        // Check if purchase would drop revenue below or to 0
+        if (this.revenue - restockCost <= 0) {
+            this.showPurchaseConfirmation('restock', restockCost, () => {
+                this.executeRestockInventory(restockCost);
+            });
+            return;
+        }
+        
+        this.executeRestockInventory(restockCost);
+    }
+    
+    executeRestockInventory(restockCost) {
         if (this.revenue >= restockCost) {
             this.revenue -= restockCost;
             for (const ingredient in this.inventory) {
@@ -471,6 +600,42 @@ class RestaurantGame {
         } else {
             this.addFeedback('⚠️ Not enough revenue to restock!', false);
         }
+    }
+    
+    showPurchaseConfirmation(type, cost, onConfirm) {
+        const modal = document.getElementById('purchase-confirmation-modal');
+        const messageEl = document.getElementById('purchase-confirmation-message');
+        const confirmBtn = document.getElementById('purchase-confirm-btn');
+        
+        const newRevenue = this.revenue - cost;
+        let message = '';
+        
+        if (type === 'restock') {
+            message = `Restocking will cost $${cost}.<br>Your revenue will drop to $${newRevenue}.<br><strong style="color: #dc3545;">⚠️ This will leave you with very low funds!</strong>`;
+        } else if (type === 'hire') {
+            message = `Hiring staff will cost $${cost}.<br>Your revenue will drop to $${newRevenue}.<br><strong style="color: #dc3545;">⚠️ This will leave you with very low funds!</strong>`;
+        } else if (type === 'upgrade') {
+            message = `Upgrading staff will cost $${cost}.<br>Your revenue will drop to $${newRevenue}.<br><strong style="color: #dc3545;">⚠️ This will leave you with very low funds!</strong>`;
+        }
+        
+        messageEl.innerHTML = message;
+        
+        // Remove old event listeners and add new one
+        const newConfirmBtn = confirmBtn.cloneNode(true);
+        confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+        
+        newConfirmBtn.onclick = () => {
+            modal.classList.remove('modal-active');
+            onConfirm();
+        };
+        
+        modal.classList.add('modal-active');
+    }
+    
+    cancelPurchaseConfirmation() {
+        const modal = document.getElementById('purchase-confirmation-modal');
+        modal.classList.remove('modal-active');
+        this.addFeedback('❌ Purchase cancelled', false);
     }
     
     toggleSound() {
@@ -506,6 +671,18 @@ class RestaurantGame {
             return;
         }
         
+        // Check if purchase would drop revenue below or to 0
+        if (this.revenue - upgradeCost <= 0) {
+            this.showPurchaseConfirmation('upgrade', upgradeCost, () => {
+                this.executeUpgradeStaff(staff, upgradeCost);
+            });
+            return;
+        }
+        
+        this.executeUpgradeStaff(staff, upgradeCost);
+    }
+    
+    executeUpgradeStaff(staff, upgradeCost) {
         // Apply upgrade
         this.revenue -= upgradeCost;
         staff.upgradeLevel++;
@@ -621,8 +798,12 @@ class RestaurantGame {
             return;
         }
         
-        // Sort orders: pending urgent first, then by time remaining
+        // Sort orders: prioritized first, then pending urgent, then by time remaining
         const sortedOrders = [...this.orders].sort((a, b) => {
+            // Priority orders always come first
+            if (a.isPriority && !b.isPriority) return -1;
+            if (!a.isPriority && b.isPriority) return 1;
+            
             const aTimePercent = (a.timeRemaining / a.timeLimit) * 100;
             const bTimePercent = (b.timeRemaining / b.timeLimit) * 100;
             
@@ -638,6 +819,10 @@ class RestaurantGame {
             const orderCard = document.createElement('div');
             orderCard.className = 'order-card';
             
+            if (order.isPriority) {
+                orderCard.classList.add('priority');
+            }
+            
             const timePercent = (order.timeRemaining / order.timeLimit) * 100;
             if (timePercent < 30) {
                 orderCard.classList.add('urgent');
@@ -650,20 +835,60 @@ class RestaurantGame {
                 timerClass = 'warning';
             }
             
-            const itemsList = order.items.map(item => `• ${item.name}`).join('<br>');
+            // Show items with individual prices
+            const itemsList = order.items.map(item => `• ${item.name} ($${item.price})`).join('<br>');
             
-            // Get assigned staff name
+            // Get assigned staff info with multi-staff support
             let assignedStaffInfo = '';
-            if (order.assignedStaff) {
-                const assignedStaff = this.staff.find(s => s.id === order.assignedStaff);
-                if (assignedStaff) {
-                    assignedStaffInfo = `<div style="margin: 5px 0; font-size: 0.85rem; color: #667eea;">👨‍🍳 ${assignedStaff.name}</div>`;
+            const assignedStaffList = order.assignedStaffIds && order.assignedStaffIds.length > 0 
+                ? order.assignedStaffIds 
+                : (order.assignedStaff ? [order.assignedStaff] : []);
+            
+            if (assignedStaffList.length > 0) {
+                const staffNames = assignedStaffList.map(staffId => {
+                    const staff = this.staff.find(s => s.id === staffId);
+                    return staff ? staff.name : '';
+                }).filter(name => name).join(', ');
+                
+                assignedStaffInfo = `<div style="margin: 5px 0; font-size: 0.85rem; color: #667eea;">👨‍🍳 ${staffNames}</div>`;
+            }
+            
+            // Available staff dropdown for in-progress orders
+            let additionalStaffSelect = '';
+            if (order.status === 'in-progress') {
+                const availableStaff = this.staff.filter(s => s.status === 'available');
+                if (availableStaff.length > 0) {
+                    const staffOptions = availableStaff.map(s => 
+                        `<option value="${s.id}">${s.name}</option>`
+                    ).join('');
+                    additionalStaffSelect = `
+                        <div style="margin-top: 8px; display: flex; gap: 5px; align-items: center;">
+                            <select id="staff-select-${order.id}" style="flex: 1; padding: 4px; font-size: 0.8rem;">
+                                <option value="">+ Assign Helper</option>
+                                ${staffOptions}
+                            </select>
+                            <button class="assign-btn" style="padding: 4px 8px; font-size: 0.8rem;" 
+                                onclick="const sel = document.getElementById('staff-select-${order.id}'); 
+                                if(sel.value) game.assignAdditionalStaff(${order.id}, parseInt(sel.value));">
+                                Add
+                            </button>
+                        </div>
+                    `;
                 }
             }
             
+            // Priority button
+            const priorityBtn = `
+                <button class="priority-btn ${order.isPriority ? 'active' : ''}" 
+                    onclick="game.toggleOrderPriority(${order.id})" 
+                    title="${order.isPriority ? 'Remove Priority' : 'Make Priority'}">
+                    ${order.isPriority ? '⭐ Priority' : '☆ Priority'}
+                </button>
+            `;
+            
             orderCard.innerHTML = `
                 <div class="order-header">
-                    <span class="order-number">Order #${order.id}</span>
+                    <span class="order-number">${order.isPriority ? '⭐ ' : ''}Order #${order.id}</span>
                     <span class="order-timer ${timerClass}">${order.timeRemaining}s</span>
                 </div>
                 <div class="order-items">${itemsList}</div>
@@ -673,10 +898,14 @@ class RestaurantGame {
                     <div class="order-progress">
                         <div class="order-progress-bar" style="width: ${order.progress}%"></div>
                     </div>
-                    ${order.status === 'pending' ? 
-                        `<button class="assign-btn" onclick="game.assignOrderToStaff(${order.id})">Assign</button>` :
-                        `<span style="font-size: 0.85rem; color: #666;">In Progress</span>`
-                    }
+                    <div style="display: flex; gap: 5px; margin-top: 5px;">
+                        ${priorityBtn}
+                        ${order.status === 'pending' ? 
+                            `<button class="assign-btn" onclick="game.assignOrderToStaff(${order.id})">Assign Staff</button>` :
+                            `<span style="font-size: 0.85rem; color: #666; flex: 1; text-align: center;">In Progress</span>`
+                        }
+                    </div>
+                    ${additionalStaffSelect}
                 </div>
             `;
             
