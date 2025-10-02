@@ -19,6 +19,7 @@ class RestaurantGame {
         this.orderGenerationChance = 0.4; // Base chance
         this.soundEnabled = true;
         this.autoAssignEnabled = false; // Auto-assign toggle
+        this.currentView = 'overview'; // Track current view
         
         this.initializeInventory();
         this.initializeStaff();
@@ -381,6 +382,53 @@ class RestaurantGame {
         this.renderInventory();
         this.renderSatisfaction();
         this.renderGameStats();
+        this.renderOverview();
+    }
+    
+    renderOverview() {
+        // Update overview cards with current stats
+        const ordersCount = this.orders.length;
+        const urgentOrders = this.orders.filter(o => o.timeRemaining <= 30 && o.status === 'pending').length;
+        const availableStaff = this.staff.filter(s => s.status === 'available').length;
+        const lowStockItems = Object.values(this.inventory).filter(item => 
+            (item.current / item.max) < 0.3
+        ).length;
+        
+        document.getElementById('overview-orders-count').textContent = ordersCount;
+        document.getElementById('overview-orders-urgent').textContent = `${urgentOrders} Urgent`;
+        document.getElementById('overview-staff-available').textContent = availableStaff;
+        document.getElementById('overview-inventory-low').textContent = lowStockItems;
+        document.getElementById('overview-satisfaction').textContent = `${Math.round(this.customerSatisfaction)}%`;
+        
+        // Add notification badges
+        const ordersCard = document.getElementById('orders-overview-card');
+        const inventoryCard = document.getElementById('inventory-overview-card');
+        
+        if (urgentOrders > 0) {
+            ordersCard.setAttribute('data-has-notification', 'true');
+        } else {
+            ordersCard.removeAttribute('data-has-notification');
+        }
+        
+        if (lowStockItems > 0) {
+            inventoryCard.setAttribute('data-has-notification', 'true');
+        } else {
+            inventoryCard.removeAttribute('data-has-notification');
+        }
+    }
+    
+    switchView(viewName) {
+        // Hide all views
+        document.querySelectorAll('.dashboard-content').forEach(view => {
+            view.classList.remove('view-active');
+        });
+        
+        // Show selected view
+        const targetView = document.getElementById(`${viewName}-view`);
+        if (targetView) {
+            targetView.classList.add('view-active');
+            this.currentView = viewName;
+        }
     }
     
     renderGameStats() {
@@ -640,9 +688,27 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('sound-toggle-btn').click();
                 break;
             case '?': // Show help
-                game.addFeedback('⌨️ Shortcuts: P=Pause, O=Order, R=Restock, A=Auto-assign, S=Sound', true);
+                game.addFeedback('⌨️ Shortcuts: P=Pause, O=Order, R=Restock, A=Auto-assign, S=Sound, Esc=Overview', true);
+                break;
+            case 'escape': // Return to overview
+                game.switchView('overview');
                 break;
         }
+    });
+    
+    // View switching functionality
+    document.querySelectorAll('.view-details-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const viewName = e.target.getAttribute('data-view');
+            game.switchView(viewName);
+        });
+    });
+    
+    document.querySelectorAll('.back-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const backView = e.target.getAttribute('data-back');
+            game.switchView(backView);
+        });
     });
     
     // Initial render

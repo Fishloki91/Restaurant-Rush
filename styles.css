@@ -74,9 +74,23 @@ body {
 
 .dashboard-content {
     padding: 30px;
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
+    display: none;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.dashboard-content.view-active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .dashboard-section {
@@ -84,6 +98,165 @@ body {
     border-radius: 10px;
     padding: 20px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Overview Cards */
+.overview-cards {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 25px;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.overview-card {
+    background: white;
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    position: relative;
+}
+
+.overview-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.overview-card .card-icon {
+    font-size: 3rem;
+    text-align: center;
+}
+
+.overview-card .card-content {
+    text-align: center;
+}
+
+.overview-card h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.overview-card .card-stats {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+.overview-card .big-stat {
+    font-size: 3rem;
+    font-weight: bold;
+    color: #667eea;
+    line-height: 1;
+}
+
+.overview-card .stat-sublabel {
+    font-size: 0.9rem;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.overview-card .urgent-badge {
+    background: #ff4444;
+    color: white;
+    padding: 5px 12px;
+    border-radius: 15px;
+    font-size: 0.85rem;
+    font-weight: bold;
+}
+
+.overview-card .warning-badge {
+    background: #ffc107;
+    color: #333;
+    padding: 5px 12px;
+    border-radius: 15px;
+    font-size: 0.85rem;
+    font-weight: bold;
+}
+
+.view-details-btn {
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.view-details-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+/* Detail Views */
+.detail-view {
+    display: none;
+}
+
+.detail-view.view-active {
+    display: block;
+}
+
+.detail-view-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 3px solid #667eea;
+}
+
+.detail-view-header h2 {
+    font-size: 1.8rem;
+    color: #333;
+    margin: 0;
+}
+
+.back-btn {
+    padding: 10px 20px;
+    background: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.back-btn:hover {
+    background: #5a6268;
+    transform: translateX(-3px);
+}
+
+/* Notification badge on overview cards */
+.overview-card[data-has-notification="true"]::before {
+    content: '!';
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 30px;
+    height: 30px;
+    background: #ff4444;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.2rem;
+    animation: pulse 1.5s infinite;
 }
 
 .section-header {
@@ -111,8 +284,11 @@ body {
 
 /* Orders Section */
 .orders-container {
-    max-height: 400px;
-    overflow-y: auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 15px;
+    max-height: none;
+    overflow-y: visible;
 }
 
 .order-card {
@@ -216,9 +392,9 @@ body {
 
 /* Staff Section */
 .staff-container {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 15px;
 }
 
 .staff-card {
@@ -319,8 +495,8 @@ body {
 /* Inventory Section */
 .inventory-container {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 15px;
 }
 
 .inventory-item {
@@ -550,11 +726,16 @@ body {
 
 /* Responsive Design */
 @media (max-width: 1024px) {
-    .dashboard-content {
+    .overview-cards {
         grid-template-columns: 1fr;
     }
     
     .satisfaction-content {
+        grid-template-columns: 1fr;
+    }
+    
+    .orders-container,
+    .staff-container {
         grid-template-columns: 1fr;
     }
 }
@@ -573,5 +754,14 @@ body {
     
     .inventory-container {
         grid-template-columns: 1fr;
+    }
+    
+    .overview-card .big-stat {
+        font-size: 2rem;
+    }
+    
+    .detail-view-header {
+        flex-wrap: wrap;
+        gap: 10px;
     }
 }

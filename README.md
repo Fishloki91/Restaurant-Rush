@@ -9,7 +9,8 @@
 - **Customer satisfaction**: Maintain high ratings by completing orders on time
 
 ## 🎮 Key Features
-- **Interactive Dashboard** with real-time updates across all game systems
+- **Multi-View Navigation** with dedicated screens for each management area and smooth transitions
+- **Interactive Dashboard** with quick-stat overview cards and visual notification alerts
 - **Order System** with automatic generation and time-sensitive completion
 - **Staff Performance** tracking with efficiency ratings and workload management
 - **Inventory Management** with color-coded stock levels and one-click restocking
@@ -29,6 +30,14 @@ Balance quick order fulfillment, staff workload, inventory management, and custo
 **Play Style**: Real-time strategy with resource management elements
 
 ## Updates
+
+### v1.2.0 - Multi-View Navigation System
+**Major Feature:** Multi-view navigation system - No more scrolling! Navigate between dedicated views for Orders, Staff, Inventory, and Customer Satisfaction with smooth transitions and an overview dashboard.
+
+**Quality of Life Improvements:**
+- Quick stats overview cards - See key metrics at a glance on the main dashboard
+- Visual notification badges - Prominent alerts for urgent orders and low inventory
+- ESC key quick navigation - Press ESC to instantly return to overview from any view
 
 ### v1.1.0 - Staff Upgrade System
 **Major Feature:** Staff upgrade system - Invest in your team! Upgrade staff members up to Level 3 to boost their efficiency by 5% per level, helping you handle busier days.

@@ -29,68 +29,127 @@
             </div>
         </header>
 
-        <div class="dashboard-content">
-            <!-- Orders Section -->
-            <section class="dashboard-section orders-section">
-                <div class="section-header">
-                    <h2>📋 Active Orders</h2>
-                    <span id="orders-count" class="badge">0</span>
-                </div>
-                <div id="orders-container" class="orders-container">
-                    <!-- Orders will be dynamically added here -->
-                </div>
-            </section>
-
-            <!-- Staff Section -->
-            <section class="dashboard-section staff-section">
-                <div class="section-header">
-                    <h2>👨‍🍳 Staff</h2>
-                    <span id="staff-count" class="badge">0</span>
-                </div>
-                <div id="staff-container" class="staff-container">
-                    <!-- Staff will be dynamically added here -->
-                </div>
-            </section>
-
-            <!-- Inventory Section -->
-            <section class="dashboard-section inventory-section">
-                <div class="section-header">
-                    <h2>📦 Inventory</h2>
-                    <button id="restock-btn" class="btn btn-primary">Restock All</button>
-                </div>
-                <div id="inventory-container" class="inventory-container">
-                    <!-- Inventory items will be dynamically added here -->
-                </div>
-            </section>
-
-            <!-- Customer Satisfaction Section -->
-            <section class="dashboard-section satisfaction-section">
-                <div class="section-header">
-                    <h2>😊 Customer Satisfaction</h2>
-                </div>
-                <div class="satisfaction-content">
-                    <div class="satisfaction-meter">
-                        <div id="satisfaction-bar" class="satisfaction-bar" style="width: 100%"></div>
-                    </div>
-                    <div class="satisfaction-stats">
-                        <div class="stat-item">
-                            <span class="stat-label">Happy Customers:</span>
-                            <span id="happy-customers" class="stat-value">0</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-label">Unhappy Customers:</span>
-                            <span id="unhappy-customers" class="stat-value">0</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-label">Average Wait Time:</span>
-                            <span id="avg-wait-time" class="stat-value">0s</span>
+        <!-- Main Overview View -->
+        <div id="overview-view" class="dashboard-content view-active">
+            <div class="overview-cards">
+                <!-- Orders Overview Card -->
+                <div class="overview-card" id="orders-overview-card">
+                    <div class="card-icon">📋</div>
+                    <div class="card-content">
+                        <h3>Active Orders</h3>
+                        <div class="card-stats">
+                            <span id="overview-orders-count" class="big-stat">0</span>
+                            <span id="overview-orders-urgent" class="urgent-badge">0 Urgent</span>
                         </div>
                     </div>
-                    <div id="feedback-container" class="feedback-container">
-                        <!-- Recent feedback will appear here -->
+                    <button class="view-details-btn" data-view="orders">View Details →</button>
+                </div>
+
+                <!-- Staff Overview Card -->
+                <div class="overview-card" id="staff-overview-card">
+                    <div class="card-icon">👨‍🍳</div>
+                    <div class="card-content">
+                        <h3>Staff Status</h3>
+                        <div class="card-stats">
+                            <span id="overview-staff-available" class="big-stat">4</span>
+                            <span class="stat-sublabel">Available</span>
+                        </div>
+                    </div>
+                    <button class="view-details-btn" data-view="staff">View Details →</button>
+                </div>
+
+                <!-- Inventory Overview Card -->
+                <div class="overview-card" id="inventory-overview-card">
+                    <div class="card-icon">📦</div>
+                    <div class="card-content">
+                        <h3>Inventory</h3>
+                        <div class="card-stats">
+                            <span id="overview-inventory-low" class="big-stat">0</span>
+                            <span class="warning-badge">Low Stock Items</span>
+                        </div>
+                    </div>
+                    <button class="view-details-btn" data-view="inventory">View Details →</button>
+                </div>
+
+                <!-- Satisfaction Overview Card -->
+                <div class="overview-card" id="satisfaction-overview-card">
+                    <div class="card-icon">😊</div>
+                    <div class="card-content">
+                        <h3>Customer Satisfaction</h3>
+                        <div class="card-stats">
+                            <span id="overview-satisfaction" class="big-stat">100%</span>
+                            <span class="stat-sublabel">Rating</span>
+                        </div>
+                    </div>
+                    <button class="view-details-btn" data-view="satisfaction">View Details →</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Orders Detail View -->
+        <div id="orders-view" class="dashboard-content detail-view">
+            <div class="detail-view-header">
+                <button class="back-btn" data-back="overview">← Back to Overview</button>
+                <h2>📋 Active Orders</h2>
+                <span id="orders-count" class="badge">0</span>
+            </div>
+            <div id="orders-container" class="orders-container">
+                <!-- Orders will be dynamically added here -->
+            </div>
+        </div>
+
+        <!-- Staff Detail View -->
+        <div id="staff-view" class="dashboard-content detail-view">
+            <div class="detail-view-header">
+                <button class="back-btn" data-back="overview">← Back to Overview</button>
+                <h2>👨‍🍳 Staff Management</h2>
+                <span id="staff-count" class="badge">0</span>
+            </div>
+            <div id="staff-container" class="staff-container">
+                <!-- Staff will be dynamically added here -->
+            </div>
+        </div>
+
+        <!-- Inventory Detail View -->
+        <div id="inventory-view" class="dashboard-content detail-view">
+            <div class="detail-view-header">
+                <button class="back-btn" data-back="overview">← Back to Overview</button>
+                <h2>📦 Inventory Management</h2>
+                <button id="restock-btn" class="btn btn-primary">Restock All</button>
+            </div>
+            <div id="inventory-container" class="inventory-container">
+                <!-- Inventory items will be dynamically added here -->
+            </div>
+        </div>
+
+        <!-- Satisfaction Detail View -->
+        <div id="satisfaction-view" class="dashboard-content detail-view">
+            <div class="detail-view-header">
+                <button class="back-btn" data-back="overview">← Back to Overview</button>
+                <h2>😊 Customer Satisfaction</h2>
+            </div>
+            <div class="satisfaction-content">
+                <div class="satisfaction-meter">
+                    <div id="satisfaction-bar" class="satisfaction-bar" style="width: 100%"></div>
+                </div>
+                <div class="satisfaction-stats">
+                    <div class="stat-item">
+                        <span class="stat-label">Happy Customers:</span>
+                        <span id="happy-customers" class="stat-value">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Unhappy Customers:</span>
+                        <span id="unhappy-customers" class="stat-value">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Average Wait Time:</span>
+                        <span id="avg-wait-time" class="stat-value">0s</span>
                     </div>
                 </div>
-            </section>
+                <div id="feedback-container" class="feedback-container">
+                    <!-- Recent feedback will appear here -->
+                </div>
+            </div>
         </div>
 
         <!-- Control Panel -->
