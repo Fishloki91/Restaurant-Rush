@@ -83,6 +83,19 @@
                     </div>
                     <button class="view-details-btn" data-view="satisfaction">View Details →</button>
                 </div>
+
+                <!-- Recipes Overview Card -->
+                <div class="overview-card" id="recipes-overview-card">
+                    <div class="card-icon">📖</div>
+                    <div class="card-content">
+                        <h3>Recipe Book</h3>
+                        <div class="card-stats">
+                            <span id="overview-recipes-unlocked" class="big-stat">7</span>
+                            <span class="stat-sublabel">Recipes Unlocked</span>
+                        </div>
+                    </div>
+                    <button class="view-details-btn" data-view="recipes">View Details →</button>
+                </div>
             </div>
         </div>
 
@@ -149,6 +162,18 @@
                 <div id="feedback-container" class="feedback-container">
                     <!-- Recent feedback will appear here -->
                 </div>
+            </div>
+        </div>
+
+        <!-- Recipes Detail View -->
+        <div id="recipes-view" class="dashboard-content detail-view">
+            <div class="detail-view-header">
+                <button class="back-btn" data-back="overview">← Back to Overview</button>
+                <h2>📖 Recipe Book</h2>
+                <span class="badge" style="background: #28a745;">Complete orders to unlock!</span>
+            </div>
+            <div id="recipes-container" class="recipes-container">
+                <!-- Recipes will be dynamically added here -->
             </div>
         </div>
 

@@ -26,9 +26,12 @@ class RestaurantGame {
         this.isGameOver = false; // Track game over state
         this.vipCustomers = 0; // Track VIP customers served
         this.maxActiveOrders = 8; // Maximum active orders at once
+        this.unlockedRecipes = []; // Track unlocked recipes
+        this.totalOrdersCompleted = 0; // Track total orders completed for unlocks
         
         this.initializeInventory();
         this.initializeStaff();
+        this.initializeRecipes();
     }
     
     initializeInventory() {
@@ -104,6 +107,47 @@ class RestaurantGame {
             upgradeLevel: 0,
             maxUpgradeLevel: 3
         };
+    }
+    
+    initializeRecipes() {
+        // Define all recipes with unlock requirements
+        this.allRecipes = [
+            // Starting recipes (unlocked by default)
+            { id: 1, name: 'Beef Steak', category: 'Grill', ingredients: ['Beef', 'Vegetables'], price: 25, time: 180, unlockAt: 0 },
+            { id: 2, name: 'Chicken Pasta', category: 'Italian', ingredients: ['Chicken', 'Pasta', 'Tomatoes'], price: 18, time: 120, unlockAt: 0 },
+            { id: 3, name: 'Grilled Fish', category: 'Seafood', ingredients: ['Fish', 'Vegetables'], price: 22, time: 150, unlockAt: 0 },
+            { id: 4, name: 'Vegetable Stir Fry', category: 'Asian', ingredients: ['Vegetables', 'Rice'], price: 15, time: 90, unlockAt: 0 },
+            { id: 5, name: 'Chicken Rice Bowl', category: 'Asian', ingredients: ['Chicken', 'Rice', 'Vegetables'], price: 16, time: 100, unlockAt: 0 },
+            { id: 6, name: 'Cheese Pizza', category: 'Italian', ingredients: ['Cheese', 'Tomatoes'], price: 14, time: 120, unlockAt: 0 },
+            { id: 7, name: 'Pasta Primavera', category: 'Italian', ingredients: ['Pasta', 'Vegetables', 'Cheese'], price: 17, time: 110, unlockAt: 0 },
+            
+            // Unlockable recipes
+            { id: 8, name: 'Premium Ribeye', category: 'Grill', ingredients: ['Beef', 'Vegetables', 'Cheese'], price: 35, time: 200, unlockAt: 10 },
+            { id: 9, name: 'Seafood Linguine', category: 'Italian', ingredients: ['Fish', 'Pasta', 'Tomatoes'], price: 28, time: 160, unlockAt: 15 },
+            { id: 10, name: 'Sushi Platter', category: 'Asian', ingredients: ['Fish', 'Rice', 'Vegetables'], price: 32, time: 180, unlockAt: 20 },
+            { id: 11, name: 'Beef Tacos', category: 'Mexican', ingredients: ['Beef', 'Cheese', 'Tomatoes'], price: 20, time: 100, unlockAt: 25 },
+            { id: 12, name: 'French Onion Soup', category: 'French', ingredients: ['Vegetables', 'Cheese'], price: 18, time: 140, unlockAt: 30 },
+            { id: 13, name: 'Lobster Thermidor', category: 'Seafood', ingredients: ['Fish', 'Cheese', 'Vegetables'], price: 45, time: 220, unlockAt: 40 },
+            { id: 14, name: 'Chicken Tikka Masala', category: 'Asian', ingredients: ['Chicken', 'Rice', 'Tomatoes'], price: 24, time: 140, unlockAt: 35 },
+            { id: 15, name: 'Filet Mignon', category: 'French', ingredients: ['Beef', 'Vegetables'], price: 40, time: 200, unlockAt: 50 }
+        ];
+        
+        // Start with basic recipes unlocked
+        this.unlockedRecipes = this.allRecipes.filter(r => r.unlockAt === 0).map(r => r.id);
+    }
+    
+    checkRecipeUnlocks() {
+        // Check if any new recipes should be unlocked
+        this.allRecipes.forEach(recipe => {
+            if (!this.unlockedRecipes.includes(recipe.id) && this.totalOrdersCompleted >= recipe.unlockAt) {
+                this.unlockedRecipes.push(recipe.id);
+                this.addFeedback(`🎉 New recipe unlocked: ${recipe.name}! ($${recipe.price})`, true);
+            }
+        });
+    }
+    
+    getAvailableRecipes() {
+        return this.allRecipes.filter(r => this.unlockedRecipes.includes(r.id));
     }
     
     hireStaff() {
@@ -199,9 +243,11 @@ class RestaurantGame {
         this.dayStartHappyCustomers = 0;
         this.dayStartUnhappyCustomers = 0;
         this.vipCustomers = 0;
+        this.totalOrdersCompleted = 0;
         
         this.initializeInventory();
         this.initializeStaff();
+        this.initializeRecipes();
         
         // Hide modal
         const modal = document.getElementById('game-over-modal');
@@ -287,15 +333,8 @@ class RestaurantGame {
             return;
         }
         
-        const dishes = [
-            { name: 'Beef Steak', ingredients: ['Beef', 'Vegetables'], price: 25, time: 180 },
-            { name: 'Chicken Pasta', ingredients: ['Chicken', 'Pasta', 'Tomatoes'], price: 18, time: 120 },
-            { name: 'Grilled Fish', ingredients: ['Fish', 'Vegetables'], price: 22, time: 150 },
-            { name: 'Vegetable Stir Fry', ingredients: ['Vegetables', 'Rice'], price: 15, time: 90 },
-            { name: 'Chicken Rice Bowl', ingredients: ['Chicken', 'Rice', 'Vegetables'], price: 16, time: 100 },
-            { name: 'Cheese Pizza', ingredients: ['Cheese', 'Tomatoes'], price: 14, time: 120 },
-            { name: 'Pasta Primavera', ingredients: ['Pasta', 'Vegetables', 'Cheese'], price: 17, time: 110 }
-        ];
+        // Use unlocked recipes
+        const availableRecipes = this.getAvailableRecipes();
         
         // Determine if this is a VIP order (15% chance)
         const isVIP = Math.random() < 0.15;
@@ -306,7 +345,14 @@ class RestaurantGame {
         let maxTime = 0;
         
         for (let i = 0; i < numItems; i++) {
-            const dish = dishes[Math.floor(Math.random() * dishes.length)];
+            const recipe = availableRecipes[Math.floor(Math.random() * availableRecipes.length)];
+            const dish = {
+                name: recipe.name,
+                category: recipe.category,
+                ingredients: recipe.ingredients,
+                price: recipe.price,
+                time: recipe.time
+            };
             orderItems.push(dish);
             totalPrice += dish.price;
             maxTime = Math.max(maxTime, dish.time);
@@ -350,7 +396,8 @@ class RestaurantGame {
             assignedStaff: null,
             progress: 0,
             requiredIngredients: requiredIngredients,
-            isVIP: isVIP
+            isVIP: isVIP,
+            isPriority: false // Player can mark orders as priority
         };
         
         this.orders.push(order);
@@ -360,6 +407,14 @@ class RestaurantGame {
         }
         
         this.render();
+    }
+    
+    toggleOrderPriority(orderId) {
+        const order = this.orders.find(o => o.id === orderId);
+        if (order) {
+            order.isPriority = !order.isPriority;
+            this.render();
+        }
     }
     
     assignOrderToStaff(orderId) {
@@ -411,8 +466,17 @@ class RestaurantGame {
                 
                 const staff = this.staff.find(s => s.id === order.assignedStaff);
                 if (staff) {
-                    // Progress based on staff efficiency
-                    order.progress += staff.efficiency * 1.5; // Progress per second
+                    // Check for specialization bonus
+                    let efficiencyBonus = 1.0;
+                    const hasMatchingSpecialty = order.items.some(item => 
+                        item.category === staff.speciality
+                    );
+                    if (hasMatchingSpecialty) {
+                        efficiencyBonus = 1.15; // 15% bonus for matching specialty
+                    }
+                    
+                    // Progress based on staff efficiency with specialty bonus
+                    order.progress += staff.efficiency * 1.5 * efficiencyBonus;
                     
                     if (order.progress >= 100) {
                         this.completeOrder(order.id, true);
@@ -441,6 +505,10 @@ class RestaurantGame {
             order.status = 'completed';
             this.revenue += order.totalPrice;
             this.happyCustomers++;
+            this.totalOrdersCompleted++; // Track for recipe unlocks
+            
+            // Check for recipe unlocks
+            this.checkRecipeUnlocks();
             
             if (order.isVIP) {
                 this.vipCustomers++;
@@ -584,6 +652,7 @@ class RestaurantGame {
         this.renderSatisfaction();
         this.renderGameStats();
         this.renderOverview();
+        this.renderRecipes();
     }
     
     renderOverview() {
@@ -600,6 +669,12 @@ class RestaurantGame {
         document.getElementById('overview-staff-available').textContent = availableStaff;
         document.getElementById('overview-inventory-low').textContent = lowStockItems;
         document.getElementById('overview-satisfaction').textContent = `${Math.round(this.customerSatisfaction)}%`;
+        
+        // Update recipes overview
+        const recipesUnlockedEl = document.getElementById('overview-recipes-unlocked');
+        if (recipesUnlockedEl) {
+            recipesUnlockedEl.textContent = this.unlockedRecipes.length;
+        }
         
         // Add notification badges
         const ordersCard = document.getElementById('orders-overview-card');
@@ -667,8 +742,12 @@ class RestaurantGame {
             return;
         }
         
-        // Sort orders: pending urgent first, then by time remaining
+        // Sort orders: priority first, then pending urgent, then by time remaining
         const sortedOrders = [...this.orders].sort((a, b) => {
+            // Priority orders come first
+            if (a.isPriority && !b.isPriority) return -1;
+            if (!a.isPriority && b.isPriority) return 1;
+            
             const aTimePercent = (a.timeRemaining / a.timeLimit) * 100;
             const bTimePercent = (b.timeRemaining / b.timeLimit) * 100;
             
@@ -709,24 +788,45 @@ class RestaurantGame {
             
             // Add VIP styling and badge
             const vipBadge = order.isVIP ? '<span class="vip-badge">⭐ VIP</span>' : '';
+            const priorityBadge = order.isPriority ? '<span class="priority-badge">⚡ Priority</span>' : '';
             if (order.isVIP) {
                 orderCard.classList.add('vip-order');
+            }
+            if (order.isPriority) {
+                orderCard.classList.add('priority-order');
+            }
+            
+            // Check for staff specialization match
+            let specializationHint = '';
+            if (order.status === 'pending') {
+                const matchingStaff = this.staff.filter(s => 
+                    s.status === 'available' && 
+                    order.items.some(item => item.category === s.speciality)
+                );
+                if (matchingStaff.length > 0) {
+                    const staffNames = matchingStaff.slice(0, 2).map(s => s.name.split(' ')[0]).join(', ');
+                    specializationHint = `<div style="margin: 5px 0; font-size: 0.8rem; color: #28a745;">✨ Best: ${staffNames}</div>`;
+                }
             }
             
             orderCard.innerHTML = `
                 <div class="order-header">
-                    <span class="order-number">Order #${order.id} ${vipBadge}</span>
+                    <span class="order-number">Order #${order.id} ${vipBadge}${priorityBadge}</span>
                     <span class="order-timer ${timerClass}">${order.timeRemaining}s</span>
                 </div>
                 <div class="order-items">${itemsList}</div>
                 <div style="margin: 5px 0; font-weight: bold; color: #28a745;">Total: $${order.totalPrice}</div>
                 ${assignedStaffInfo}
+                ${specializationHint}
                 <div class="order-status">
                     <div class="order-progress">
                         <div class="order-progress-bar" style="width: ${order.progress}%"></div>
                     </div>
                     ${order.status === 'pending' ? 
-                        `<button class="assign-btn" onclick="game.assignOrderToStaff(${order.id})">Assign</button>` :
+                        `<div style="display: flex; gap: 5px;">
+                            <button class="assign-btn" onclick="game.assignOrderToStaff(${order.id})">Assign</button>
+                            <button class="priority-btn ${order.isPriority ? 'active' : ''}" onclick="game.toggleOrderPriority(${order.id})" title="Mark as priority">⚡</button>
+                        </div>` :
                         `<span style="font-size: 0.85rem; color: #666;">In Progress</span>`
                     }
                 </div>
@@ -869,6 +969,70 @@ class RestaurantGame {
             avgWaitTime.textContent = `${avgTime}s`;
         } else {
             avgWaitTime.textContent = '0s';
+        }
+    }
+    
+    renderRecipes() {
+        const container = document.getElementById('recipes-container');
+        if (!container) return; // Recipe view might not exist in HTML yet
+        
+        container.innerHTML = '';
+        
+        // Group recipes by unlocked/locked
+        const unlocked = this.allRecipes.filter(r => this.unlockedRecipes.includes(r.id));
+        const locked = this.allRecipes.filter(r => !this.unlockedRecipes.includes(r.id));
+        
+        // Render unlocked recipes
+        if (unlocked.length > 0) {
+            const unlockedSection = document.createElement('div');
+            unlockedSection.innerHTML = '<h3 style="color: #28a745; margin: 10px 0;">✅ Unlocked Recipes</h3>';
+            container.appendChild(unlockedSection);
+            
+            unlocked.forEach(recipe => {
+                const recipeCard = document.createElement('div');
+                recipeCard.className = 'recipe-card unlocked';
+                recipeCard.innerHTML = `
+                    <div class="recipe-header">
+                        <span class="recipe-name">${recipe.name}</span>
+                        <span class="recipe-price">$${recipe.price}</span>
+                    </div>
+                    <div class="recipe-category">${recipe.category}</div>
+                    <div class="recipe-ingredients">
+                        ${recipe.ingredients.map(ing => `<span class="ingredient-tag">${ing}</span>`).join(' ')}
+                    </div>
+                    <div class="recipe-time">⏱️ ${recipe.time}s</div>
+                `;
+                container.appendChild(recipeCard);
+            });
+        }
+        
+        // Render locked recipes
+        if (locked.length > 0) {
+            const lockedSection = document.createElement('div');
+            lockedSection.innerHTML = '<h3 style="color: #666; margin: 20px 0 10px 0;">🔒 Locked Recipes</h3>';
+            container.appendChild(lockedSection);
+            
+            locked.forEach(recipe => {
+                const recipeCard = document.createElement('div');
+                recipeCard.className = 'recipe-card locked';
+                recipeCard.innerHTML = `
+                    <div class="recipe-header">
+                        <span class="recipe-name">${recipe.name}</span>
+                        <span class="recipe-price">$${recipe.price}</span>
+                    </div>
+                    <div class="recipe-category">${recipe.category}</div>
+                    <div class="recipe-unlock">
+                        🔒 Unlock at ${recipe.unlockAt} completed orders
+                        <div class="unlock-progress">
+                            <div class="unlock-progress-bar" style="width: ${Math.min(100, (this.totalOrdersCompleted / recipe.unlockAt) * 100)}%"></div>
+                        </div>
+                        <div style="font-size: 0.8rem; color: #666; margin-top: 5px;">
+                            ${this.totalOrdersCompleted} / ${recipe.unlockAt} orders
+                        </div>
+                    </div>
+                `;
+                container.appendChild(recipeCard);
+            });
         }
     }
 }
