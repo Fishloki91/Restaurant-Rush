@@ -41,6 +41,14 @@ Balance quick order fulfillment, staff workload, inventory management, and custo
 
 ## Updates
 
+### v1.5.0 - Recipe Variety & Specialization System
+**Major Feature:** Recipe unlock system - Expand your menu by unlocking 8 premium recipes (up to $45 value!) as you complete orders. Staff gain a 15% efficiency bonus when cooking dishes matching their specialty category (Italian, Asian, Grill, etc.).
+
+**Quality of Life Improvements:**
+- **Recipe Book view** - Browse all available and locked recipes with unlock requirements and progress tracking
+- **Staff specialization indicators** - "✨ Best:" hints on orders show which staff have matching specialties for optimal assignments
+- **Order priority marking** - Flag important orders with ⚡ priority button to keep them at the top of your queue
+
 ### v1.4.0 - VIP Customer System
 **Major Feature:** VIP customer system - Serve high-value VIP customers with 50% higher rewards but 20% stricter deadlines! VIP orders are visually distinct with gold styling and ⭐ badges, and have greater impact on satisfaction.
 
