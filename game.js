@@ -954,11 +954,13 @@ class RestaurantGame {
         const satisfactionBar = document.getElementById('satisfaction-bar');
         const happyCustomers = document.getElementById('happy-customers');
         const unhappyCustomers = document.getElementById('unhappy-customers');
+        const vipCustomers = document.getElementById('vip-customers');
         const avgWaitTime = document.getElementById('avg-wait-time');
         
         satisfactionBar.style.width = `${this.customerSatisfaction}%`;
         happyCustomers.textContent = this.happyCustomers;
         unhappyCustomers.textContent = this.unhappyCustomers;
+        vipCustomers.textContent = this.vipCustomers;
         
         // Calculate average wait time from completed orders
         if (this.completedOrders.length > 0) {
