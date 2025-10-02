@@ -41,6 +41,14 @@ Balance quick order fulfillment, staff workload, inventory management, and custo
 
 ## Updates
 
+### v1.6.0 - Warm Matte Theme Redesign
+**Major Feature:** Warm matte theme redesign - A complete visual overhaul with warm earth tones (terracotta, burnt sienna, golden browns) and subtle matte texture effects for a more inviting, restaurant-like atmosphere. All UI elements now use the cohesive warm color palette with better contrast.
+
+**Quality of Life Improvements:**
+- **Smooth interactive transitions** - All buttons and interactive elements feature silky 0.3s ease transitions with seamless color shifts
+- **Enhanced depth perception** - Multi-layered warm-toned shadows (2-8px range) that respond to interactions for better visual hierarchy
+- **Hover scale animations** - Cards subtly lift (translateY -2px) with enhanced shadows on hover for immediate visual feedback
+
 ### v1.5.0 - Recipe Variety & Specialization System
 **Major Feature:** Recipe unlock system - Expand your menu by unlocking 8 premium recipes (up to $45 value!) as you complete orders. Staff gain a 15% efficiency bonus when cooking dishes matching their specialty category (Italian, Asian, Grill, etc.).
 
