@@ -2,6 +2,18 @@
 
 A fast-paced restaurant management game where you oversee multiple aspects of a busy restaurant from a central dashboard. Make quick decisions to keep customers happy, staff efficient, and profits up!
 
+///
+## Updates
+
+### v1.0.0 - Day Progression System
+**Major Feature:** Day progression system with increasing difficulty - Your restaurant now advances through 3-minute business days with increasing order frequency and end-of-day bonuses.
+
+**Quality of Life Improvements:**
+- Sound control toggle button (framework ready for future audio features)
+- Smart order sorting - urgent orders automatically prioritized at the top
+- Enhanced visual feedback with hover tooltips on staff and inventory items
+///
+
 ## Game Overview
 
 Players are the manager of a busy restaurant. They must oversee multiple aspects of the operation from a central dashboard, making decisions quickly to keep customers happy, staff efficient, and profits up. As the game progresses, the restaurant grows more complex, with more tables, orders, and challenges.
