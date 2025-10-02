@@ -14,6 +14,10 @@ class RestaurantGame {
         this.completedOrders = [];
         this.nextOrderId = 1;
         this.nextStaffId = 1;
+        this.dayTimer = 0;
+        this.dayDuration = 180; // 3 minutes per day
+        this.orderGenerationChance = 0.4; // Base chance
+        this.soundEnabled = true;
         
         this.initializeInventory();
         this.initializeStaff();
@@ -79,6 +83,7 @@ class RestaurantGame {
                 this.updateOrders();
                 this.updateStaff();
                 this.checkCustomerSatisfaction();
+                this.updateDayProgression();
                 this.render();
             }
         }, 1000);
@@ -86,11 +91,30 @@ class RestaurantGame {
         // Generate orders periodically
         this.orderInterval = setInterval(() => {
             if (!this.isPaused && this.isRunning) {
-                if (Math.random() < 0.4) { // 40% chance to generate order each interval
+                if (Math.random() < this.orderGenerationChance) {
                     this.generateOrder();
                 }
             }
         }, 5000); // Check every 5 seconds
+    }
+    
+    updateDayProgression() {
+        this.dayTimer++;
+        
+        if (this.dayTimer >= this.dayDuration) {
+            // Advance to next day
+            this.day++;
+            this.dayTimer = 0;
+            
+            // Increase difficulty gradually
+            this.orderGenerationChance = Math.min(0.8, 0.4 + (this.day - 1) * 0.05);
+            
+            // End of day bonus
+            const bonus = Math.floor(this.revenue * 0.1);
+            this.revenue += bonus;
+            
+            this.addFeedback(`🌅 Day ${this.day} begins! Difficulty increased. Bonus: $${bonus}`, true);
+        }
     }
     
     generateOrder() {
@@ -281,6 +305,13 @@ class RestaurantGame {
         }
     }
     
+    toggleSound() {
+        this.soundEnabled = !this.soundEnabled;
+        const btn = document.getElementById('sound-toggle-btn');
+        btn.textContent = this.soundEnabled ? '🔊 Sound On' : '🔇 Sound Off';
+        this.addFeedback(`Sound ${this.soundEnabled ? 'enabled' : 'disabled'}`, true);
+    }
+    
     addFeedback(message, isPositive) {
         const feedbackContainer = document.getElementById('feedback-container');
         const feedbackItem = document.createElement('div');
@@ -306,7 +337,9 @@ class RestaurantGame {
     }
     
     renderGameStats() {
+        const dayProgress = (this.dayTimer / this.dayDuration) * 100;
         document.getElementById('game-day').textContent = this.day;
+        document.getElementById('game-day').title = `Day ${this.day} - ${Math.floor(dayProgress)}% complete`;
         document.getElementById('revenue').textContent = `$${this.revenue}`;
         
         const avgRating = this.calculateAverageRating();
@@ -331,7 +364,20 @@ class RestaurantGame {
             return;
         }
         
-        this.orders.forEach(order => {
+        // Sort orders: pending urgent first, then by time remaining
+        const sortedOrders = [...this.orders].sort((a, b) => {
+            const aTimePercent = (a.timeRemaining / a.timeLimit) * 100;
+            const bTimePercent = (b.timeRemaining / b.timeLimit) * 100;
+            
+            // Prioritize pending orders over in-progress
+            if (a.status === 'pending' && b.status !== 'pending') return -1;
+            if (a.status !== 'pending' && b.status === 'pending') return 1;
+            
+            // Then sort by urgency (time remaining percentage)
+            return aTimePercent - bTimePercent;
+        });
+        
+        sortedOrders.forEach(order => {
             const orderCard = document.createElement('div');
             orderCard.className = 'order-card';
             
@@ -381,6 +427,7 @@ class RestaurantGame {
         this.staff.forEach(staff => {
             const staffCard = document.createElement('div');
             staffCard.className = 'staff-card';
+            staffCard.title = `Speciality: ${staff.speciality} | Orders Completed: ${staff.ordersCompleted}`;
             
             staffCard.innerHTML = `
                 <div class="staff-header">
@@ -425,6 +472,7 @@ class RestaurantGame {
             
             const item = document.createElement('div');
             item.className = 'inventory-item';
+            item.title = `${name}: ${stock.current}/${stock.max} (${percentage.toFixed(0)}%)`;
             
             item.innerHTML = `
                 <div class="inventory-header">
@@ -490,6 +538,10 @@ document.addEventListener('DOMContentLoaded', () => {
     
     document.getElementById('restock-btn').addEventListener('click', () => {
         game.restockInventory();
+    });
+    
+    document.getElementById('sound-toggle-btn').addEventListener('click', () => {
+        game.toggleSound();
     });
     
     // Initial render
