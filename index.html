@@ -162,6 +162,80 @@
         </div>
     </div>
 
+    <!-- Day Summary Modal -->
+    <div id="day-summary-modal" class="modal">
+        <div class="modal-content">
+            <h2>📊 Day <span id="summary-day-number">1</span> Complete!</h2>
+            <div class="summary-stats">
+                <div class="summary-section">
+                    <h3>💰 Financial Summary</h3>
+                    <div class="summary-item">
+                        <span>Revenue Earned:</span>
+                        <span id="summary-revenue-earned" class="summary-value">$0</span>
+                    </div>
+                    <div class="summary-item">
+                        <span>End of Day Bonus (10%):</span>
+                        <span id="summary-bonus" class="summary-value success">$0</span>
+                    </div>
+                    <div class="summary-item summary-total">
+                        <span>Total Revenue:</span>
+                        <span id="summary-total-revenue" class="summary-value">$0</span>
+                    </div>
+                </div>
+                <div class="summary-section">
+                    <h3>👥 Customer Summary</h3>
+                    <div class="summary-item">
+                        <span>Customers Served:</span>
+                        <span id="summary-customers-served" class="summary-value">0</span>
+                    </div>
+                    <div class="summary-item">
+                        <span>Happy Customers:</span>
+                        <span id="summary-happy-customers" class="summary-value success">0</span>
+                    </div>
+                    <div class="summary-item">
+                        <span>Unhappy Customers:</span>
+                        <span id="summary-unhappy-customers" class="summary-value danger">0</span>
+                    </div>
+                    <div class="summary-item summary-total">
+                        <span>Success Rate:</span>
+                        <span id="summary-success-rate" class="summary-value">100%</span>
+                    </div>
+                </div>
+            </div>
+            <button class="btn btn-success btn-large" onclick="game.continueToNextDay()">Continue to Day <span id="next-day-number"></span> →</button>
+        </div>
+    </div>
+
+    <!-- Game Over Modal -->
+    <div id="game-over-modal" class="modal">
+        <div class="modal-content">
+            <h2 style="color: #dc3545;">💔 Game Over</h2>
+            <p style="font-size: 1.2rem; margin: 20px 0;">Your restaurant ran out of funds!</p>
+            <div class="summary-stats">
+                <div class="summary-section">
+                    <h3>📈 Final Statistics</h3>
+                    <div class="summary-item">
+                        <span>Days Survived:</span>
+                        <span id="gameover-day-reached" class="summary-value">0</span>
+                    </div>
+                    <div class="summary-item">
+                        <span>Total Customers:</span>
+                        <span id="gameover-total-customers" class="summary-value">0</span>
+                    </div>
+                    <div class="summary-item">
+                        <span>Happy Customers:</span>
+                        <span id="gameover-happy-customers" class="summary-value success">0</span>
+                    </div>
+                    <div class="summary-item">
+                        <span>Average Rating:</span>
+                        <span id="gameover-rating" class="summary-value">5.0</span>
+                    </div>
+                </div>
+            </div>
+            <button class="btn btn-primary btn-large" onclick="game.restartGame()">🔄 Start New Game</button>
+        </div>
+    </div>
+
     <script src="game.js"></script>
 </body>
 </html>

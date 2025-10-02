@@ -4,32 +4,53 @@
 
 ## 🎯 Core Gameplay
 - **Real-time management**: Handle incoming orders with countdown timers
-- **Staff coordination**: Assign orders to 4 staff members with different efficiency levels (70-90%)
+- **Staff coordination**: Hire and manage staff members with random efficiency levels (60-90%)
 - **Resource management**: Monitor and restock 8 ingredient types when supplies run low
 - **Customer satisfaction**: Maintain high ratings by completing orders on time
+- **Daily progression**: Complete 3-minute business days with performance summaries
 
 ## 🎮 Key Features
+- **Dynamic Staff Hiring** system to expand your team with randomly-generated employees
+- **End-of-Day Summaries** with detailed performance metrics and bonus rewards
 - **Multi-View Navigation** with dedicated screens for each management area and smooth transitions
 - **Interactive Dashboard** with quick-stat overview cards and visual notification alerts
-- **Order System** with automatic generation and time-sensitive completion
-- **Staff Performance** tracking with efficiency ratings and workload management
+- **Order System** with automatic generation, time-sensitive completion, and assigned staff tracking
+- **Staff Performance** tracking with efficiency ratings, workload management, and upgrades
 - **Inventory Management** with color-coded stock levels and one-click restocking
 - **Satisfaction Metrics** including customer feedback and restaurant ratings
+- **Game Over Detection** when funds run out with final statistics display
 
 ## 🎲 Game Mechanics
-- Orders auto-generate every 5 seconds (40% chance)
+- Starting revenue of $200 to begin your restaurant journey
+- Orders auto-generate every 5 seconds (40% base chance, increases with each day)
 - 7 different dishes ranging from $14-$25 with varying completion times
 - Staff efficiency affects order speed; performance changes based on success/failure
 - Failed orders hurt satisfaction (-10 points), completed orders boost it (+2 points)
-- Ingredients are consumed when orders are assigned, requiring strategic restocking
+- Ingredients are consumed when orders are assigned, requiring strategic restocking ($50 cost)
+- Hire new staff members for $150 with random efficiency stats (60-90%)
+- Upgrade staff up to Level 3 for increased efficiency
+- Each day lasts 3 minutes with 10% end-of-day revenue bonus
+- Game over occurs when revenue reaches $0 or below
 
 ## 🎯 Objective
-Balance quick order fulfillment, staff workload, inventory management, and customer satisfaction to maximize revenue and maintain a high restaurant rating. Success requires strategic thinking, quick decision-making, and efficient resource allocation.
+Balance quick order fulfillment, staff workload, inventory management, and customer satisfaction to maximize revenue and maintain a high restaurant rating. Strategically hire and upgrade staff to handle increasing difficulty. Survive as many days as possible while growing your restaurant empire!
 
 **Tech Stack**: Pure HTML5/CSS3/JavaScript with responsive design
 **Play Style**: Real-time strategy with resource management elements
+**Display**: Optimized for 1920x1080 screens with no scrolling
 
 ## Updates
+
+### v1.3.0 - Staff Hiring & Daily Progression System
+**Major Features:**
+- **Staff hiring system** - Hire new employees for $150 with randomly-generated names, roles, and efficiency stats (60-90%)
+- **Random staff stats** - All staff now start with randomized efficiency for variety and replay value
+- **End-of-day summaries** - Detailed performance reports at the end of each 3-minute day with revenue breakdown, customer statistics, and continue button
+
+**Quality of Life Improvements:**
+- **Assigned staff display** - Active orders now show which staff member is working on them
+- **Game over detection** - Proper game over screen when revenue reaches $0 with final statistics
+- **1920x1080 optimization** - Dashboard perfectly fits full HD screens with no scrolling required
 
 ### v1.2.0 - Multi-View Navigation System
 **Major Feature:** Multi-view navigation system - No more scrolling! Navigate between dedicated views for Orders, Staff, Inventory, and Customer Satisfaction with smooth transitions and an overview dashboard.
