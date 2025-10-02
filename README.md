@@ -1,14 +1,3 @@
-## Updates
-
-### v1.0.0 - Day Progression System
-**Major Feature:** Day progression system with increasing difficulty - Your restaurant now advances through 3-minute business days with increasing order frequency and end-of-day bonuses.
-
-**Quality of Life Improvements:**
-- Sound control toggle button (framework ready for future audio features)
-- Smart order sorting - urgent orders automatically prioritized at the top
-- Enhanced visual feedback with hover tooltips on staff and inventory items
-///
-
 # Restaurant Rush - Game Summary
 
 **Restaurant Rush** is a real-time restaurant management simulation game where players act as a restaurant manager, overseeing all operations from a central dashboard to keep customers satisfied and profits flowing.
@@ -38,3 +27,13 @@ Balance quick order fulfillment, staff workload, inventory management, and custo
 
 **Tech Stack**: Pure HTML5/CSS3/JavaScript with responsive design
 **Play Style**: Real-time strategy with resource management elements
+
+## Updates
+
+### v1.0.0 - Day Progression System
+**Major Feature:** Day progression system with increasing difficulty - Your restaurant now advances through 3-minute business days with increasing order frequency and end-of-day bonuses.
+
+**Quality of Life Improvements:**
+- Sound control toggle button (framework ready for future audio features)
+- Smart order sorting - urgent orders automatically prioritized at the top
+- Enhanced visual feedback with hover tooltips on staff and inventory items
