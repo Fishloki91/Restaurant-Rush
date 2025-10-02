@@ -24,6 +24,8 @@ class RestaurantGame {
         this.dayStartHappyCustomers = 0; // Track happy customers at day start
         this.dayStartUnhappyCustomers = 0; // Track unhappy customers at day start
         this.isGameOver = false; // Track game over state
+        this.vipCustomers = 0; // Track VIP customers served
+        this.maxActiveOrders = 8; // Maximum active orders at once
         
         this.initializeInventory();
         this.initializeStaff();
@@ -196,6 +198,7 @@ class RestaurantGame {
         this.dayStartRevenue = 200;
         this.dayStartHappyCustomers = 0;
         this.dayStartUnhappyCustomers = 0;
+        this.vipCustomers = 0;
         
         this.initializeInventory();
         this.initializeStaff();
@@ -278,6 +281,12 @@ class RestaurantGame {
     }
     
     generateOrder() {
+        // Check order queue limit
+        if (this.orders.length >= this.maxActiveOrders) {
+            this.addFeedback('⚠️ Order queue is full! Complete orders before accepting new ones.', false);
+            return;
+        }
+        
         const dishes = [
             { name: 'Beef Steak', ingredients: ['Beef', 'Vegetables'], price: 25, time: 180 },
             { name: 'Chicken Pasta', ingredients: ['Chicken', 'Pasta', 'Tomatoes'], price: 18, time: 120 },
@@ -287,6 +296,9 @@ class RestaurantGame {
             { name: 'Cheese Pizza', ingredients: ['Cheese', 'Tomatoes'], price: 14, time: 120 },
             { name: 'Pasta Primavera', ingredients: ['Pasta', 'Vegetables', 'Cheese'], price: 17, time: 110 }
         ];
+        
+        // Determine if this is a VIP order (15% chance)
+        const isVIP = Math.random() < 0.15;
         
         const numItems = Math.floor(Math.random() * 3) + 1; // 1-3 items per order
         const orderItems = [];
@@ -298,6 +310,12 @@ class RestaurantGame {
             orderItems.push(dish);
             totalPrice += dish.price;
             maxTime = Math.max(maxTime, dish.time);
+        }
+        
+        // VIP orders get price boost and time reduction
+        if (isVIP) {
+            totalPrice = Math.floor(totalPrice * 1.5); // 50% price bonus
+            maxTime = Math.floor(maxTime * 0.8); // 20% less time
         }
         
         // Check if we have enough ingredients
@@ -331,10 +349,16 @@ class RestaurantGame {
             status: 'pending', // pending, in-progress, completed, failed
             assignedStaff: null,
             progress: 0,
-            requiredIngredients: requiredIngredients
+            requiredIngredients: requiredIngredients,
+            isVIP: isVIP
         };
         
         this.orders.push(order);
+        
+        if (isVIP) {
+            this.addFeedback('⭐ VIP Customer arrived! High reward, strict deadline!', true);
+        }
+        
         this.render();
     }
     
@@ -411,11 +435,16 @@ class RestaurantGame {
         if (!order) return;
         
         const staff = this.staff.find(s => s.id === order.assignedStaff);
+        const satisfactionChange = order.isVIP ? 5 : 2; // VIP orders affect satisfaction more
         
         if (success) {
             order.status = 'completed';
             this.revenue += order.totalPrice;
             this.happyCustomers++;
+            
+            if (order.isVIP) {
+                this.vipCustomers++;
+            }
             
             if (staff) {
                 staff.ordersCompleted++;
@@ -424,8 +453,9 @@ class RestaurantGame {
                 staff.currentOrder = null;
             }
             
-            this.customerSatisfaction = Math.min(100, this.customerSatisfaction + 2);
-            this.addFeedback(`✅ Order #${order.id} completed! Customer is happy! +$${order.totalPrice}`, true);
+            this.customerSatisfaction = Math.min(100, this.customerSatisfaction + satisfactionChange);
+            const vipLabel = order.isVIP ? ' ⭐ VIP' : '';
+            this.addFeedback(`✅ Order #${order.id}${vipLabel} completed! Customer is happy! +$${order.totalPrice}`, true);
         } else {
             order.status = 'failed';
             this.unhappyCustomers++;
@@ -436,8 +466,10 @@ class RestaurantGame {
                 staff.currentOrder = null;
             }
             
-            this.customerSatisfaction = Math.max(0, this.customerSatisfaction - 10);
-            this.addFeedback(`❌ Order #${order.id} failed! Customer is unhappy!`, false);
+            const penaltyChange = order.isVIP ? 20 : 10; // VIP failures hurt more
+            this.customerSatisfaction = Math.max(0, this.customerSatisfaction - penaltyChange);
+            const vipLabel = order.isVIP ? ' ⭐ VIP' : '';
+            this.addFeedback(`❌ Order #${order.id}${vipLabel} failed! Customer is unhappy!`, false);
         }
         
         this.completedOrders.push(order);
@@ -468,6 +500,20 @@ class RestaurantGame {
             }
             this.addFeedback(`📦 Inventory restocked! Cost: $${restockCost}`, true);
             this.render();
+        } else {
+            this.addFeedback('⚠️ Not enough revenue to restock!', false);
+        }
+    }
+    
+    restockSingleItem(ingredientName) {
+        const restockCost = 10;
+        if (this.revenue >= restockCost) {
+            if (this.inventory[ingredientName]) {
+                this.revenue -= restockCost;
+                this.inventory[ingredientName].current = this.inventory[ingredientName].max;
+                this.addFeedback(`📦 ${ingredientName} restocked! Cost: $${restockCost}`, true);
+                this.render();
+            }
         } else {
             this.addFeedback('⚠️ Not enough revenue to restock!', false);
         }
@@ -661,9 +707,15 @@ class RestaurantGame {
                 }
             }
             
+            // Add VIP styling and badge
+            const vipBadge = order.isVIP ? '<span class="vip-badge">⭐ VIP</span>' : '';
+            if (order.isVIP) {
+                orderCard.classList.add('vip-order');
+            }
+            
             orderCard.innerHTML = `
                 <div class="order-header">
-                    <span class="order-number">Order #${order.id}</span>
+                    <span class="order-number">Order #${order.id} ${vipBadge}</span>
                     <span class="order-timer ${timerClass}">${order.timeRemaining}s</span>
                 </div>
                 <div class="order-items">${itemsList}</div>
@@ -700,6 +752,14 @@ class RestaurantGame {
             const canUpgrade = staff.upgradeLevel < staff.maxUpgradeLevel;
             const upgradeStars = '⭐'.repeat(staff.upgradeLevel);
             
+            // Performance bar color
+            let performanceColor = '#28a745'; // green
+            if (staff.performance < 50) {
+                performanceColor = '#dc3545'; // red
+            } else if (staff.performance < 75) {
+                performanceColor = '#ffc107'; // yellow
+            }
+            
             staffCard.innerHTML = `
                 <div class="staff-header">
                     <div>
@@ -721,6 +781,9 @@ class RestaurantGame {
                         <span class="metric-label">Orders Done</span>
                         <span class="metric-value">${staff.ordersCompleted}</span>
                     </div>
+                </div>
+                <div class="performance-bar-container">
+                    <div class="performance-bar" style="width: ${staff.performance}%; background-color: ${performanceColor};"></div>
                 </div>
                 ${canUpgrade ? `
                     <button class="upgrade-btn" onclick="game.upgradeStaff(${staff.id})" ${this.revenue < upgradeCost ? 'disabled' : ''}>
@@ -766,6 +829,9 @@ class RestaurantGame {
             item.className = 'inventory-item';
             item.title = `${name}: ${stock.current}/${stock.max} (${percentage.toFixed(0)}%)`;
             
+            const restockCost = 10;
+            const canRestock = this.revenue >= restockCost && stock.current < stock.max;
+            
             item.innerHTML = `
                 <div class="inventory-header">
                     <span class="ingredient-name">${name}</span>
@@ -774,6 +840,10 @@ class RestaurantGame {
                 <div class="stock-bar">
                     <div class="stock-bar-fill ${levelClass}" style="width: ${percentage}%"></div>
                 </div>
+                <button class="restock-btn" onclick="game.restockSingleItem('${name}')" 
+                    ${!canRestock ? 'disabled' : ''}>
+                    📦 Restock ($${restockCost})
+                </button>
             `;
             
             container.appendChild(item);

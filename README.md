@@ -41,6 +41,14 @@ Balance quick order fulfillment, staff workload, inventory management, and custo
 
 ## Updates
 
+### v1.4.0 - VIP Customer System
+**Major Feature:** VIP customer system - Serve high-value VIP customers with 50% higher rewards but 20% stricter deadlines! VIP orders are visually distinct with gold styling and ⭐ badges, and have greater impact on satisfaction.
+
+**Quality of Life Improvements:**
+- **Order queue management** - Maximum of 8 active orders to prevent overwhelming situations
+- **Staff performance indicators** - Color-coded performance bars (green/yellow/red) on staff cards for instant visual feedback
+- **Individual item restocking** - Restock specific ingredients for $10 instead of buying everything for $50
+
 ### v1.3.0 - Staff Hiring & Daily Progression System
 **Major Features:**
 - **Staff hiring system** - Hire new employees for $150 with randomly-generated names, roles, and efficiency stats (60-90%)
