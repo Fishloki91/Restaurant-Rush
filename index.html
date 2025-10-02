@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurant Rush - Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="dashboard">
+        <header class="dashboard-header">
+            <h1>🍽️ Restaurant Rush</h1>
+            <div class="game-stats">
+                <div class="stat">
+                    <span class="stat-label">Day:</span>
+                    <span id="game-day" class="stat-value">1</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Revenue:</span>
+                    <span id="revenue" class="stat-value">$0</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Overall Rating:</span>
+                    <span id="overall-rating" class="stat-value">5.0</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="dashboard-content">
+            <!-- Orders Section -->
+            <section class="dashboard-section orders-section">
+                <div class="section-header">
+                    <h2>📋 Active Orders</h2>
+                    <span id="orders-count" class="badge">0</span>
+                </div>
+                <div id="orders-container" class="orders-container">
+                    <!-- Orders will be dynamically added here -->
+                </div>
+            </section>
+
+            <!-- Staff Section -->
+            <section class="dashboard-section staff-section">
+                <div class="section-header">
+                    <h2>👨‍🍳 Staff</h2>
+                    <span id="staff-count" class="badge">0</span>
+                </div>
+                <div id="staff-container" class="staff-container">
+                    <!-- Staff will be dynamically added here -->
+                </div>
+            </section>
+
+            <!-- Inventory Section -->
+            <section class="dashboard-section inventory-section">
+                <div class="section-header">
+                    <h2>📦 Inventory</h2>
+                    <button id="restock-btn" class="btn btn-primary">Restock All</button>
+                </div>
+                <div id="inventory-container" class="inventory-container">
+                    <!-- Inventory items will be dynamically added here -->
+                </div>
+            </section>
+
+            <!-- Customer Satisfaction Section -->
+            <section class="dashboard-section satisfaction-section">
+                <div class="section-header">
+                    <h2>😊 Customer Satisfaction</h2>
+                </div>
+                <div class="satisfaction-content">
+                    <div class="satisfaction-meter">
+                        <div id="satisfaction-bar" class="satisfaction-bar" style="width: 100%"></div>
+                    </div>
+                    <div class="satisfaction-stats">
+                        <div class="stat-item">
+                            <span class="stat-label">Happy Customers:</span>
+                            <span id="happy-customers" class="stat-value">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Unhappy Customers:</span>
+                            <span id="unhappy-customers" class="stat-value">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Average Wait Time:</span>
+                            <span id="avg-wait-time" class="stat-value">0s</span>
+                        </div>
+                    </div>
+                    <div id="feedback-container" class="feedback-container">
+                        <!-- Recent feedback will appear here -->
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Control Panel -->
+        <div class="control-panel">
+            <button id="start-game-btn" class="btn btn-success">Start Game</button>
+            <button id="pause-game-btn" class="btn btn-warning" disabled>Pause</button>
+            <button id="new-order-btn" class="btn btn-primary" disabled>Generate Order</button>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>
