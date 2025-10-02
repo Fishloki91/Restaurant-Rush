@@ -7,15 +7,21 @@
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    height: 100vh;
+    min-height: 100vh;
     padding: 10px;
-    overflow: hidden;
+    overflow: auto;
+}
+
+@media (min-width: 1024px) and (orientation: landscape) {
+    body {
+        height: 100vh;
+        overflow: hidden;
+    }
 }
 
 .dashboard {
     max-width: 1880px;
-    max-height: 1040px;
-    height: calc(100vh - 20px);
+    min-height: calc(100vh - 20px);
     margin: 0 auto;
     background: white;
     border-radius: 15px;
@@ -23,6 +29,13 @@ body {
     overflow: hidden;
     display: flex;
     flex-direction: column;
+}
+
+@media (min-width: 1024px) and (orientation: landscape) {
+    .dashboard {
+        max-height: 1040px;
+        height: calc(100vh - 20px);
+    }
 }
 
 .dashboard-header {
@@ -200,11 +213,23 @@ body {
     font-weight: bold;
     cursor: pointer;
     transition: all 0.3s ease;
+    min-height: 44px; /* Touch-friendly minimum */
 }
 
 .view-details-btn:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+/* Touch devices - remove hover transform */
+@media (hover: none) and (pointer: coarse) {
+    .view-details-btn:hover {
+        transform: none;
+    }
+    
+    .view-details-btn:active {
+        transform: scale(0.98);
+    }
 }
 
 /* Detail Views */
@@ -241,11 +266,24 @@ body {
     font-weight: bold;
     cursor: pointer;
     transition: all 0.3s ease;
+    min-height: 44px; /* Touch-friendly */
 }
 
 .back-btn:hover {
     background: #5a6268;
     transform: translateX(-3px);
+}
+
+/* Touch devices */
+@media (hover: none) and (pointer: coarse) {
+    .back-btn:hover {
+        background: #6c757d;
+        transform: none;
+    }
+    
+    .back-btn:active {
+        background: #5a6268;
+    }
 }
 
 /* Notification badge on overview cards */
@@ -387,6 +425,8 @@ body {
     border-radius: 5px;
     cursor: pointer;
     font-size: 0.85rem;
+    min-height: 36px; /* Touch-friendly */
+    min-width: 80px;
 }
 
 .assign-btn:hover {
@@ -396,6 +436,17 @@ body {
 .assign-btn:disabled {
     background: #ccc;
     cursor: not-allowed;
+}
+
+/* Touch devices */
+@media (hover: none) and (pointer: coarse) {
+    .assign-btn:hover {
+        background: #667eea;
+    }
+    
+    .assign-btn:active:not(:disabled) {
+        background: #5568d3;
+    }
 }
 
 /* Staff Section */
@@ -487,6 +538,7 @@ body {
     font-size: 0.85rem;
     font-weight: bold;
     transition: all 0.3s ease;
+    min-height: 40px; /* Touch-friendly */
 }
 
 .upgrade-btn:hover:not(:disabled) {
@@ -498,6 +550,17 @@ body {
     background: #ccc;
     cursor: not-allowed;
     opacity: 0.6;
+}
+
+/* Touch devices */
+@media (hover: none) and (pointer: coarse) {
+    .upgrade-btn:hover:not(:disabled) {
+        transform: none;
+    }
+    
+    .upgrade-btn:active:not(:disabled) {
+        transform: scale(0.98);
+    }
 }
 
 /* Inventory Section */
@@ -666,11 +729,23 @@ body {
     font-weight: bold;
     cursor: pointer;
     transition: all 0.3s ease;
+    min-height: 44px; /* Touch-friendly minimum */
 }
 
 .btn:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+}
+
+/* Touch devices - adjust interactions */
+@media (hover: none) and (pointer: coarse) {
+    .btn:hover:not(:disabled) {
+        transform: none;
+    }
+    
+    .btn:active:not(:disabled) {
+        transform: scale(0.98);
+    }
 }
 
 .btn-primary {
@@ -747,31 +822,246 @@ body {
     .staff-container {
         grid-template-columns: 1fr;
     }
+    
+    .inventory-container {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    }
 }
 
 @media (max-width: 768px) {
+    body {
+        padding: 5px;
+    }
+    
+    .dashboard {
+        border-radius: 10px;
+        min-height: calc(100vh - 10px);
+    }
+    
     .dashboard-header {
         flex-direction: column;
         gap: 15px;
+        padding: 15px 20px;
+    }
+    
+    .dashboard-header h1 {
+        font-size: 1.5rem;
     }
     
     .game-stats {
-        flex-direction: column;
-        gap: 10px;
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 15px;
         width: 100%;
+        justify-content: space-around;
+    }
+    
+    .stat {
+        flex: 1;
+        min-width: 80px;
+    }
+    
+    .stat-label {
+        font-size: 0.75rem;
+    }
+    
+    .stat-value {
+        font-size: 1.2rem;
+    }
+    
+    .day-progress {
+        width: 80px;
+    }
+    
+    .dashboard-content {
+        padding: 15px;
     }
     
     .inventory-container {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    }
+    
+    .overview-card {
+        padding: 20px;
+    }
+    
+    .overview-card .big-stat {
+        font-size: 2.5rem;
+    }
+    
+    .overview-card .card-icon {
+        font-size: 2.5rem;
+    }
+    
+    .detail-view-header {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    
+    .detail-view-header h2 {
+        font-size: 1.5rem;
+        width: 100%;
+        text-align: center;
+        order: 2;
+    }
+    
+    .back-btn {
+        order: 1;
+        font-size: 0.9rem;
+        padding: 8px 15px;
+    }
+    
+    .detail-view-header .badge,
+    .detail-view-header .btn {
+        order: 3;
+    }
+    
+    .control-panel {
+        flex-wrap: wrap;
+        padding: 10px 15px;
+        gap: 8px;
+    }
+    
+    .btn {
+        padding: 10px 20px;
+        font-size: 0.9rem;
+        flex: 1;
+        min-width: 120px;
+    }
+    
+    .orders-container {
         grid-template-columns: 1fr;
+    }
+    
+    .order-card {
+        padding: 12px;
+    }
+    
+    .staff-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .staff-card {
+        padding: 12px;
+    }
+    
+    .modal-content {
+        padding: 25px;
+        width: 95%;
+    }
+    
+    .modal-content h2 {
+        font-size: 1.5rem;
+    }
+    
+    .summary-section h3 {
+        font-size: 1.1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .dashboard-header h1 {
+        font-size: 1.3rem;
+    }
+    
+    .game-stats {
+        gap: 10px;
+    }
+    
+    .stat-value {
+        font-size: 1rem;
     }
     
     .overview-card .big-stat {
         font-size: 2rem;
     }
     
-    .detail-view-header {
-        flex-wrap: wrap;
-        gap: 10px;
+    .overview-card .card-icon {
+        font-size: 2rem;
+    }
+    
+    .btn {
+        padding: 10px 15px;
+        font-size: 0.85rem;
+        min-width: 100px;
+    }
+    
+    .control-panel {
+        gap: 6px;
+    }
+    
+    .detail-view-header h2 {
+        font-size: 1.3rem;
+    }
+    
+    .inventory-container {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .modal-content {
+        padding: 20px;
+    }
+    
+    .modal-content h2 {
+        font-size: 1.3rem;
+    }
+}
+
+/* Landscape tablet optimization */
+@media (min-width: 768px) and (max-width: 1024px) and (orientation: landscape) {
+    .overview-cards {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .orders-container {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .staff-container {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .inventory-container {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+/* Large landscape desktop optimization (1920x1080 and similar) */
+@media (min-width: 1600px) and (orientation: landscape) {
+    .overview-cards {
+        grid-template-columns: repeat(2, 1fr);
+        max-width: 1200px;
+    }
+    
+    .orders-container {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    
+    .staff-container {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    
+    .inventory-container {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+/* Portrait tablet optimization */
+@media (min-width: 481px) and (max-width: 768px) and (orientation: portrait) {
+    .dashboard-header h1 {
+        font-size: 1.6rem;
+    }
+    
+    .stat-value {
+        font-size: 1.3rem;
+    }
+    
+    .overview-card .big-stat {
+        font-size: 2.5rem;
+    }
+    
+    .inventory-container {
+        grid-template-columns: repeat(3, 1fr);
     }
 }
 
