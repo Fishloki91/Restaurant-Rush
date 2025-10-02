@@ -1491,4 +1491,52 @@ body {
     border-radius: 3px;
 }
 
+/* Keyboard Shortcuts Modal */
+.shortcuts-modal-content {
+    max-width: 500px;
+}
+
+.shortcuts-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 15px;
+    margin: 20px 0;
+}
+
+.shortcut-item {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 12px;
+    background: #EDE6DF;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.shortcut-item:hover {
+    background: #E5DDD5;
+    transform: translateX(5px);
+}
+
+.shortcut-key {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 50px;
+    padding: 8px 12px;
+    background: linear-gradient(135deg, #C17B5B 0%, #8B5A3C 100%);
+    color: white;
+    font-weight: bold;
+    border-radius: 6px;
+    font-size: 1rem;
+    box-shadow: 0 2px 4px rgba(139, 90, 60, 0.3);
+    font-family: 'Courier New', monospace;
+}
+
+.shortcut-desc {
+    flex: 1;
+    color: #333;
+    font-size: 0.95rem;
+}
+
 

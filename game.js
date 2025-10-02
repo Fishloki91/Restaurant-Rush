@@ -691,6 +691,11 @@ class RestaurantGame {
         this.render();
     }
     
+    toggleShortcutsModal() {
+        const modal = document.getElementById('shortcuts-modal');
+        modal.classList.toggle('modal-active');
+    }
+    
     addFeedback(message, isPositive) {
         const feedbackContainer = document.getElementById('feedback-container');
         const feedbackItem = document.createElement('div');
@@ -1175,6 +1180,10 @@ document.addEventListener('DOMContentLoaded', () => {
     
     document.getElementById('auto-assign-btn').addEventListener('click', () => {
         game.toggleAutoAssign();
+    });
+    
+    document.getElementById('shortcuts-help-btn').addEventListener('click', () => {
+        game.toggleShortcutsModal();
     });
     
     // Keyboard shortcuts
