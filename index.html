@@ -233,11 +233,11 @@
                     <button class="view-details-btn" data-view="achievements">View Details →</button>
                 </div>
 
-                <!-- Employee of the Month Overview Card -->
+                <!-- Staff of the Day Overview Card -->
                 <div class="overview-card tooltip-container" id="eotm-overview-card">
                     <div class="card-icon">👑</div>
                     <div class="card-content">
-                        <h3>Employee of the Month</h3>
+                        <h3>Staff of the Day</h3>
                         <div class="card-stats-multi">
                             <div class="stat-item">
                                 <span id="overview-eotm-winner" class="stat-number eotm-name">TBD</span>
@@ -256,7 +256,7 @@
                     <button class="view-details-btn" data-view="eotm">View Details →</button>
                     <div style="display:none"></div>
                     <div 
-                      data-tippy-content="<strong>Employee of the Month</strong><br>Track staff performance through monthly leaderboards, weekly challenges, and rewards. Top performers earn titles, bonuses, and a place in the Hall of Fame!"
+                      data-tippy-content="<strong>Staff of the Day</strong><br>Track staff performance through daily leaderboards, challenges, and rewards. Top performers earn titles, bonuses, and a place in the Hall of Fame!"
                       class="tippy-init"
                     ></div>
                 </div>
@@ -369,17 +369,17 @@
             </div>
         </div>
 
-        <!-- Employee of the Month View -->
+        <!-- Staff of the Day View -->
         <div id="eotm-view" class="dashboard-content detail-view">
             <div class="detail-view-header">
                 <button class="back-btn" data-back="overview">← Back to Overview</button>
-                <h2>🏆 Employee of the Month</h2>
-                <span id="eotm-month-badge" class="badge" style="background: #D89E54;">Month 1</span>
+                <h2>🏆 Staff of the Day</h2>
+                <span id="eotm-month-badge" class="badge" style="background: #D89E54;">Day 1</span>
             </div>
             <div class="eotm-container">
                 <!-- Leaderboard Section -->
                 <div class="eotm-section">
-                    <h3>📊 Monthly Leaderboard</h3>
+                    <h3>📊 Daily Leaderboard</h3>
                     <div id="leaderboard-container" class="leaderboard-container">
                         <!-- Top 3 staff will be displayed here -->
                     </div>
@@ -387,7 +387,7 @@
 
                 <!-- Weekly Challenge Section -->
                 <div class="eotm-section">
-                    <h3>🎯 Weekly Challenge</h3>
+                    <h3>🎯 Daily Challenge</h3>
                     <div id="weekly-challenge-container" class="weekly-challenge-container">
                         <!-- Weekly challenge will be displayed here -->
                     </div>
@@ -512,6 +512,12 @@
                     <div class="summary-item">
                         <span>Perfect Day:</span>
                         <span id="summary-perfect-day" class="summary-value">No</span>
+                    </div>
+                </div>
+                <div class="summary-section">
+                    <h3>👨‍🍳 Staff Performance</h3>
+                    <div id="summary-staff-breakdown">
+                        <!-- Staff performance will be dynamically added here -->
                     </div>
                 </div>
             </div>
