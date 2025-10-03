@@ -629,6 +629,12 @@ class RestaurantGame {
     }
     
     showToast({ icon = '💬', title = '', message = '', type = 'info', duration = 4000 }) {
+        // Don't show toasts if a modal is active (player is in a menu)
+        const activeModal = document.querySelector('.modal.modal-active');
+        if (activeModal) {
+            return; // Silently skip showing toast when in a menu
+        }
+        
         // Add toast to queue
         this.toastQueue.push({ icon, title, message, type, duration });
         
@@ -1928,7 +1934,7 @@ class RestaurantGame {
             }
             
             // Adjust efficiency based on fatigue, morale, and mood
-            const fatigueMultiplier = 1 - (staff.fatigue / 200); // Max 50% reduction
+            const fatigueMultiplier = 1 - (staff.fatigue / 500); // Max 20% reduction (1:5 ratio)
             const moraleMultiplier = this.getMoralePerformanceModifier(staff.morale); // Dynamic from morale factors
             const moodMultiplier = staff.mood ? staff.mood.performanceModifier : 1.0;
             
@@ -3034,8 +3040,7 @@ Fatigue: ${staff.fatigue.toFixed(0)}%
             monthBadge.textContent = `Day ${currentDay}`;
             daysLeft.textContent = daysUntilEnd;
             
-            this.updateMonthlyLeaderboard();
-            
+            // Don't recalculate scores during the day - just display existing leaderboard
             if (this.monthlyLeaderboard.length > 0) {
                 const leader = this.monthlyLeaderboard[0];
                 winnerName.textContent = leader.name.split(' ')[0]; // Just first name for space
