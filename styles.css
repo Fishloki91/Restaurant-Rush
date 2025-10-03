@@ -1090,9 +1090,106 @@ body {
 }
 
 .satisfaction-content {
-    display: grid;
-    grid-template-columns: 2fr 1fr;
+    display: flex;
+    flex-direction: column;
     gap: 20px;
+}
+
+/* New satisfaction dashboard styles */
+.satisfaction-card {
+    background: #FDFBF7;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 4px 15px rgba(139, 90, 60, 0.15);
+    text-align: center;
+}
+
+.satisfaction-card h3 {
+    margin: 0 0 15px 0;
+    color: #333;
+    font-size: 1.3rem;
+}
+
+.satisfaction-meter-large {
+    height: 50px;
+    background: #EDE6DF;
+    border-radius: 25px;
+    overflow: hidden;
+    position: relative;
+    margin-bottom: 15px;
+}
+
+.satisfaction-bar-large {
+    height: 100%;
+    background: linear-gradient(90deg, #B85450 0%, #D89E54 50%, #5A9E6F 100%);
+    transition: width 0.8s ease;
+    position: relative;
+}
+
+.satisfaction-percentage {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #333;
+    font-weight: bold;
+    font-size: 1.2rem;
+    text-shadow: 0 0 3px rgba(255, 255, 255, 0.8);
+}
+
+.satisfaction-emoji {
+    font-size: 3rem;
+    margin-top: 10px;
+}
+
+.satisfaction-metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.metric-card {
+    background: #FDFBF7;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 3px 10px rgba(139, 90, 60, 0.1);
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.metric-icon {
+    font-size: 2.5rem;
+    flex-shrink: 0;
+}
+
+.metric-content {
+    flex: 1;
+}
+
+.metric-label {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 5px;
+}
+
+.metric-value {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #C17B5B;
+}
+
+.satisfaction-feedback-section {
+    background: #FDFBF7;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 15px rgba(139, 90, 60, 0.15);
+}
+
+.satisfaction-feedback-section h3 {
+    margin: 0 0 15px 0;
+    color: #333;
+    font-size: 1.2rem;
 }
 
 .satisfaction-meter {
@@ -2335,14 +2432,15 @@ body {
 }
 
 .leaderboard-bonus {
-    margin-top: 10px;
-    padding: 8px;
+    display: inline-block;
+    margin-top: 8px;
+    padding: 4px 10px;
     background: linear-gradient(135deg, #FFD700, #FFA500);
-    border-radius: 5px;
-    text-align: center;
+    border-radius: 12px;
     font-weight: bold;
     color: white;
-    font-size: 0.9rem;
+    font-size: 0.75rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .leaderboard-others {

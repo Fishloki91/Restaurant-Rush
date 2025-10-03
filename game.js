@@ -2536,7 +2536,7 @@ class RestaurantGame {
             
             // Calculate efficiency breakdown
             const upgradeBonus = staff.upgradeLevel * 0.05;
-            const fatigueMultiplier = 1 - (staff.fatigue / 200);
+            const fatigueMultiplier = 1 - (staff.fatigue / 500); // 1:5 ratio - max 20% reduction
             const moraleMultiplier = this.getMoralePerformanceModifier(staff.morale);
             const moodMultiplier = staff.mood ? staff.mood.performanceModifier : 1.0;
             
@@ -2789,25 +2789,106 @@ Fatigue: ${staff.fatigue.toFixed(0)}%
     
     renderSatisfaction() {
         const satisfactionBar = document.getElementById('satisfaction-bar');
+        const satisfactionPercentage = document.getElementById('satisfaction-percentage');
+        const satisfactionEmoji = document.getElementById('satisfaction-emoji');
         const happyCustomers = document.getElementById('happy-customers');
         const unhappyCustomers = document.getElementById('unhappy-customers');
         const vipCustomers = document.getElementById('vip-customers');
         const avgWaitTime = document.getElementById('avg-wait-time');
+        const successRate = document.getElementById('success-rate');
+        const todayOrders = document.getElementById('today-orders');
+        const avgOrderValue = document.getElementById('avg-order-value');
+        const performanceRating = document.getElementById('performance-rating');
         
-        satisfactionBar.style.width = `${this.customerSatisfaction}%`;
-        happyCustomers.textContent = this.happyCustomers;
-        unhappyCustomers.textContent = this.unhappyCustomers;
-        vipCustomers.textContent = this.vipCustomers;
+        // Update satisfaction bar and percentage
+        if (satisfactionBar) {
+            satisfactionBar.style.width = `${this.customerSatisfaction}%`;
+        }
+        if (satisfactionPercentage) {
+            satisfactionPercentage.textContent = `${Math.round(this.customerSatisfaction)}%`;
+        }
+        
+        // Update emoji based on satisfaction level
+        if (satisfactionEmoji) {
+            if (this.customerSatisfaction >= 90) {
+                satisfactionEmoji.textContent = '😄';
+            } else if (this.customerSatisfaction >= 70) {
+                satisfactionEmoji.textContent = '😊';
+            } else if (this.customerSatisfaction >= 50) {
+                satisfactionEmoji.textContent = '😐';
+            } else if (this.customerSatisfaction >= 30) {
+                satisfactionEmoji.textContent = '😟';
+            } else {
+                satisfactionEmoji.textContent = '😢';
+            }
+        }
+        
+        // Update basic stats
+        if (happyCustomers) happyCustomers.textContent = this.happyCustomers;
+        if (unhappyCustomers) unhappyCustomers.textContent = this.unhappyCustomers;
+        if (vipCustomers) vipCustomers.textContent = this.vipCustomers;
         
         // Calculate average wait time from completed orders
-        if (this.completedOrders.length > 0) {
-            const totalWaitTime = this.completedOrders.reduce((sum, order) => {
-                return sum + (order.timeLimit - order.timeRemaining);
-            }, 0);
-            const avgTime = Math.floor(totalWaitTime / this.completedOrders.length);
-            avgWaitTime.textContent = `${avgTime}s`;
-        } else {
-            avgWaitTime.textContent = '0s';
+        if (avgWaitTime) {
+            if (this.completedOrders.length > 0) {
+                const totalWaitTime = this.completedOrders.reduce((sum, order) => {
+                    return sum + (order.timeLimit - order.timeRemaining);
+                }, 0);
+                const avgTime = Math.floor(totalWaitTime / this.completedOrders.length);
+                avgWaitTime.textContent = `${avgTime}s`;
+            } else {
+                avgWaitTime.textContent = '0s';
+            }
+        }
+        
+        // Calculate success rate
+        if (successRate) {
+            const totalCustomers = this.happyCustomers + this.unhappyCustomers;
+            if (totalCustomers > 0) {
+                const rate = Math.round((this.happyCustomers / totalCustomers) * 100);
+                successRate.textContent = `${rate}%`;
+            } else {
+                successRate.textContent = '0%';
+            }
+        }
+        
+        // Today's orders (since day start)
+        if (todayOrders) {
+            const ordersToday = this.totalOrdersCompleted - this.dayStartOrdersCompleted;
+            todayOrders.textContent = ordersToday;
+        }
+        
+        // Average order value
+        if (avgOrderValue) {
+            if (this.completedOrders.length > 0) {
+                const totalValue = this.completedOrders.reduce((sum, order) => {
+                    return sum + (order.totalPrice || 0);
+                }, 0);
+                const avg = Math.floor(totalValue / this.completedOrders.length);
+                avgOrderValue.textContent = `$${avg}`;
+            } else {
+                avgOrderValue.textContent = '$0';
+            }
+        }
+        
+        // Performance rating based on multiple factors
+        if (performanceRating) {
+            const totalCustomers = this.happyCustomers + this.unhappyCustomers;
+            const successRateValue = totalCustomers > 0 ? (this.happyCustomers / totalCustomers) * 100 : 100;
+            
+            if (successRateValue >= 90 && this.customerSatisfaction >= 80) {
+                performanceRating.textContent = 'Excellent';
+                performanceRating.style.color = '#5A9E6F';
+            } else if (successRateValue >= 75 && this.customerSatisfaction >= 60) {
+                performanceRating.textContent = 'Good';
+                performanceRating.style.color = '#5A9E6F';
+            } else if (successRateValue >= 50 && this.customerSatisfaction >= 40) {
+                performanceRating.textContent = 'Average';
+                performanceRating.style.color = '#D89E54';
+            } else {
+                performanceRating.textContent = 'Poor';
+                performanceRating.style.color = '#B85450';
+            }
         }
     }
     
