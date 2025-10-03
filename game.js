@@ -742,31 +742,20 @@ class RestaurantGame {
     }
     
     continueToNextDay() {
-        // Apply penalties for unfinished assigned orders
-        let penaltyAmount = 0;
-        const unfinishedAssignedOrders = this.orders.filter(o => 
-            (o.status === 'in-progress' || o.status === 'paused') && o.assignedStaff !== null
-        );
+        // Clear all orders at end of day
+        this.orders = [];
         
-        if (unfinishedAssignedOrders.length > 0) {
-            const penaltyRate = (this.ordersConfig && this.ordersConfig.penalties) 
-                ? this.ordersConfig.penalties.unfinishedAssignedOrder 
-                : 0.05;
-            
-            unfinishedAssignedOrders.forEach(order => {
-                const penalty = Math.floor(order.totalPrice * penaltyRate);
-                penaltyAmount += penalty;
-            });
-            
-            this.revenue -= penaltyAmount;
-            this.addFeedback(`⚠️ Lost $${penaltyAmount} for ${unfinishedAssignedOrders.length} unfinished assigned order(s)`, false);
-        }
-        
-        // Clear only unassigned pending orders (assigned orders carry over)
-        const carryOverOrders = this.orders.filter(o => 
-            (o.status === 'in-progress' || o.status === 'paused') && o.assignedStaff !== null
-        );
-        this.orders = carryOverOrders;
+        // Reset all staff to available status and reset their needs
+        this.staff.forEach(staff => {
+            staff.status = 'available';
+            staff.currentOrder = null;
+            staff.fatigue = 0;
+            staff.morale = 100;
+            // Reset hunger if it exists
+            if (staff.hasOwnProperty('hunger')) {
+                staff.hunger = 0;
+            }
+        });
         
         // Check if day was perfect (100% satisfaction maintained)
         if (this.customerSatisfaction === 100) {

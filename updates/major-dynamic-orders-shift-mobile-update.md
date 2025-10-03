@@ -14,17 +14,17 @@ Your restaurant now adapts to the flow of business throughout the day! Orders ar
 
 The game now feels more realistic with natural ebbs and flows throughout each business day, rewarding you for keeping staff available and ready to work!
 
-## Major Feature 2: Shift Transition Behavior
+## Major Feature 2: Fresh Start Each Day
 
-End-of-day transitions now have real consequences! Your management decisions carry over between shifts.
+Every new day brings a clean slate for your restaurant! Staff and orders reset at the start of each business day.
 
 **What Changed:**
-- **Staff needs carry over** - Fatigue, morale, and hunger persist between days, so take care of your team!
-- **Unfinished assigned orders** - Any orders that were assigned to staff but not completed incur a **5% revenue penalty per order**
-- **Unassigned orders cleared** - Orders that were never assigned don't carry penalties and are cleared at end of day
-- **Strategic management** - You must now balance accepting orders with your team's capacity to complete them
+- **Staff needs reset** - Fatigue, morale, and hunger all reset to fresh levels at the start of each day
+- **All orders cleared** - The order queue clears completely when a new day begins, giving you a fresh start
+- **Staff status reset** - All staff return to 'available' status, ready to work the new shift
+- **No carry-over** - Each day is independent, allowing you to manage without worrying about yesterday's problems
 
-This adds a layer of strategy: assign orders carefully and ensure your staff can handle their workload before the day ends!
+This keeps each day feeling fresh and manageable, letting you focus on the current shift without the burden of previous day's unfinished work!
 
 ## Major Feature 3: Mobile Gameplay QOL Improvements
 

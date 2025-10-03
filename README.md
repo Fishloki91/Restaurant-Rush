@@ -37,7 +37,8 @@
 - Upgrade equipment (Stove, Fridge, Counter, Dishwasher) to boost restaurant performance
 - Auto-assign mode with smart auto-rest for fatigued staff
 - Each day lasts 3 minutes with 10% end-of-day revenue bonus
-- Shift transitions with penalties for unfinished assigned orders (5% per order)
+- Staff needs and orders reset at the start of each new day
+- Game over occurs when revenue reaches $0 or below
 - Game over occurs when revenue reaches $0 or below
 
 ## 🎯 Objective
@@ -49,10 +50,10 @@ Balance quick order fulfillment, staff workload, inventory management, and custo
 
 ## Updates
 
-### v2.1.0 - Dynamic Orders, Shift Transitions & Mobile QOL
+### v2.1.0 - Dynamic Orders & Mobile QOL
 **Major Features:**
 - **Dynamic order system** - Orders now flow naturally with the day: fewer in early hours, steady mid-day, and rush hour volume at the end. More available staff = more orders!
-- **Shift transition penalties** - Unfinished assigned orders cost 5% revenue at day's end. Staff fatigue and needs carry over between days for realistic continuity.
+- **Fresh start each day** - Staff needs (fatigue, morale, hunger) and all orders reset at the start of each new day for a clean slate.
 - **Mobile gameplay improvements** - Tap tooltips, locked horizontal scrolling, achievement toast notifications, and haptic feedback on supported devices.
 
 **Configuration:**
