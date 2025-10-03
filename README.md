@@ -11,20 +11,22 @@
 
 ## 🎮 Key Features
 - **Achievement System** with 18 unique milestones tracking orders, revenue, staff, survival, and excellence
+- **Dynamic Order Generation** that adapts to time of day and available staff for realistic business flow
 - **Dynamic Staff Hiring** system to expand your team with randomly-generated employees
 - **Equipment Upgrades** to boost cooking speed, reduce waste, increase prices, and lower fatigue
-- **End-of-Day Summaries** with detailed performance metrics and bonus rewards
+- **End-of-Day Summaries** with detailed performance metrics, bonus rewards, and shift transition penalties
 - **Multi-View Navigation** with dedicated screens for each management area and smooth transitions
 - **Interactive Dashboard** with quick-stat overview cards and visual notification alerts
-- **Order System** with automatic generation, time-sensitive completion, and assigned staff tracking
+- **Order System** with intelligent generation, time-sensitive completion, and assigned staff tracking
 - **Staff Performance** tracking with efficiency ratings, workload management, upgrades, and order history
 - **Inventory Management** with color-coded stock levels, usage tracking, and one-click restocking
 - **Satisfaction Metrics** including customer feedback and restaurant ratings
+- **Mobile-Optimized** with tap tooltips, haptic feedback, and achievement toast notifications
 - **Game Over Detection** when funds run out with final statistics display
 
 ## 🎲 Game Mechanics
 - Starting revenue of $200 to begin your restaurant journey
-- Orders auto-generate every 5 seconds (40% base chance, increases with each day)
+- Dynamic order generation based on time of day (early/mid/rush) and available staff
 - 50+ different recipes across appetizers, mains, desserts, and drinks ranging from $6-$45
 - 18 unique ingredients including premium items like shrimp, avocado, and chocolate
 - Staff efficiency affects order speed; performance changes based on success/failure
@@ -35,6 +37,7 @@
 - Upgrade equipment (Stove, Fridge, Counter, Dishwasher) to boost restaurant performance
 - Auto-assign mode with smart auto-rest for fatigued staff
 - Each day lasts 3 minutes with 10% end-of-day revenue bonus
+- Shift transitions with penalties for unfinished assigned orders (5% per order)
 - Game over occurs when revenue reaches $0 or below
 
 ## 🎯 Objective
@@ -45,6 +48,15 @@ Balance quick order fulfillment, staff workload, inventory management, and custo
 **Display**: Optimized for 1920x1080 screens with no scrolling
 
 ## Updates
+
+### v2.1.0 - Dynamic Orders, Shift Transitions & Mobile QOL
+**Major Features:**
+- **Dynamic order system** - Orders now flow naturally with the day: fewer in early hours, steady mid-day, and rush hour volume at the end. More available staff = more orders!
+- **Shift transition penalties** - Unfinished assigned orders cost 5% revenue at day's end. Staff fatigue and needs carry over between days for realistic continuity.
+- **Mobile gameplay improvements** - Tap tooltips, locked horizontal scrolling, achievement toast notifications, and haptic feedback on supported devices.
+
+**Configuration:**
+- New `data/orders.json` file controls spawn rates, day progression multipliers, and staff scaling for easy customization
 
 ///
 ### v2.0.0 - Expanded Menu & Recipe System
