@@ -599,13 +599,37 @@ class RestaurantGame {
         
         // Find available staff
         const availableStaff = this.staff.filter(s => s.status === 'available');
-        if (availableStaff.length === 0) {
-            this.addFeedback('⚠️ No available staff to assign order!', false);
-            return;
-        }
         
-        // Pick the most efficient available staff
-        const staffMember = availableStaff.sort((a, b) => b.efficiency - a.efficiency)[0];
+        let staffMember;
+        
+        if (availableStaff.length === 0) {
+            // If this is a priority order and no staff available, reassign from current work
+            if (order.isPriority) {
+                // Find busy staff with the highest morale
+                const busyStaff = this.staff.filter(s => s.status === 'busy');
+                if (busyStaff.length === 0) {
+                    this.addFeedback('⚠️ No available staff to assign order!', false);
+                    return;
+                }
+                
+                // Sort by morale (highest first)
+                staffMember = busyStaff.sort((a, b) => b.morale - a.morale)[0];
+                
+                // Pause the current order they're working on
+                const currentOrder = this.orders.find(o => o.id === staffMember.currentOrder);
+                if (currentOrder) {
+                    currentOrder.status = 'paused';
+                    currentOrder.assignedStaff = null;
+                    this.addFeedback(`⏸️ ${staffMember.name} paused Order #${currentOrder.id} to handle priority order!`, true);
+                }
+            } else {
+                this.addFeedback('⚠️ No available staff to assign order!', false);
+                return;
+            }
+        } else {
+            // Pick the most efficient available staff
+            staffMember = availableStaff.sort((a, b) => b.efficiency - a.efficiency)[0];
+        }
         
         // Deduct ingredients from inventory (with possible efficiency bonus)
         const ingredientEfficiency = this.getEquipmentBonus('ingredient_efficiency');
@@ -627,6 +651,31 @@ class RestaurantGame {
     }
     
     updateOrders() {
+        // First, try to reassign paused orders to available staff
+        const pausedOrders = this.orders.filter(o => o.status === 'paused');
+        if (pausedOrders.length > 0) {
+            const availableStaff = this.staff.filter(s => s.status === 'available');
+            if (availableStaff.length > 0) {
+                // Sort paused orders by time remaining (most urgent first)
+                const sortedPausedOrders = pausedOrders.sort((a, b) => a.timeRemaining - b.timeRemaining);
+                
+                for (const pausedOrder of sortedPausedOrders) {
+                    const availableStaffNow = this.staff.filter(s => s.status === 'available');
+                    if (availableStaffNow.length > 0) {
+                        // Pick the most efficient available staff
+                        const staffMember = availableStaffNow.sort((a, b) => b.efficiency - a.efficiency)[0];
+                        
+                        pausedOrder.status = 'in-progress';
+                        pausedOrder.assignedStaff = staffMember.id;
+                        staffMember.status = 'busy';
+                        staffMember.currentOrder = pausedOrder.id;
+                        
+                        this.addFeedback(`▶️ ${staffMember.name} resumed Order #${pausedOrder.id}!`, true);
+                    }
+                }
+            }
+        }
+        
         this.orders.forEach(order => {
             if (order.status === 'pending') {
                 order.timeRemaining--;
@@ -643,6 +692,9 @@ class RestaurantGame {
                 if (order.timeRemaining < order.timeLimit * 0.3 && order.status === 'pending') {
                     this.assignOrderToStaff(order.id);
                 }
+            } else if (order.status === 'paused') {
+                // Paused orders still count down
+                order.timeRemaining--;
             } else if (order.status === 'in-progress') {
                 order.timeRemaining--;
                 
@@ -1143,6 +1195,8 @@ class RestaurantGame {
                             <button class="assign-btn" onclick="game.assignOrderToStaff(${order.id})">Assign</button>
                             <button class="priority-btn ${order.isPriority ? 'active' : ''}" onclick="game.toggleOrderPriority(${order.id})" title="Mark as priority">⚡</button>
                         </div>` :
+                        order.status === 'paused' ?
+                        `<span style="font-size: 0.85rem; color: #ff9800;">⏸️ Paused</span>` :
                         `<span style="font-size: 0.85rem; color: #666;">In Progress</span>`
                     }
                 </div>
