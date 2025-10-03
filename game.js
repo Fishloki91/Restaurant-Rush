@@ -2513,12 +2513,6 @@ class RestaurantGame {
             container.appendChild(stageColumn);
         });
     }
-                </div>
-            `;
-            
-            container.appendChild(orderCard);
-        });
-    }
     
     renderStaff() {
         const container = document.getElementById('staff-container');
