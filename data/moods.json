@@ -1,0 +1,38 @@
+[
+    {
+        "name": "Happy",
+        "emoji": "😊",
+        "performanceModifier": 1.15,
+        "description": "+15% performance"
+    },
+    {
+        "name": "Focused",
+        "emoji": "😎",
+        "performanceModifier": 1.10,
+        "description": "+10% performance"
+    },
+    {
+        "name": "Neutral",
+        "emoji": "😐",
+        "performanceModifier": 1.0,
+        "description": "Normal performance"
+    },
+    {
+        "name": "Tired",
+        "emoji": "😴",
+        "performanceModifier": 0.90,
+        "description": "-10% performance"
+    },
+    {
+        "name": "Stressed",
+        "emoji": "😰",
+        "performanceModifier": 0.85,
+        "description": "-15% performance"
+    },
+    {
+        "name": "Energized",
+        "emoji": "🤩",
+        "performanceModifier": 1.20,
+        "description": "+20% performance"
+    }
+]
