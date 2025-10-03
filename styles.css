@@ -977,6 +977,83 @@ body {
 }
 
 /* Inventory Section */
+/* Food Statistics Container */
+.food-stats-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding: 20px 0;
+}
+
+.food-stat-card {
+    background: #FDFBF7;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 15px rgba(139, 90, 60, 0.15);
+    border: 1px solid rgba(193, 123, 91, 0.2);
+}
+
+.stat-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.stat-name {
+    font-weight: bold;
+    color: #333;
+    font-size: 1rem;
+}
+
+.stat-value {
+    font-weight: bold;
+    color: #C17B5B;
+    font-size: 1rem;
+}
+
+.stat-bar-container {
+    height: 20px;
+    background: #EDE6DF;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.stat-bar {
+    height: 100%;
+    transition: width 0.5s ease;
+    border-radius: 10px;
+}
+
+.stat-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.summary-box {
+    background: #FDFBF7;
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(139, 90, 60, 0.15);
+    border: 2px solid #C17B5B;
+}
+
+.summary-label {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 8px;
+}
+
+.summary-value {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #C17B5B;
+}
+
+/* Old Inventory Container - Keep for backward compatibility but rename */
 .inventory-container {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));

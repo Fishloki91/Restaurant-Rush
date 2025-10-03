@@ -152,30 +152,30 @@
                     ></div>
                 </div>
 
-                <!-- Inventory Overview Card -->
+                <!-- Food Statistics Overview Card -->
                 <div class="overview-card tooltip-container" id="inventory-overview-card">
-                    <div class="card-icon">📦</div>
+                    <div class="card-icon">📊</div>
                     <div class="card-content">
-                        <h3>Inventory</h3>
+                        <h3>Food Stats</h3>
                         <div class="card-stats-multi">
                             <div class="stat-item">
-                                <span id="overview-inventory-total" class="stat-number">18</span>
-                                <span class="stat-label-small">Items</span>
+                                <span id="overview-inventory-total" class="stat-number">$0</span>
+                                <span class="stat-label-small">Food Cost</span>
                             </div>
                             <div class="stat-item">
-                                <span id="overview-inventory-low" class="stat-number warning">0</span>
-                                <span class="stat-label-small">Low</span>
+                                <span id="overview-inventory-low" class="stat-number">0</span>
+                                <span class="stat-label-small">Ingredients</span>
                             </div>
                             <div class="stat-item">
-                                <span id="overview-inventory-empty" class="stat-number danger">0</span>
-                                <span class="stat-label-small">Empty</span>
+                                <span id="overview-inventory-empty" class="stat-number">0</span>
+                                <span class="stat-label-small">Categories</span>
                             </div>
                         </div>
                     </div>
                     <button class="view-details-btn" data-view="inventory">View Details →</button>
                     <div style="display:none"></div>
                     <div 
-                      data-tippy-content="<strong>Inventory Management</strong><br>Track ingredient levels. Low items (&lt;30%) need restocking soon. Empty items (0%) block orders. Restock all for $50 or individual items for $10."
+                      data-tippy-content="<strong>Food Statistics</strong><br>Track ingredient usage, food costs, and category performance. Ingredients are auto-restocked. Food costs 15% of order price."
                       class="tippy-init"
                     ></div>
                 </div>
@@ -305,11 +305,15 @@
         <div id="inventory-view" class="dashboard-content detail-view">
             <div class="detail-view-header">
                 <button class="back-btn" data-back="overview">← Back to Overview</button>
-                <h2>📦 Inventory Management</h2>
-                <button id="restock-btn" class="btn btn-primary">Restock All</button>
+                <h2>📊 Food Statistics</h2>
             </div>
-            <div id="inventory-container" class="inventory-container">
-                <!-- Inventory items will be dynamically added here -->
+            <div id="food-stats-controls" style="margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
+                <button class="btn btn-secondary" onclick="game.setFoodStatsView('ingredients')">Ingredients</button>
+                <button class="btn btn-secondary" onclick="game.setFoodStatsView('cost')">Food Cost</button>
+                <button class="btn btn-secondary" onclick="game.setFoodStatsView('categories')">Categories</button>
+            </div>
+            <div id="food-stats-container" class="food-stats-container">
+                <!-- Food statistics will be dynamically added here -->
             </div>
         </div>
 

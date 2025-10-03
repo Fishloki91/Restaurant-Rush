@@ -59,6 +59,15 @@ class RestaurantGame {
         // Last day summary tracking
         this.lastDaySummary = null; // Store last completed day's summary
         
+        // Food statistics tracking (from day 1)
+        this.foodStatistics = {
+            ingredientsUsed: {}, // Track total ingredients used since day 1
+            ingredientsByDay: [], // Track ingredients used per day
+            categorySales: {}, // Track sales by food category
+            totalFoodCost: 0, // Total food cost spent
+            foodCostByDay: [] // Track food cost per day
+        };
+        
         // Initialize Audio Context for sound effects
         this.audioContext = null;
         this.initializeAudio();
@@ -1509,6 +1518,20 @@ class RestaurantGame {
         this.dayStartVipCustomers = this.vipCustomers;
         this.dayStartStaffLevels = this.staff.reduce((sum, s) => sum + s.level, 0);
         
+        // Track food statistics for completed day
+        const dayIngredients = {};
+        Object.keys(this.foodStatistics.ingredientsUsed).forEach(ing => {
+            const prevTotal = this.foodStatistics.ingredientsByDay.length > 0 
+                ? this.foodStatistics.ingredientsByDay.reduce((sum, day) => sum + (day[ing] || 0), 0)
+                : 0;
+            dayIngredients[ing] = (this.foodStatistics.ingredientsUsed[ing] || 0) - prevTotal;
+        });
+        this.foodStatistics.ingredientsByDay.push(dayIngredients);
+        
+        const prevFoodCost = this.foodStatistics.foodCostByDay.reduce((sum, cost) => sum + cost, 0);
+        const todayFoodCost = this.foodStatistics.totalFoodCost - prevFoodCost;
+        this.foodStatistics.foodCostByDay.push(todayFoodCost);
+        
         // Increase difficulty gradually (keep for backward compatibility)
         this.orderGenerationChance = Math.min(0.8, 0.4 + (this.day - 1) * 0.05);
         
@@ -1686,12 +1709,25 @@ class RestaurantGame {
             }
             if (actualUsed > 0) {
                 ingredientsUsed[ingredient] = actualUsed;
+                // Track ingredients used in statistics
+                if (!this.foodStatistics.ingredientsUsed[ingredient]) {
+                    this.foodStatistics.ingredientsUsed[ingredient] = 0;
+                }
+                this.foodStatistics.ingredientsUsed[ingredient] += actualUsed;
+            }
+        }
+        
+        // Auto-replenish inventory (no purchase needed)
+        for (const ingredient in this.inventory) {
+            if (this.inventory[ingredient].current < this.inventory[ingredient].max * 0.3) {
+                this.inventory[ingredient].current = this.inventory[ingredient].max;
             }
         }
         
         // Calculate food cost (15% of order price) and deduct from revenue as expense
         const foodCost = Math.floor(order.totalPrice * 0.15);
         this.revenue -= foodCost;
+        this.foodStatistics.totalFoodCost += foodCost;
         
         // Show toast notification for ingredients used
         if (Object.keys(ingredientsUsed).length > 0) {
@@ -2255,10 +2291,20 @@ class RestaurantGame {
         document.getElementById('overview-staff-busy').textContent = busyStaff;
         document.getElementById('overview-staff-resting').textContent = restingStaff;
         
-        // Inventory card
-        document.getElementById('overview-inventory-total').textContent = totalInventoryItems;
-        document.getElementById('overview-inventory-low').textContent = lowStockItems;
-        document.getElementById('overview-inventory-empty').textContent = emptyStockItems;
+        // Food Statistics card
+        const totalFoodCost = this.foodStatistics.totalFoodCost;
+        const uniqueIngredients = Object.keys(this.foodStatistics.ingredientsUsed).length;
+        const categorySales = {};
+        this.completedOrders.forEach(order => {
+            order.items.forEach(item => {
+                categorySales[item.category] = true;
+            });
+        });
+        const categoriesCount = Object.keys(categorySales).length;
+        
+        document.getElementById('overview-inventory-total').textContent = `$${totalFoodCost}`;
+        document.getElementById('overview-inventory-low').textContent = uniqueIngredients;
+        document.getElementById('overview-inventory-empty').textContent = categoriesCount;
         
         // Satisfaction card
         document.getElementById('overview-satisfaction').textContent = `${Math.round(this.customerSatisfaction)}%`;
@@ -2829,54 +2875,142 @@ Fatigue: ${staff.fatigue.toFixed(0)}%
     }
     
     renderInventory() {
-        const container = document.getElementById('inventory-container');
+        const container = document.getElementById('food-stats-container');
+        if (!container) return;
+        
         container.innerHTML = '';
         
-        // QOL2: Calculate ingredient usage in active orders
-        const ingredientUsage = {};
-        this.orders.forEach(order => {
-            Object.keys(order.requiredIngredients).forEach(ing => {
-                ingredientUsage[ing] = (ingredientUsage[ing] || 0) + 1;
+        // Default to ingredients view if no view set
+        if (!this.foodStatsCurrentView) {
+            this.foodStatsCurrentView = 'ingredients';
+        }
+        
+        if (this.foodStatsCurrentView === 'ingredients') {
+            this.renderFoodStatsIngredients(container);
+        } else if (this.foodStatsCurrentView === 'cost') {
+            this.renderFoodStatsCost(container);
+        } else if (this.foodStatsCurrentView === 'categories') {
+            this.renderFoodStatsCategories(container);
+        }
+    }
+    
+    setFoodStatsView(view) {
+        this.foodStatsCurrentView = view;
+        this.renderInventory();
+    }
+    
+    renderFoodStatsIngredients(container) {
+        const ingredients = this.foodStatistics.ingredientsUsed;
+        
+        if (Object.keys(ingredients).length === 0) {
+            container.innerHTML = '<div class="empty-state">No ingredients used yet. Start serving orders to see statistics!</div>';
+            return;
+        }
+        
+        // Find max for scaling
+        const maxUsage = Math.max(...Object.values(ingredients));
+        
+        container.innerHTML = '<h3 style="margin-bottom: 20px; color: #333;">📊 Ingredient Usage (All Time)</h3>';
+        
+        Object.entries(ingredients).sort((a, b) => b[1] - a[1]).forEach(([name, count]) => {
+            const percentage = maxUsage > 0 ? (count / maxUsage) * 100 : 0;
+            
+            const statCard = document.createElement('div');
+            statCard.className = 'food-stat-card';
+            statCard.innerHTML = `
+                <div class="stat-header">
+                    <span class="stat-name">${name}</span>
+                    <span class="stat-value">${count} used</span>
+                </div>
+                <div class="stat-bar-container">
+                    <div class="stat-bar" style="width: ${percentage}%; background: linear-gradient(90deg, #4CAF50, #45a049);"></div>
+                </div>
+            `;
+            container.appendChild(statCard);
+        });
+    }
+    
+    renderFoodStatsCost(container) {
+        const totalCost = this.foodStatistics.totalFoodCost;
+        const costByDay = this.foodStatistics.foodCostByDay;
+        
+        if (costByDay.length === 0) {
+            container.innerHTML = '<div class="empty-state">No food cost data yet. Complete your first day to see statistics!</div>';
+            return;
+        }
+        
+        const maxCost = Math.max(...costByDay);
+        
+        container.innerHTML = `
+            <h3 style="margin-bottom: 20px; color: #333;">💰 Food Cost Analysis</h3>
+            <div class="stat-summary">
+                <div class="summary-box">
+                    <div class="summary-label">Total Food Cost</div>
+                    <div class="summary-value">$${totalCost}</div>
+                </div>
+                <div class="summary-box">
+                    <div class="summary-label">Average Per Day</div>
+                    <div class="summary-value">$${Math.floor(totalCost / costByDay.length)}</div>
+                </div>
+            </div>
+            <h4 style="margin: 20px 0 10px 0; color: #666;">Food Cost by Day</h4>
+        `;
+        
+        costByDay.forEach((cost, index) => {
+            const percentage = maxCost > 0 ? (cost / maxCost) * 100 : 0;
+            
+            const statCard = document.createElement('div');
+            statCard.className = 'food-stat-card';
+            statCard.innerHTML = `
+                <div class="stat-header">
+                    <span class="stat-name">Day ${index + 1}</span>
+                    <span class="stat-value">$${cost}</span>
+                </div>
+                <div class="stat-bar-container">
+                    <div class="stat-bar" style="width: ${percentage}%; background: linear-gradient(90deg, #FF9800, #F57C00);"></div>
+                </div>
+            `;
+            container.appendChild(statCard);
+        });
+    }
+    
+    renderFoodStatsCategories(container) {
+        // Track completed orders by category
+        const categorySales = {};
+        this.completedOrders.forEach(order => {
+            order.items.forEach(item => {
+                if (!categorySales[item.category]) {
+                    categorySales[item.category] = 0;
+                }
+                categorySales[item.category] += item.price;
             });
         });
         
-        for (const [name, stock] of Object.entries(this.inventory)) {
-            const percentage = (stock.current / stock.max) * 100;
-            let levelClass = 'high';
-            if (percentage < 30) {
-                levelClass = 'low';
-            } else if (percentage < 60) {
-                levelClass = 'medium';
-            }
-            
-            const item = document.createElement('div');
-            item.className = 'inventory-item';
-            item.title = `${name}: ${stock.current}/${stock.max} (${percentage.toFixed(0)}%)`;
-            
-            const restockCost = 10;
-            const canRestock = this.revenue >= restockCost && stock.current < stock.max;
-            
-            // QOL2: Show usage badge
-            const usageCount = ingredientUsage[name] || 0;
-            const usageBadge = usageCount > 0 ? `<span class="usage-badge" title="Used in ${usageCount} active order(s)">🍽️ ${usageCount}</span>` : '';
-            
-            item.innerHTML = `
-                <div class="inventory-header">
-                    <span class="ingredient-name">${name}</span>
-                    <span class="stock-level ${levelClass}">${stock.current}/${stock.max}</span>
-                </div>
-                ${usageBadge}
-                <div class="stock-bar">
-                    <div class="stock-bar-fill ${levelClass}" style="width: ${percentage}%"></div>
-                </div>
-                <button class="restock-btn" onclick="game.restockSingleItem('${name}')" 
-                    ${!canRestock ? 'disabled' : ''}>
-                    📦 Restock ($${restockCost})
-                </button>
-            `;
-            
-            container.appendChild(item);
+        if (Object.keys(categorySales).length === 0) {
+            container.innerHTML = '<div class="empty-state">No category data yet. Complete orders to see statistics!</div>';
+            return;
         }
+        
+        const maxSales = Math.max(...Object.values(categorySales));
+        
+        container.innerHTML = '<h3 style="margin-bottom: 20px; color: #333;">🍽️ Sales by Category</h3>';
+        
+        Object.entries(categorySales).sort((a, b) => b[1] - a[1]).forEach(([category, sales]) => {
+            const percentage = maxSales > 0 ? (sales / maxSales) * 100 : 0;
+            
+            const statCard = document.createElement('div');
+            statCard.className = 'food-stat-card';
+            statCard.innerHTML = `
+                <div class="stat-header">
+                    <span class="stat-name">${category}</span>
+                    <span class="stat-value">$${sales}</span>
+                </div>
+                <div class="stat-bar-container">
+                    <div class="stat-bar" style="width: ${percentage}%; background: linear-gradient(90deg, #2196F3, #1976D2);"></div>
+                </div>
+            `;
+            container.appendChild(statCard);
+        });
     }
     
     renderSatisfaction() {
@@ -3459,10 +3593,6 @@ document.addEventListener('DOMContentLoaded', () => {
         game.generateOrder();
     });
     
-    document.getElementById('restock-btn').addEventListener('click', () => {
-        game.restockInventory();
-    });
-    
     document.getElementById('sound-toggle-btn').addEventListener('click', () => {
         game.toggleSound();
     });
@@ -3490,11 +3620,6 @@ document.addEventListener('DOMContentLoaded', () => {
             case 'o': // Generate Order
                 if (!game.isPaused) {
                     document.getElementById('new-order-btn').click();
-                }
-                break;
-            case 'r': // Restock
-                if (!game.isPaused) {
-                    document.getElementById('restock-btn').click();
                 }
                 break;
             case 'a': // Toggle Auto-assign
