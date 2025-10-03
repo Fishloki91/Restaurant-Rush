@@ -10,13 +10,14 @@
 - **Daily progression**: Complete 3-minute business days with performance summaries
 
 ## 🎮 Key Features
+- **Achievement System** with 18 unique milestones tracking orders, revenue, staff, survival, and excellence
 - **Dynamic Staff Hiring** system to expand your team with randomly-generated employees
 - **Equipment Upgrades** to boost cooking speed, reduce waste, increase prices, and lower fatigue
 - **End-of-Day Summaries** with detailed performance metrics and bonus rewards
 - **Multi-View Navigation** with dedicated screens for each management area and smooth transitions
 - **Interactive Dashboard** with quick-stat overview cards and visual notification alerts
 - **Order System** with automatic generation, time-sensitive completion, and assigned staff tracking
-- **Staff Performance** tracking with efficiency ratings, workload management, and upgrades
+- **Staff Performance** tracking with efficiency ratings, workload management, upgrades, and order history
 - **Inventory Management** with color-coded stock levels, usage tracking, and one-click restocking
 - **Satisfaction Metrics** including customer feedback and restaurant ratings
 - **Game Over Detection** when funds run out with final statistics display
@@ -42,6 +43,14 @@ Balance quick order fulfillment, staff workload, inventory management, and custo
 **Display**: Optimized for 1920x1080 screens with no scrolling
 
 ## Updates
+
+### v1.9.0 - Achievement & Milestone System
+**Major Feature:** Achievement & Milestone System - Track your restaurant management prowess with 18 unique achievements across 7 categories! Unlock badges for order completion (First Steps to Master Chef), revenue milestones ($500 to $5,000), staff hiring, survival days, perfect service, VIP customers, and equipment upgrades. Real-time progress tracking with visual progress bars and instant notifications.
+
+**Quality of Life Improvements:**
+- **Revenue forecast indicator** - See projected end-of-day revenue in the revenue tooltip based on current earning pace, including the 10% bonus
+- **Staff performance history** - Track last 5 orders for each staff member with success/failure indicators and revenue earned
+- **Restock tracking** - Automatic tracking of inventory restocks for future achievement integration
 
 ### v1.8.0 - Equipment Upgrade System
 **Major Feature:** Equipment upgrade system - Invest in professional-grade equipment! Upgrade your Stove (faster cooking), Fridge (reduced waste), Counter (higher prices), and Dishwasher (less fatigue). Each upgrades up to Level 3 with cumulative bonuses that transform your restaurant's efficiency.

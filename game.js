@@ -31,6 +31,11 @@ class RestaurantGame {
         this.previousDayRevenue = 0; // Track previous day's revenue for trend
         this.revenueTrend = 0; // Revenue trend (positive or negative)
         this.equipment = {}; // Track equipment upgrades
+        this.achievements = []; // Track unlocked achievements
+        this.totalStaffHired = 0; // Track total staff hired for achievements
+        this.highestRevenue = 200; // Track highest revenue reached
+        this.totalRestocks = 0; // Track total inventory restocks
+        this.perfectDays = 0; // Track days with 100% satisfaction
         
         // Initialize Audio Context for sound effects
         this.audioContext = null;
@@ -40,6 +45,7 @@ class RestaurantGame {
         this.initializeStaff();
         this.initializeRecipes();
         this.initializeEquipment();
+        this.initializeAchievements();
     }
     
     initializeAudio() {
@@ -172,7 +178,8 @@ class RestaurantGame {
             maxUpgradeLevel: 3,
             fatigue: 0, // Fatigue level (0-100)
             morale: 100, // Morale level (0-100)
-            lastRestTime: 0 // Track when staff last rested
+            lastRestTime: 0, // Track when staff last rested
+            orderHistory: [] // QOL3: Track last 5 orders
         };
     }
     
@@ -295,6 +302,7 @@ class RestaurantGame {
         equipment.level++;
         
         this.addFeedback(`${equipType.icon} ${equipType.name} upgraded to Level ${equipment.level}!`, true);
+        this.checkAchievements();
         this.render();
     }
     
@@ -308,6 +316,83 @@ class RestaurantGame {
         return totalBonus;
     }
     
+    initializeAchievements() {
+        // Define all achievements with unlock conditions
+        this.allAchievements = [
+            // Getting Started
+            { id: 'first_order', name: 'First Steps', icon: '🎯', description: 'Complete your first order', requirement: 1, category: 'orders', unlocked: false },
+            { id: 'ten_orders', name: 'Gaining Momentum', icon: '📈', description: 'Complete 10 orders', requirement: 10, category: 'orders', unlocked: false },
+            { id: 'fifty_orders', name: 'Experienced Chef', icon: '👨‍🍳', description: 'Complete 50 orders', requirement: 50, category: 'orders', unlocked: false },
+            { id: 'hundred_orders', name: 'Master Chef', icon: '⭐', description: 'Complete 100 orders', requirement: 100, category: 'orders', unlocked: false },
+            
+            // Revenue Milestones
+            { id: 'revenue_500', name: 'Small Business', icon: '💵', description: 'Reach $500 in revenue', requirement: 500, category: 'revenue', unlocked: false },
+            { id: 'revenue_1000', name: 'Growing Business', icon: '💰', description: 'Reach $1,000 in revenue', requirement: 1000, category: 'revenue', unlocked: false },
+            { id: 'revenue_2500', name: 'Thriving Restaurant', icon: '🏆', description: 'Reach $2,500 in revenue', requirement: 2500, category: 'revenue', unlocked: false },
+            { id: 'revenue_5000', name: 'Restaurant Empire', icon: '👑', description: 'Reach $5,000 in revenue', requirement: 5000, category: 'revenue', unlocked: false },
+            
+            // Staff Management
+            { id: 'hire_first', name: 'Team Builder', icon: '👥', description: 'Hire your first employee', requirement: 1, category: 'staff', unlocked: false },
+            { id: 'hire_five', name: 'Growing Team', icon: '🤝', description: 'Hire 5 employees', requirement: 5, category: 'staff', unlocked: false },
+            { id: 'hire_ten', name: 'HR Manager', icon: '📋', description: 'Hire 10 employees', requirement: 10, category: 'staff', unlocked: false },
+            
+            // Days Survived
+            { id: 'survive_5', name: 'First Week', icon: '📅', description: 'Survive 5 days', requirement: 5, category: 'days', unlocked: false },
+            { id: 'survive_10', name: 'Established', icon: '🗓️', description: 'Survive 10 days', requirement: 10, category: 'days', unlocked: false },
+            { id: 'survive_20', name: 'Restaurant Veteran', icon: '🎖️', description: 'Survive 20 days', requirement: 20, category: 'days', unlocked: false },
+            
+            // Customer Satisfaction
+            { id: 'perfect_day', name: 'Perfect Service', icon: '😊', description: 'Complete a day with 100% satisfaction', requirement: 1, category: 'perfect_days', unlocked: false },
+            { id: 'vip_ten', name: 'VIP Favorite', icon: '⭐', description: 'Serve 10 VIP customers', requirement: 10, category: 'vip', unlocked: false },
+            
+            // Equipment
+            { id: 'first_upgrade', name: 'Modernizing', icon: '🔧', description: 'Upgrade any equipment to Level 1', requirement: 1, category: 'equipment', unlocked: false },
+            { id: 'all_max', name: 'Fully Equipped', icon: '🏭', description: 'Max out all equipment to Level 3', requirement: 12, category: 'equipment', unlocked: false }
+        ];
+        
+        this.achievements = [];
+    }
+    
+    checkAchievements() {
+        // Check for newly unlocked achievements
+        this.allAchievements.forEach(achievement => {
+            if (achievement.unlocked) return;
+            
+            let currentValue = 0;
+            
+            switch(achievement.category) {
+                case 'orders':
+                    currentValue = this.totalOrdersCompleted;
+                    break;
+                case 'revenue':
+                    currentValue = this.highestRevenue;
+                    break;
+                case 'staff':
+                    currentValue = this.totalStaffHired;
+                    break;
+                case 'days':
+                    currentValue = this.day;
+                    break;
+                case 'perfect_days':
+                    currentValue = this.perfectDays;
+                    break;
+                case 'vip':
+                    currentValue = this.vipCustomers;
+                    break;
+                case 'equipment':
+                    currentValue = Object.values(this.equipment).reduce((sum, eq) => sum + eq.level, 0);
+                    break;
+            }
+            
+            if (currentValue >= achievement.requirement) {
+                achievement.unlocked = true;
+                this.achievements.push(achievement);
+                this.addFeedback(`🎉 Achievement Unlocked: ${achievement.icon} ${achievement.name}!`, true);
+                this.playSuccessSound();
+            }
+        });
+    }
+    
     hireStaff() {
         const hireCost = 150;
         if (this.revenue < hireCost) {
@@ -318,7 +403,9 @@ class RestaurantGame {
         this.revenue -= hireCost;
         const newStaff = this.generateRandomStaff();
         this.staff.push(newStaff);
+        this.totalStaffHired++;
         this.addFeedback(`✅ Hired ${newStaff.name} (${newStaff.role}) - Efficiency: ${(newStaff.efficiency * 100).toFixed(0)}%`, true);
+        this.checkAchievements();
         this.render();
     }
     
@@ -402,11 +489,17 @@ class RestaurantGame {
         this.dayStartUnhappyCustomers = 0;
         this.vipCustomers = 0;
         this.totalOrdersCompleted = 0;
+        this.achievements = [];
+        this.totalStaffHired = 0;
+        this.highestRevenue = 200;
+        this.totalRestocks = 0;
+        this.perfectDays = 0;
         
         this.initializeInventory();
         this.initializeStaff();
         this.initializeRecipes();
         this.initializeEquipment();
+        this.initializeAchievements();
         
         // Hide modal
         const modal = document.getElementById('game-over-modal');
@@ -460,6 +553,11 @@ class RestaurantGame {
     }
     
     continueToNextDay() {
+        // Check if day was perfect (100% satisfaction maintained)
+        if (this.customerSatisfaction === 100) {
+            this.perfectDays++;
+        }
+        
         // Calculate revenue trend
         const currentRevenue = this.revenue;
         if (this.previousDayRevenue > 0) {
@@ -473,9 +571,17 @@ class RestaurantGame {
         const bonus = Math.floor(this.revenue * 0.1);
         this.revenue += bonus;
         
+        // Track highest revenue for achievements
+        if (this.revenue > this.highestRevenue) {
+            this.highestRevenue = this.revenue;
+        }
+        
         // Advance to next day
         this.day++;
         this.dayTimer = 0;
+        
+        // Check achievements after day progression
+        this.checkAchievements();
         
         // Store starting values for next day
         this.dayStartRevenue = this.revenue;
@@ -741,8 +847,16 @@ class RestaurantGame {
             this.happyCustomers++;
             this.totalOrdersCompleted++; // Track for recipe unlocks
             
+            // Track highest revenue for achievements
+            if (this.revenue > this.highestRevenue) {
+                this.highestRevenue = this.revenue;
+            }
+            
             // Check for recipe unlocks
             this.checkRecipeUnlocks();
+            
+            // Check for achievements
+            this.checkAchievements();
             
             if (order.isVIP) {
                 this.vipCustomers++;
@@ -753,6 +867,18 @@ class RestaurantGame {
                 staff.performance = Math.min(100, staff.performance + 2);
                 staff.status = 'available';
                 staff.currentOrder = null;
+                
+                // QOL3: Add to order history (keep last 5)
+                staff.orderHistory.unshift({
+                    orderId: order.id,
+                    dishName: order.items.map(i => i.name).join(', '),
+                    success: true,
+                    price: order.totalPrice,
+                    timestamp: Date.now()
+                });
+                if (staff.orderHistory.length > 5) {
+                    staff.orderHistory = staff.orderHistory.slice(0, 5);
+                }
             }
             
             this.customerSatisfaction = Math.min(100, this.customerSatisfaction + satisfactionChange);
@@ -769,6 +895,18 @@ class RestaurantGame {
                 staff.performance = Math.max(0, staff.performance - 5);
                 staff.status = 'available';
                 staff.currentOrder = null;
+                
+                // QOL3: Add to order history (keep last 5)
+                staff.orderHistory.unshift({
+                    orderId: order.id,
+                    dishName: order.items.map(i => i.name).join(', '),
+                    success: false,
+                    price: 0,
+                    timestamp: Date.now()
+                });
+                if (staff.orderHistory.length > 5) {
+                    staff.orderHistory = staff.orderHistory.slice(0, 5);
+                }
             }
             
             const penaltyChange = order.isVIP ? 20 : 10; // VIP failures hurt more
@@ -846,6 +984,7 @@ class RestaurantGame {
             for (const ingredient in this.inventory) {
                 this.inventory[ingredient].current = this.inventory[ingredient].max;
             }
+            this.totalRestocks++; // Track for achievements (QOL2)
             this.addFeedback(`📦 Inventory restocked! Cost: $${restockCost}`, true);
             this.render();
         } else {
@@ -859,6 +998,7 @@ class RestaurantGame {
             if (this.inventory[ingredientName]) {
                 this.revenue -= restockCost;
                 this.inventory[ingredientName].current = this.inventory[ingredientName].max;
+                this.totalRestocks++; // Track for achievements (QOL2)
                 this.addFeedback(`📦 ${ingredientName} restocked! Cost: $${restockCost}`, true);
                 this.render();
             }
@@ -959,6 +1099,7 @@ class RestaurantGame {
         this.renderOverview();
         this.renderRecipes();
         this.renderEquipment();
+        this.renderAchievements();
     }
     
     renderOverview() {
@@ -987,6 +1128,18 @@ class RestaurantGame {
         if (equipmentUpgradesEl) {
             const totalUpgrades = Object.values(this.equipment).reduce((sum, eq) => sum + eq.level, 0);
             equipmentUpgradesEl.textContent = totalUpgrades;
+        }
+        
+        // Update achievements overview
+        const achievementsCountEl = document.getElementById('overview-achievements-count');
+        if (achievementsCountEl) {
+            achievementsCountEl.textContent = this.achievements.length;
+        }
+        
+        // Update achievements badge
+        const achievementsBadgeEl = document.getElementById('achievements-badge');
+        if (achievementsBadgeEl) {
+            achievementsBadgeEl.textContent = `${this.achievements.length} / ${this.allAchievements.length} Unlocked`;
         }
         
         // Add notification badges
@@ -1060,15 +1213,34 @@ class RestaurantGame {
         }
         revenueEl.innerHTML = `$${this.revenue}${trendIndicator}`;
         
-        // Update revenue tooltip (QOL1)
+        // Update revenue tooltip (QOL1 - Revenue forecast indicator)
         const revenueTooltip = document.querySelector('#revenue-tooltip .tooltip-content');
         if (revenueTooltip) {
             const staffCost = this.staff.length * 50; // Estimated upkeep
             const netRevenue = this.revenue - this.dayStartRevenue;
+            const dayProgress = this.dayTimer / this.dayDuration;
+            
+            // Calculate projected end-of-day revenue based on current pace
+            let projectedRevenue = this.revenue;
+            if (dayProgress > 0) {
+                const revenuePerSecond = netRevenue / this.dayTimer;
+                const remainingTime = this.dayDuration - this.dayTimer;
+                const projectedGain = revenuePerSecond * remainingTime;
+                projectedRevenue = Math.floor(this.revenue + projectedGain);
+            }
+            
+            // Add 10% bonus
+            const bonusRevenue = Math.floor(projectedRevenue * 0.1);
+            const finalProjected = projectedRevenue + bonusRevenue;
+            
+            const projectionColor = projectedRevenue > this.revenue ? '#28a745' : '#666';
+            
             revenueTooltip.innerHTML = `
                 <strong>Revenue Details</strong><br>
                 Total: $${this.revenue}<br>
                 Today's Gain: $${netRevenue}<br>
+                <span style="color: ${projectionColor};">📊 Projected EOD: $${finalProjected}</span><br>
+                <span style="font-size: 0.85rem; color: #888;">(includes 10% bonus)</span><br>
                 Staff Count: ${this.staff.length}<br>
                 ${this.day > 1 ? `Previous Day: $${this.previousDayRevenue}<br>` : ''}
             `;
@@ -1312,6 +1484,18 @@ class RestaurantGame {
                         </button>
                     ` : ''}
                 </div>
+                ${staff.orderHistory && staff.orderHistory.length > 0 ? `
+                    <div class="order-history">
+                        <div class="order-history-header">📊 Recent Orders</div>
+                        ${staff.orderHistory.map(order => `
+                            <div class="order-history-item ${order.success ? 'success' : 'failed'}">
+                                <span class="order-history-icon">${order.success ? '✓' : '✗'}</span>
+                                <span class="order-history-dish">${order.dishName.length > 25 ? order.dishName.substring(0, 25) + '...' : order.dishName}</span>
+                                ${order.success ? `<span class="order-history-price">+$${order.price}</span>` : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+                ` : ''}
             `;
             
             container.appendChild(staffCard);
@@ -1532,6 +1716,95 @@ class RestaurantGame {
                 const equipmentId = e.target.getAttribute('data-equipment-id');
                 this.upgradeEquipment(equipmentId);
             });
+        });
+    }
+    
+    renderAchievements() {
+        const container = document.getElementById('achievements-container');
+        if (!container) return;
+        
+        container.innerHTML = '';
+        
+        // Group achievements by category
+        const categories = {
+            'orders': { name: 'Order Completion', icon: '📋' },
+            'revenue': { name: 'Revenue Milestones', icon: '💰' },
+            'staff': { name: 'Staff Management', icon: '👥' },
+            'days': { name: 'Survival', icon: '📅' },
+            'perfect_days': { name: 'Excellence', icon: '😊' },
+            'vip': { name: 'VIP Service', icon: '⭐' },
+            'equipment': { name: 'Equipment', icon: '🔧' }
+        };
+        
+        Object.keys(categories).forEach(categoryKey => {
+            const categoryAchievements = this.allAchievements.filter(a => a.category === categoryKey);
+            if (categoryAchievements.length === 0) return;
+            
+            const categoryDiv = document.createElement('div');
+            categoryDiv.className = 'achievement-category';
+            
+            const categoryHeader = document.createElement('div');
+            categoryHeader.className = 'achievement-category-header';
+            categoryHeader.innerHTML = `
+                <span class="category-icon">${categories[categoryKey].icon}</span>
+                <span class="category-name">${categories[categoryKey].name}</span>
+            `;
+            categoryDiv.appendChild(categoryHeader);
+            
+            const achievementsGrid = document.createElement('div');
+            achievementsGrid.className = 'achievements-grid';
+            
+            categoryAchievements.forEach(achievement => {
+                const achievementCard = document.createElement('div');
+                achievementCard.className = `achievement-card ${achievement.unlocked ? 'unlocked' : 'locked'}`;
+                
+                // Calculate progress
+                let currentValue = 0;
+                switch(achievement.category) {
+                    case 'orders':
+                        currentValue = this.totalOrdersCompleted;
+                        break;
+                    case 'revenue':
+                        currentValue = this.highestRevenue;
+                        break;
+                    case 'staff':
+                        currentValue = this.totalStaffHired;
+                        break;
+                    case 'days':
+                        currentValue = this.day;
+                        break;
+                    case 'perfect_days':
+                        currentValue = this.perfectDays;
+                        break;
+                    case 'vip':
+                        currentValue = this.vipCustomers;
+                        break;
+                    case 'equipment':
+                        currentValue = Object.values(this.equipment).reduce((sum, eq) => sum + eq.level, 0);
+                        break;
+                }
+                
+                const progress = Math.min(100, (currentValue / achievement.requirement) * 100);
+                
+                achievementCard.innerHTML = `
+                    <div class="achievement-icon ${achievement.unlocked ? '' : 'grayscale'}">${achievement.icon}</div>
+                    <div class="achievement-info">
+                        <div class="achievement-name">${achievement.name}</div>
+                        <div class="achievement-description">${achievement.description}</div>
+                        <div class="achievement-progress">
+                            <div class="progress-bar-container">
+                                <div class="progress-bar-fill" style="width: ${progress}%"></div>
+                            </div>
+                            <div class="progress-text">${currentValue} / ${achievement.requirement}</div>
+                        </div>
+                    </div>
+                `;
+                
+                achievementsGrid.appendChild(achievementCard);
+            });
+            
+            categoryDiv.appendChild(achievementsGrid);
+            container.appendChild(categoryDiv);
         });
     }
 }
