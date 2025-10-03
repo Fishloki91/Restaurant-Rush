@@ -407,6 +407,7 @@
         <div class="control-panel">
             <button id="start-game-btn" class="btn btn-success">Start Game</button>
             <button id="pause-game-btn" class="btn btn-warning" disabled>Pause</button>
+            <button id="new-order-btn" class="btn btn-primary" disabled>📋 New Order</button>
             <button id="auto-assign-btn" class="btn btn-secondary">🤖 Auto: OFF</button>
             <button id="sound-toggle-btn" class="btn btn-secondary">🔊 Sound On</button>
             <button id="shortcuts-help-btn" class="btn btn-secondary">⌨️ Shortcuts</button>
@@ -466,6 +467,10 @@
                         <span>End of Day Bonus (10%):</span>
                         <span id="summary-bonus" class="summary-value success">$0</span>
                     </div>
+                    <div class="summary-item" id="summary-penalties-item" style="display: none;">
+                        <span>Penalties (Unfinished Orders):</span>
+                        <span id="summary-penalties" class="summary-value danger">-$0</span>
+                    </div>
                     <div class="summary-item summary-total">
                         <span>Total Revenue:</span>
                         <span id="summary-total-revenue" class="summary-value">$0</span>
@@ -488,6 +493,25 @@
                     <div class="summary-item summary-total">
                         <span>Success Rate:</span>
                         <span id="summary-success-rate" class="summary-value">100%</span>
+                    </div>
+                </div>
+                <div class="summary-section">
+                    <h3>📊 Additional Stats</h3>
+                    <div class="summary-item">
+                        <span>Total Orders Completed:</span>
+                        <span id="summary-orders-completed" class="summary-value">0</span>
+                    </div>
+                    <div class="summary-item">
+                        <span>VIP Customers Served:</span>
+                        <span id="summary-vip-served" class="summary-value">0</span>
+                    </div>
+                    <div class="summary-item">
+                        <span>Staff Upgrades:</span>
+                        <span id="summary-staff-upgrades" class="summary-value">0</span>
+                    </div>
+                    <div class="summary-item">
+                        <span>Perfect Day:</span>
+                        <span id="summary-perfect-day" class="summary-value">No</span>
                     </div>
                 </div>
             </div>
