@@ -10,6 +10,7 @@
 - **Daily progression**: Complete 3-minute business days with performance summaries
 
 ## 🎮 Key Features
+- **Employee of the Month System** with dynamic leaderboards, weekly challenges, rewards, and Hall of Fame
 - **Achievement System** with 18 unique milestones tracking orders, revenue, staff, survival, and excellence
 - **Dynamic Order Generation** that adapts to time of day and available staff for realistic business flow
 - **Dynamic Staff Hiring** system to expand your team with randomly-generated employees
@@ -39,6 +40,9 @@
 - Each day lasts 3 minutes with 10% end-of-day revenue bonus
 - Staff needs and orders reset at the start of each new day
 - Unfinished assigned orders incur penalties based on incomplete progress at day's end
+- Employee of the Month crowned every 30 days with performance bonuses and Hall of Fame entry
+- Weekly challenges with bonus rewards for completion
+- Tips system based on order completion speed (15% bonus for fast service)
 - Game over occurs when revenue reaches $0 or below
 
 ## 🎯 Objective
@@ -49,6 +53,18 @@ Balance quick order fulfillment, staff workload, inventory management, and custo
 **Display**: Optimized for 1920x1080 screens with no scrolling
 
 ## Updates
+
+### v3.0.0 - Employee of the Month
+**Major Feature:** Employee of the Month system - Transform staff management into a competitive, rewarding experience! Track staff performance through dynamic leaderboards that update in real-time. Top performers earn unique titles (Tip Master, Speed Demon, Order Champion, Reliable Star) and a +20% efficiency bonus for the month. Weekly challenges (fastest order, highest tips, most orders, perfectionist streak, team player) add variety and bonus points. Staff now earn tips based on speed (15% bonus for completing orders in under 75% of expected time). Winners are immortalized in the Hall of Fame with their achievements preserved forever. Every 30 in-game days brings a new month, new challenges, and a new champion!
+
+**Detailed Features:**
+- **Dynamic Leaderboard** - Real-time top 3 podium with gold/silver/bronze styling, full staff rankings, and comprehensive scoring based on orders, revenue, tips, efficiency, performance, morale, and speed
+- **Reward System** - +20% efficiency bonus for Employee of the Month, unique titles, crown badge, and prominent display on staff cards
+- **Weekly Challenges** - 5 challenge types rotating weekly with progress tracking, visual progress bars, and 50-point bonuses for completion
+- **Hall of Fame** - Persistent recognition of past winners with detailed historical records displayed in golden trophy cards
+- **Enhanced Metrics** - Monthly tracking for orders, revenue, tips, and fastest completion times with visual displays throughout the game
+
+///
 
 ### v2.1.0 - Dynamic Orders & Mobile QOL
 **Major Features:**

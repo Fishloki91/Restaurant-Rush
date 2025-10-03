@@ -39,6 +39,15 @@ class RestaurantGame {
         this.recipeData = null; // Store loaded recipe data
         this.ordersConfig = null; // Store orders configuration
         
+        // Employee of the Month tracking
+        this.monthlyLeaderboard = []; // Track staff monthly performance
+        this.currentMonthWinner = null; // Current Employee of the Month
+        this.hallOfFame = []; // Past winners
+        this.weeklyChallenge = null; // Current weekly challenge
+        this.challengeProgress = {}; // Track challenge progress per staff
+        this.monthStartDay = 1; // Track which day the current month started
+        this.monthDuration = 30; // A month is 30 in-game days
+        
         // Initialize Audio Context for sound effects
         this.audioContext = null;
         this.initializeAudio();
@@ -66,6 +75,7 @@ class RestaurantGame {
             this.initializeRecipes();
             this.initializeEquipment();
             this.initializeAchievements();
+            this.initializeEmployeeOfMonth();
             
             // Render after initialization is complete
             this.render();
@@ -77,6 +87,7 @@ class RestaurantGame {
             this.initializeRecipesLegacy();
             this.initializeEquipment();
             this.initializeAchievements();
+            this.initializeEmployeeOfMonth();
             
             // Render after initialization is complete
             this.render();
@@ -214,7 +225,17 @@ class RestaurantGame {
                 fatigue: 0, // Fatigue level (0-100)
                 morale: 100, // Morale level (0-100)
                 lastRestTime: 0, // Track when staff last rested
-                orderHistory: [] // Track last 5 orders
+                orderHistory: [], // Track last 5 orders
+                // Employee of the Month metrics
+                monthlyScore: 0, // Overall performance score for the month
+                monthlyOrders: 0, // Orders completed this month
+                monthlyRevenue: 0, // Revenue generated this month
+                monthlyTips: 0, // Tips earned this month (from fast service)
+                fastestOrder: null, // Fastest order time this month
+                isEmployeeOfMonth: false, // Current Employee of the Month flag
+                employeeOfMonthTitle: '', // Title earned (e.g., "Speed Demon", "Reliable Star")
+                employeeOfMonthBonus: 0, // Skill bonus percentage (0-20%)
+                hallOfFameCount: 0 // Number of times won Employee of the Month
             });
         });
     }
@@ -247,7 +268,17 @@ class RestaurantGame {
             fatigue: 0, // Fatigue level (0-100)
             morale: 100, // Morale level (0-100)
             lastRestTime: 0, // Track when staff last rested
-            orderHistory: [] // QOL3: Track last 5 orders
+            orderHistory: [], // QOL3: Track last 5 orders
+            // Employee of the Month metrics
+            monthlyScore: 0,
+            monthlyOrders: 0,
+            monthlyRevenue: 0,
+            monthlyTips: 0,
+            fastestOrder: null,
+            isEmployeeOfMonth: false,
+            employeeOfMonthTitle: '',
+            employeeOfMonthBonus: 0,
+            hallOfFameCount: 0
         };
     }
     
@@ -528,6 +559,229 @@ class RestaurantGame {
         }, 4000);
     }
     
+    initializeEmployeeOfMonth() {
+        // Initialize weekly challenges
+        this.generateWeeklyChallenge();
+        
+        // Initialize challenge progress for existing staff
+        this.staff.forEach(staff => {
+            this.challengeProgress[staff.id] = {
+                ordersToday: 0,
+                tipsToday: 0,
+                fastestOrderToday: null,
+                teamworkScore: 0
+            };
+        });
+    }
+    
+    generateWeeklyChallenge() {
+        const challenges = [
+            { id: 'fastest_fulfillment', name: 'Speed Demon', description: 'Complete an order in under 60 seconds', target: 60, icon: '⚡' },
+            { id: 'highest_tips', name: 'Tip Master', description: 'Earn $50 in tips in one day', target: 50, icon: '💰' },
+            { id: 'most_orders', name: 'Order Champion', description: 'Complete 15 orders in one day', target: 15, icon: '📋' },
+            { id: 'perfect_streak', name: 'Perfectionist', description: 'Complete 5 orders without any failures', target: 5, icon: '⭐' },
+            { id: 'teamwork_hero', name: 'Team Player', description: 'Maintain 100% performance while completing 10 orders', target: 10, icon: '🤝' }
+        ];
+        
+        this.weeklyChallenge = challenges[Math.floor(Math.random() * challenges.length)];
+        this.weeklyChallenge.startDay = this.day;
+        this.weeklyChallenge.endDay = this.day + 7;
+    }
+    
+    updateEmployeeOfMonthMetrics(staff, order, completionTime) {
+        // Update monthly metrics
+        staff.monthlyOrders++;
+        staff.monthlyRevenue += order.price;
+        
+        // Calculate tips based on speed (faster = better tips)
+        const expectedTime = order.time;
+        if (completionTime < expectedTime * 0.75) {
+            const tipAmount = order.price * 0.15; // 15% tip for fast service
+            staff.monthlyTips += tipAmount;
+            this.challengeProgress[staff.id].tipsToday += tipAmount;
+        }
+        
+        // Track fastest order
+        if (!staff.fastestOrder || completionTime < staff.fastestOrder) {
+            staff.fastestOrder = completionTime;
+        }
+        if (!this.challengeProgress[staff.id].fastestOrderToday || 
+            completionTime < this.challengeProgress[staff.id].fastestOrderToday) {
+            this.challengeProgress[staff.id].fastestOrderToday = completionTime;
+        }
+        
+        // Update daily challenge progress
+        this.challengeProgress[staff.id].ordersToday++;
+        
+        // Update teamwork score (high performance = teamwork)
+        if (staff.performance > 80) {
+            this.challengeProgress[staff.id].teamworkScore += 1;
+        }
+        
+        // Check if staff completed weekly challenge
+        this.checkWeeklyChallengeCompletion(staff);
+        
+        // Calculate overall monthly score
+        this.calculateMonthlyScore(staff);
+    }
+    
+    checkWeeklyChallengeCompletion(staff) {
+        if (!this.weeklyChallenge || this.day > this.weeklyChallenge.endDay) {
+            return;
+        }
+        
+        let completed = false;
+        const progress = this.challengeProgress[staff.id];
+        
+        switch(this.weeklyChallenge.id) {
+            case 'fastest_fulfillment':
+                if (progress.fastestOrderToday && progress.fastestOrderToday <= this.weeklyChallenge.target) {
+                    completed = true;
+                }
+                break;
+            case 'highest_tips':
+                if (progress.tipsToday >= this.weeklyChallenge.target) {
+                    completed = true;
+                }
+                break;
+            case 'most_orders':
+                if (progress.ordersToday >= this.weeklyChallenge.target) {
+                    completed = true;
+                }
+                break;
+            case 'teamwork_hero':
+                if (progress.teamworkScore >= this.weeklyChallenge.target) {
+                    completed = true;
+                }
+                break;
+        }
+        
+        if (completed && !staff.weeklyChallengeBadge) {
+            staff.weeklyChallengeBadge = this.weeklyChallenge.icon;
+            staff.monthlyScore += 50; // Bonus points for completing challenge
+            this.addFeedback(`🏆 ${staff.name} completed the weekly challenge: ${this.weeklyChallenge.name}!`, true);
+            this.playSuccessSound();
+        }
+    }
+    
+    calculateMonthlyScore(staff) {
+        // Calculate comprehensive monthly score based on multiple factors
+        let score = 0;
+        
+        // Orders completed (5 points each)
+        score += staff.monthlyOrders * 5;
+        
+        // Revenue generated (1 point per $10)
+        score += Math.floor(staff.monthlyRevenue / 10);
+        
+        // Tips earned (2 points per $1)
+        score += staff.monthlyTips * 2;
+        
+        // Efficiency bonus (up to 50 points)
+        score += staff.efficiency * 50;
+        
+        // Performance bonus (up to 30 points)
+        score += (staff.performance / 100) * 30;
+        
+        // Morale bonus (up to 20 points)
+        score += (staff.morale / 100) * 20;
+        
+        // Weekly challenge completion bonus (already added in checkWeeklyChallengeCompletion)
+        
+        // Fastest order bonus (up to 50 points based on speed)
+        if (staff.fastestOrder) {
+            const speedBonus = Math.max(0, 50 - Math.floor(staff.fastestOrder / 2));
+            score += speedBonus;
+        }
+        
+        staff.monthlyScore = Math.floor(score);
+    }
+    
+    updateMonthlyLeaderboard() {
+        // Sort staff by monthly score
+        this.monthlyLeaderboard = [...this.staff].sort((a, b) => b.monthlyScore - a.monthlyScore);
+    }
+    
+    checkMonthlyReset() {
+        // Check if it's time for a new month (every 30 days)
+        if (this.day - this.monthStartDay >= this.monthDuration) {
+            this.processMonthEnd();
+        }
+    }
+    
+    processMonthEnd() {
+        this.updateMonthlyLeaderboard();
+        
+        // Award Employee of the Month
+        if (this.monthlyLeaderboard.length > 0) {
+            const winner = this.monthlyLeaderboard[0];
+            
+            // Remove previous Employee of the Month status
+            this.staff.forEach(s => {
+                s.isEmployeeOfMonth = false;
+                s.employeeOfMonthBonus = 0;
+                s.employeeOfMonthTitle = '';
+            });
+            
+            // Set new Employee of the Month
+            winner.isEmployeeOfMonth = true;
+            winner.hallOfFameCount++;
+            winner.employeeOfMonthBonus = 20; // 20% bonus
+            
+            // Assign title based on performance
+            if (winner.monthlyTips > 50) {
+                winner.employeeOfMonthTitle = 'Tip Master';
+            } else if (winner.fastestOrder && winner.fastestOrder < 60) {
+                winner.employeeOfMonthTitle = 'Speed Demon';
+            } else if (winner.monthlyOrders > 50) {
+                winner.employeeOfMonthTitle = 'Order Champion';
+            } else {
+                winner.employeeOfMonthTitle = 'Reliable Star';
+            }
+            
+            // Add to Hall of Fame
+            this.hallOfFame.push({
+                name: winner.name,
+                month: Math.floor(this.day / this.monthDuration),
+                score: winner.monthlyScore,
+                title: winner.employeeOfMonthTitle,
+                orders: winner.monthlyOrders,
+                revenue: winner.monthlyRevenue,
+                tips: winner.monthlyTips
+            });
+            
+            this.currentMonthWinner = winner;
+            
+            // Show announcement
+            this.addFeedback(`🏆 Employee of the Month: ${winner.name} - ${winner.employeeOfMonthTitle}!`, true);
+            this.playSuccessSound();
+        }
+        
+        // Reset monthly stats
+        this.staff.forEach(staff => {
+            staff.monthlyOrders = 0;
+            staff.monthlyRevenue = 0;
+            staff.monthlyTips = 0;
+            staff.fastestOrder = null;
+            staff.monthlyScore = 0;
+            staff.weeklyChallengeBadge = null;
+        });
+        
+        this.monthStartDay = this.day;
+        
+        // Generate new weekly challenge
+        this.generateWeeklyChallenge();
+    }
+    
+    applyEmployeeOfMonthBonus(staff) {
+        // Apply temporary skill boost to Employee of the Month
+        if (staff.isEmployeeOfMonth && staff.employeeOfMonthBonus > 0) {
+            const bonusMultiplier = 1 + (staff.employeeOfMonthBonus / 100);
+            return staff.efficiency * bonusMultiplier;
+        }
+        return staff.efficiency;
+    }
+    
     hireStaff() {
         const hireCost = 150;
         if (this.revenue < hireCost) {
@@ -539,6 +793,15 @@ class RestaurantGame {
         const newStaff = this.generateRandomStaff();
         this.staff.push(newStaff);
         this.totalStaffHired++;
+        
+        // Initialize challenge progress for new hire
+        this.challengeProgress[newStaff.id] = {
+            ordersToday: 0,
+            tipsToday: 0,
+            fastestOrderToday: null,
+            teamworkScore: 0
+        };
+        
         this.addFeedback(`✅ Hired ${newStaff.name} (${newStaff.role}) - Efficiency: ${(newStaff.efficiency * 100).toFixed(0)}%`, true);
         this.checkAchievements();
         this.triggerHaptic('medium');
@@ -818,6 +1081,22 @@ class RestaurantGame {
         // Check achievements after day progression
         this.checkAchievements();
         
+        // Check for monthly reset and Employee of the Month
+        this.checkMonthlyReset();
+        
+        // Update monthly leaderboard
+        this.updateMonthlyLeaderboard();
+        
+        // Reset daily challenge progress
+        this.staff.forEach(staff => {
+            if (this.challengeProgress[staff.id]) {
+                this.challengeProgress[staff.id].ordersToday = 0;
+                this.challengeProgress[staff.id].tipsToday = 0;
+                this.challengeProgress[staff.id].fastestOrderToday = null;
+                this.challengeProgress[staff.id].teamworkScore = 0;
+            }
+        });
+        
         // Store starting values for next day
         this.dayStartRevenue = this.revenue;
         this.dayStartHappyCustomers = this.happyCustomers;
@@ -1051,8 +1330,11 @@ class RestaurantGame {
                         efficiencyBonus = 1.15; // 15% bonus for matching specialty
                     }
                     
-                    // Progress based on staff efficiency with specialty bonus
-                    order.progress += staff.efficiency * 1.5 * efficiencyBonus;
+                    // Apply Employee of the Month bonus
+                    const effectiveEfficiency = this.applyEmployeeOfMonthBonus(staff);
+                    
+                    // Progress based on staff efficiency with specialty bonus and Employee of Month bonus
+                    order.progress += effectiveEfficiency * 1.5 * efficiencyBonus;
                     
                     if (order.progress >= 100) {
                         this.completeOrder(order.id, true);
@@ -1101,6 +1383,10 @@ class RestaurantGame {
             if (staff) {
                 staff.ordersCompleted++;
                 staff.performance = Math.min(100, staff.performance + 2);
+                
+                // Update Employee of the Month metrics
+                const completionTime = order.timeLimit - order.timeRemaining;
+                this.updateEmployeeOfMonthMetrics(staff, order, completionTime);
                 
                 // QoL 2: Auto-rest if fatigued in auto mode
                 if (this.autoAssignEnabled && staff.fatigue > 70) {
@@ -1362,6 +1648,7 @@ class RestaurantGame {
         this.renderRecipes();
         this.renderEquipment();
         this.renderAchievements();
+        this.renderEmployeeOfMonth();
     }
     
     renderOverview() {
@@ -1719,11 +2006,18 @@ class RestaurantGame {
                 efficiencyBadge = '<span class="efficiency-badge poor" title="Needs Rest">⚠️</span>';
             }
             
+            // Employee of the Month badge
+            let eotmBadge = '';
+            if (staff.isEmployeeOfMonth) {
+                eotmBadge = `<span class="eotm-badge" title="Employee of the Month - ${staff.employeeOfMonthTitle}">👑</span>`;
+            }
+            
             staffCard.innerHTML = `
                 <div class="staff-header">
                     <div>
-                        <div class="staff-name">${staff.name} ${upgradeStars} ${efficiencyBadge}</div>
+                        <div class="staff-name">${staff.name} ${eotmBadge} ${upgradeStars} ${efficiencyBadge}</div>
                         <div class="staff-role">${staff.role} ${canUpgrade ? `(Level ${staff.upgradeLevel}/${staff.maxUpgradeLevel})` : '(MAX)'}</div>
+                        ${staff.isEmployeeOfMonth ? `<div class="eotm-title">${staff.employeeOfMonthTitle} (+${staff.employeeOfMonthBonus}% bonus)</div>` : ''}
                     </div>
                     <span class="staff-status ${staff.status}">${staff.status.toUpperCase()}</span>
                 </div>
@@ -1739,6 +2033,10 @@ class RestaurantGame {
                     <div class="metric">
                         <span class="metric-label">Orders Done</span>
                         <span class="metric-value">${staff.ordersCompleted}</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">Monthly Score</span>
+                        <span class="metric-value">${staff.monthlyScore}</span>
                     </div>
                 </div>
                 <div class="performance-bar-container" title="Performance">
@@ -2091,6 +2389,223 @@ class RestaurantGame {
             
             categoryDiv.appendChild(achievementsGrid);
             container.appendChild(categoryDiv);
+        });
+    }
+    
+    renderEmployeeOfMonth() {
+        // Update overview card
+        const winnerName = document.getElementById('overview-eotm-winner');
+        const topScore = document.getElementById('overview-eotm-score');
+        const daysLeft = document.getElementById('overview-eotm-days');
+        const monthBadge = document.getElementById('eotm-month-badge');
+        
+        if (winnerName && topScore && daysLeft && monthBadge) {
+            const currentMonth = Math.floor((this.day - 1) / this.monthDuration) + 1;
+            const daysUntilEnd = this.monthDuration - ((this.day - this.monthStartDay) % this.monthDuration);
+            
+            monthBadge.textContent = `Month ${currentMonth}`;
+            daysLeft.textContent = daysUntilEnd;
+            
+            this.updateMonthlyLeaderboard();
+            
+            if (this.monthlyLeaderboard.length > 0) {
+                const leader = this.monthlyLeaderboard[0];
+                winnerName.textContent = leader.name.split(' ')[0]; // Just first name for space
+                topScore.textContent = leader.monthlyScore;
+            } else {
+                winnerName.textContent = 'TBD';
+                topScore.textContent = '0';
+            }
+        }
+        
+        // Render leaderboard
+        const leaderboardContainer = document.getElementById('leaderboard-container');
+        if (!leaderboardContainer) return;
+        
+        leaderboardContainer.innerHTML = '';
+        
+        if (this.monthlyLeaderboard.length === 0) {
+            leaderboardContainer.innerHTML = '<div class="empty-state">Complete some orders to see staff rankings!</div>';
+            return;
+        }
+        
+        // Show top 3
+        const top3 = this.monthlyLeaderboard.slice(0, 3);
+        const medals = ['🥇', '🥈', '🥉'];
+        const ranks = ['1st Place', '2nd Place', '3rd Place'];
+        const colors = ['#FFD700', '#C0C0C0', '#CD7F32'];
+        
+        top3.forEach((staff, index) => {
+            const leaderCard = document.createElement('div');
+            leaderCard.className = 'leaderboard-card';
+            leaderCard.style.borderColor = colors[index];
+            
+            const isWinner = staff.isEmployeeOfMonth;
+            
+            leaderCard.innerHTML = `
+                <div class="leaderboard-rank" style="background: ${colors[index]};">
+                    <div class="rank-medal">${medals[index]}</div>
+                    <div class="rank-label">${ranks[index]}</div>
+                </div>
+                <div class="leaderboard-info">
+                    <div class="leaderboard-name">
+                        ${staff.name} ${isWinner ? '👑' : ''} ${staff.weeklyChallengeBadge || ''}
+                    </div>
+                    ${isWinner ? `<div class="leaderboard-title">${staff.employeeOfMonthTitle}</div>` : ''}
+                    <div class="leaderboard-stats">
+                        <div class="leaderboard-stat">
+                            <span class="stat-label">Score:</span>
+                            <span class="stat-value">${staff.monthlyScore}</span>
+                        </div>
+                        <div class="leaderboard-stat">
+                            <span class="stat-label">Orders:</span>
+                            <span class="stat-value">${staff.monthlyOrders}</span>
+                        </div>
+                        <div class="leaderboard-stat">
+                            <span class="stat-label">Revenue:</span>
+                            <span class="stat-value">$${staff.monthlyRevenue.toFixed(0)}</span>
+                        </div>
+                        <div class="leaderboard-stat">
+                            <span class="stat-label">Tips:</span>
+                            <span class="stat-value">$${staff.monthlyTips.toFixed(0)}</span>
+                        </div>
+                    </div>
+                    ${isWinner ? `<div class="leaderboard-bonus">+${staff.employeeOfMonthBonus}% Efficiency Bonus</div>` : ''}
+                </div>
+            `;
+            
+            leaderboardContainer.appendChild(leaderCard);
+        });
+        
+        // Show remaining staff in compact list
+        if (this.monthlyLeaderboard.length > 3) {
+            const otherStaff = this.monthlyLeaderboard.slice(3);
+            const otherList = document.createElement('div');
+            otherList.className = 'leaderboard-others';
+            otherList.innerHTML = '<h4>Other Staff:</h4>';
+            
+            otherStaff.forEach((staff, index) => {
+                const rank = index + 4;
+                const staffItem = document.createElement('div');
+                staffItem.className = 'leaderboard-other-item';
+                staffItem.innerHTML = `
+                    <span class="other-rank">#${rank}</span>
+                    <span class="other-name">${staff.name}</span>
+                    <span class="other-score">${staff.monthlyScore} pts</span>
+                `;
+                otherList.appendChild(staffItem);
+            });
+            
+            leaderboardContainer.appendChild(otherList);
+        }
+        
+        // Render weekly challenge
+        const challengeContainer = document.getElementById('weekly-challenge-container');
+        if (!challengeContainer) return;
+        
+        challengeContainer.innerHTML = '';
+        
+        if (this.weeklyChallenge) {
+            const challengeCard = document.createElement('div');
+            challengeCard.className = 'weekly-challenge-card';
+            
+            const daysRemaining = Math.max(0, this.weeklyChallenge.endDay - this.day);
+            
+            challengeCard.innerHTML = `
+                <div class="challenge-header">
+                    <span class="challenge-icon">${this.weeklyChallenge.icon}</span>
+                    <span class="challenge-name">${this.weeklyChallenge.name}</span>
+                    <span class="challenge-timer">⏱️ ${daysRemaining} days left</span>
+                </div>
+                <div class="challenge-description">${this.weeklyChallenge.description}</div>
+                <div class="challenge-progress-section">
+                    <h4>Staff Progress:</h4>
+                    <div class="challenge-staff-list">
+                        ${this.staff.map(staff => {
+                            const progress = this.challengeProgress[staff.id];
+                            let currentProgress = 0;
+                            let progressText = '';
+                            
+                            switch(this.weeklyChallenge.id) {
+                                case 'fastest_fulfillment':
+                                    currentProgress = progress.fastestOrderToday ? Math.min(100, (this.weeklyChallenge.target / progress.fastestOrderToday) * 100) : 0;
+                                    progressText = progress.fastestOrderToday ? `${progress.fastestOrderToday.toFixed(0)}s` : 'N/A';
+                                    break;
+                                case 'highest_tips':
+                                    currentProgress = (progress.tipsToday / this.weeklyChallenge.target) * 100;
+                                    progressText = `$${progress.tipsToday.toFixed(0)}`;
+                                    break;
+                                case 'most_orders':
+                                    currentProgress = (progress.ordersToday / this.weeklyChallenge.target) * 100;
+                                    progressText = `${progress.ordersToday}`;
+                                    break;
+                                case 'teamwork_hero':
+                                    currentProgress = (progress.teamworkScore / this.weeklyChallenge.target) * 100;
+                                    progressText = `${progress.teamworkScore}`;
+                                    break;
+                            }
+                            
+                            const completed = staff.weeklyChallengeBadge ? '✓' : '';
+                            
+                            return `
+                                <div class="challenge-staff-item ${staff.weeklyChallengeBadge ? 'completed' : ''}">
+                                    <span class="challenge-staff-name">${staff.name} ${completed}</span>
+                                    <div class="challenge-progress-bar">
+                                        <div class="challenge-progress-fill" style="width: ${Math.min(100, currentProgress)}%"></div>
+                                    </div>
+                                    <span class="challenge-progress-text">${progressText}</span>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            `;
+            
+            challengeContainer.appendChild(challengeCard);
+        }
+        
+        // Render Hall of Fame
+        const hofContainer = document.getElementById('hall-of-fame-container');
+        if (!hofContainer) return;
+        
+        hofContainer.innerHTML = '';
+        
+        if (this.hallOfFame.length === 0) {
+            hofContainer.innerHTML = '<div class="empty-state">No winners yet. Complete 30 days to see the first Employee of the Month!</div>';
+            return;
+        }
+        
+        // Show most recent winners first
+        const recentWinners = [...this.hallOfFame].reverse().slice(0, 5);
+        
+        recentWinners.forEach(winner => {
+            const hofCard = document.createElement('div');
+            hofCard.className = 'hall-of-fame-card';
+            
+            hofCard.innerHTML = `
+                <div class="hof-header">
+                    <span class="hof-icon">🌟</span>
+                    <span class="hof-month">Month ${winner.month}</span>
+                </div>
+                <div class="hof-name">${winner.name}</div>
+                <div class="hof-title">${winner.title}</div>
+                <div class="hof-stats">
+                    <div class="hof-stat">
+                        <span class="stat-label">Score:</span>
+                        <span class="stat-value">${winner.score}</span>
+                    </div>
+                    <div class="hof-stat">
+                        <span class="stat-label">Orders:</span>
+                        <span class="stat-value">${winner.orders}</span>
+                    </div>
+                    <div class="hof-stat">
+                        <span class="stat-label">Revenue:</span>
+                        <span class="stat-value">$${winner.revenue.toFixed(0)}</span>
+                    </div>
+                </div>
+            `;
+            
+            hofContainer.appendChild(hofCard);
         });
     }
 }

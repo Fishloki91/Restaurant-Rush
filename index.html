@@ -195,6 +195,35 @@
                     </div>
                     <button class="view-details-btn" data-view="achievements">View Details →</button>
                 </div>
+
+                <!-- Employee of the Month Overview Card -->
+                <div class="overview-card tooltip-container" id="eotm-overview-card">
+                    <div class="card-icon">👑</div>
+                    <div class="card-content">
+                        <h3>Employee of the Month</h3>
+                        <div class="card-stats-multi">
+                            <div class="stat-item">
+                                <span id="overview-eotm-winner" class="stat-number eotm-name">TBD</span>
+                                <span class="stat-label-small">Current Winner</span>
+                            </div>
+                            <div class="stat-item">
+                                <span id="overview-eotm-score" class="stat-number">0</span>
+                                <span class="stat-label-small">Top Score</span>
+                            </div>
+                            <div class="stat-item">
+                                <span id="overview-eotm-days" class="stat-number">30</span>
+                                <span class="stat-label-small">Days Left</span>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="view-details-btn" data-view="eotm">View Details →</button>
+                    <div class="card-tooltip">
+                        <div class="tooltip-content">
+                            <strong>Employee of the Month</strong><br>
+                            Track staff performance through monthly leaderboards, weekly challenges, and rewards. Top performers earn titles, bonuses, and a place in the Hall of Fame!
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -301,6 +330,40 @@
             </div>
             <div id="achievements-container" class="achievements-container">
                 <!-- Achievements will be dynamically added here -->
+            </div>
+        </div>
+
+        <!-- Employee of the Month View -->
+        <div id="eotm-view" class="dashboard-content detail-view">
+            <div class="detail-view-header">
+                <button class="back-btn" data-back="overview">← Back to Overview</button>
+                <h2>🏆 Employee of the Month</h2>
+                <span id="eotm-month-badge" class="badge" style="background: #D89E54;">Month 1</span>
+            </div>
+            <div class="eotm-container">
+                <!-- Leaderboard Section -->
+                <div class="eotm-section">
+                    <h3>📊 Monthly Leaderboard</h3>
+                    <div id="leaderboard-container" class="leaderboard-container">
+                        <!-- Top 3 staff will be displayed here -->
+                    </div>
+                </div>
+
+                <!-- Weekly Challenge Section -->
+                <div class="eotm-section">
+                    <h3>🎯 Weekly Challenge</h3>
+                    <div id="weekly-challenge-container" class="weekly-challenge-container">
+                        <!-- Weekly challenge will be displayed here -->
+                    </div>
+                </div>
+
+                <!-- Hall of Fame Section -->
+                <div class="eotm-section">
+                    <h3>🌟 Hall of Fame</h3>
+                    <div id="hall-of-fame-container" class="hall-of-fame-container">
+                        <!-- Past winners will be displayed here -->
+                    </div>
+                </div>
             </div>
         </div>
 

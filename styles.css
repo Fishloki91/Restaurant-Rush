@@ -2100,4 +2100,366 @@ body {
     }
 }
 
+/* Employee of the Month Styles */
+.eotm-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 15px;
+}
+
+.eotm-section {
+    background: #F5F5F0;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.eotm-section h3 {
+    margin: 0 0 15px 0;
+    color: #8B4513;
+    font-size: 1.3rem;
+    border-bottom: 2px solid #C17A4F;
+    padding-bottom: 10px;
+}
+
+/* Leaderboard Styles */
+.leaderboard-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.leaderboard-card {
+    background: white;
+    border-radius: 8px;
+    padding: 15px;
+    display: flex;
+    gap: 15px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-left: 4px solid #D89E54;
+    transition: transform 0.3s ease;
+}
+
+.leaderboard-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.leaderboard-rank {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 80px;
+    border-radius: 8px;
+    color: white;
+    padding: 10px;
+}
+
+.rank-medal {
+    font-size: 2rem;
+    margin-bottom: 5px;
+}
+
+.rank-label {
+    font-size: 0.8rem;
+    font-weight: bold;
+    text-align: center;
+}
+
+.leaderboard-info {
+    flex: 1;
+}
+
+.leaderboard-name {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #8B4513;
+    margin-bottom: 5px;
+}
+
+.leaderboard-title {
+    font-size: 0.9rem;
+    color: #D89E54;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.leaderboard-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.leaderboard-stat {
+    display: flex;
+    flex-direction: column;
+}
+
+.leaderboard-stat .stat-label {
+    font-size: 0.75rem;
+    color: #666;
+}
+
+.leaderboard-stat .stat-value {
+    font-size: 1rem;
+    font-weight: bold;
+    color: #8B4513;
+}
+
+.leaderboard-bonus {
+    margin-top: 10px;
+    padding: 8px;
+    background: linear-gradient(135deg, #FFD700, #FFA500);
+    border-radius: 5px;
+    text-align: center;
+    font-weight: bold;
+    color: white;
+    font-size: 0.9rem;
+}
+
+.leaderboard-others {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 2px solid #e0e0e0;
+}
+
+.leaderboard-others h4 {
+    margin: 0 0 10px 0;
+    color: #8B4513;
+    font-size: 1rem;
+}
+
+.leaderboard-other-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px;
+    background: white;
+    border-radius: 5px;
+    margin-bottom: 5px;
+}
+
+.other-rank {
+    font-weight: bold;
+    color: #666;
+    min-width: 30px;
+}
+
+.other-name {
+    flex: 1;
+    color: #8B4513;
+}
+
+.other-score {
+    font-weight: bold;
+    color: #D89E54;
+}
+
+/* Weekly Challenge Styles */
+.weekly-challenge-card {
+    background: white;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.challenge-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+.challenge-icon {
+    font-size: 2rem;
+}
+
+.challenge-name {
+    flex: 1;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #8B4513;
+}
+
+.challenge-timer {
+    font-size: 0.9rem;
+    color: #666;
+    font-weight: bold;
+}
+
+.challenge-description {
+    margin-bottom: 15px;
+    color: #666;
+    font-size: 0.95rem;
+}
+
+.challenge-progress-section h4 {
+    margin: 10px 0;
+    color: #8B4513;
+    font-size: 1rem;
+}
+
+.challenge-staff-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.challenge-staff-item {
+    background: #F5F5F0;
+    border-radius: 5px;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.challenge-staff-item.completed {
+    background: linear-gradient(135deg, #90EE90, #98FB98);
+    border: 2px solid #28a745;
+}
+
+.challenge-staff-name {
+    min-width: 120px;
+    font-weight: bold;
+    color: #8B4513;
+}
+
+.challenge-progress-bar {
+    flex: 1;
+    height: 20px;
+    background: #e0e0e0;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.challenge-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #4CAF50, #8BC34A);
+    border-radius: 10px;
+    transition: width 0.5s ease;
+}
+
+.challenge-progress-text {
+    min-width: 60px;
+    text-align: right;
+    font-weight: bold;
+    color: #8B4513;
+}
+
+/* Hall of Fame Styles */
+.hall-of-fame-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 15px;
+}
+
+.hall-of-fame-card {
+    background: linear-gradient(135deg, #FFD700, #FFA500);
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    color: white;
+    transition: transform 0.3s ease;
+}
+
+.hall-of-fame-card:hover {
+    transform: scale(1.05);
+}
+
+.hof-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.5);
+    padding-bottom: 8px;
+}
+
+.hof-icon {
+    font-size: 1.5rem;
+}
+
+.hof-month {
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+.hof-name {
+    font-size: 1.3rem;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.hof-title {
+    font-size: 0.9rem;
+    opacity: 0.9;
+    margin-bottom: 10px;
+}
+
+.hof-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-top: 10px;
+}
+
+.hof-stat {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+}
+
+.hof-stat .stat-label {
+    opacity: 0.9;
+}
+
+.hof-stat .stat-value {
+    font-weight: bold;
+}
+
+/* Staff Card Employee of the Month Badge */
+.eotm-badge {
+    display: inline-block;
+    font-size: 1.2rem;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.2);
+    }
+}
+
+.eotm-title {
+    font-size: 0.85rem;
+    color: #D89E54;
+    font-weight: bold;
+    font-style: italic;
+    margin-top: 3px;
+}
+
+.eotm-name {
+    font-size: 0.85rem !important;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 40px;
+    color: #999;
+    font-style: italic;
+}
+
 
