@@ -13,6 +13,7 @@
 - **Employee of the Month System** with dynamic leaderboards, weekly challenges, rewards, and Hall of Fame
 - **Achievement System** with 18 unique milestones tracking orders, revenue, staff, survival, and excellence
 - **Dynamic Order Generation** that adapts to time of day and available staff for realistic business flow
+- **Toast Notification System** with colorful notifications for important events (success, warning, error, info, achievement)
 - **Dynamic Staff Hiring** system to expand your team with randomly-generated employees
 - **Equipment Upgrades** to boost cooking speed, reduce waste, increase prices, and lower fatigue
 - **End-of-Day Summaries** with detailed performance metrics, bonus rewards, and shift transition penalties
@@ -22,7 +23,7 @@
 - **Staff Performance** tracking with efficiency ratings, workload management, upgrades, and order history
 - **Inventory Management** with color-coded stock levels, usage tracking, and one-click restocking
 - **Satisfaction Metrics** including customer feedback and restaurant ratings
-- **Mobile-Optimized** with tap tooltips, haptic feedback, and achievement toast notifications
+- **Mobile-Optimized** with tap tooltips, centralized tooltip display, haptic feedback, and achievement toast notifications
 - **Game Over Detection** when funds run out with final statistics display
 
 ## 🎲 Game Mechanics
@@ -40,7 +41,7 @@
 - Each day lasts 3 minutes with 10% end-of-day revenue bonus
 - Staff needs and orders reset at the start of each new day
 - Unfinished assigned orders incur penalties based on incomplete progress at day's end
-- Employee of the Month crowned every 30 days with performance bonuses and Hall of Fame entry
+- Employee of the Day crowned every in-game day with performance bonuses and Hall of Fame entry
 - Weekly challenges with bonus rewards for completion
 - Tips system based on order completion speed (15% bonus for fast service)
 - Game over occurs when revenue reaches $0 or below
@@ -53,6 +54,17 @@ Balance quick order fulfillment, staff workload, inventory management, and custo
 **Display**: Optimized for 1920x1080 screens with no scrolling
 
 ## Updates
+
+### v3.1.0 - Gameplay & QOL Improvements
+**Major Features:**
+- **Enhanced toast notification system** - Colorful toast notifications for all important game events (success, warning, error, info, achievement) with smooth animations
+- **2x faster order completion** - Order progress multiplier increased from 1.5x to 3.0x for better pacing with 4 staff members
+- **Centralized mobile tooltips** - All tooltips now appear in a single centered location at the bottom of the screen on mobile devices for better readability
+- **Smart priority order logic** - Staff already working on priority orders won't be reassigned to another priority order
+- **Employee of the Day** - Employee recognition now updates daily instead of every 30 days for faster-paced progression
+- **Dynamic starting staff** - Always start with 4 randomly-generated staff members instead of hardcoded preset team for unique gameplay every time
+
+///
 
 ### v3.0.0 - Employee of the Month
 **Major Feature:** Employee of the Month system - Transform staff management into a competitive, rewarding experience! Track staff performance through dynamic leaderboards that update in real-time. Top performers earn unique titles (Tip Master, Speed Demon, Order Champion, Reliable Star) and a +20% efficiency bonus for the month. Weekly challenges (fastest order, highest tips, most orders, perfectionist streak, team player) add variety and bonus points. Staff now earn tips based on speed (15% bonus for completing orders in under 75% of expected time). Winners are immortalized in the Hall of Fame with their achievements preserved forever. Every 30 in-game days brings a new month, new challenges, and a new champion!

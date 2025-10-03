@@ -46,7 +46,7 @@ class RestaurantGame {
         this.weeklyChallenge = null; // Current weekly challenge
         this.challengeProgress = {}; // Track challenge progress per staff
         this.monthStartDay = 1; // Track which day the current month started
-        this.monthDuration = 30; // A month is 30 in-game days
+        this.monthDuration = 1; // A month is 1 in-game day (Employee of the Day)
         
         // Initialize Audio Context for sound effects
         this.audioContext = null;
@@ -200,44 +200,11 @@ class RestaurantGame {
     }
     
     initializeStaff() {
-        const staffMembers = [
-            { name: 'Chef Mario', role: 'Head Chef', speciality: 'Italian' },
-            { name: 'Chef Lisa', role: 'Sous Chef', speciality: 'Asian' },
-            { name: 'Cook Tom', role: 'Line Cook', speciality: 'Grill' },
-            { name: 'Cook Sarah', role: 'Line Cook', speciality: 'Prep' }
-        ];
-        
-        staffMembers.forEach(member => {
-            const randomEfficiency = 0.6 + Math.random() * 0.3; // Random efficiency between 0.6 and 0.9
-            this.staff.push({
-                id: this.nextStaffId++,
-                name: member.name,
-                role: member.role,
-                efficiency: randomEfficiency,
-                baseEfficiency: randomEfficiency, // Store base efficiency
-                speciality: member.speciality,
-                status: 'available',
-                ordersCompleted: 0,
-                currentOrder: null,
-                performance: 100,
-                upgradeLevel: 0, // Track upgrade level
-                maxUpgradeLevel: 3, // Maximum upgrade level
-                fatigue: 0, // Fatigue level (0-100)
-                morale: 100, // Morale level (0-100)
-                lastRestTime: 0, // Track when staff last rested
-                orderHistory: [], // Track last 5 orders
-                // Employee of the Month metrics
-                monthlyScore: 0, // Overall performance score for the month
-                monthlyOrders: 0, // Orders completed this month
-                monthlyRevenue: 0, // Revenue generated this month
-                monthlyTips: 0, // Tips earned this month (from fast service)
-                fastestOrder: null, // Fastest order time this month
-                isEmployeeOfMonth: false, // Current Employee of the Month flag
-                employeeOfMonthTitle: '', // Title earned (e.g., "Speed Demon", "Reliable Star")
-                employeeOfMonthBonus: 0, // Skill bonus percentage (0-20%)
-                hallOfFameCount: 0 // Number of times won Employee of the Month
-            });
-        });
+        // Generate 4 random staff members instead of hardcoded ones
+        for (let i = 0; i < 4; i++) {
+            const randomStaff = this.generateRandomStaff();
+            this.staff.push(randomStaff);
+        }
     }
     
     generateRandomStaff() {
@@ -435,6 +402,12 @@ class RestaurantGame {
         equipment.level++;
         
         this.addFeedback(`${equipType.icon} ${equipType.name} upgraded to Level ${equipment.level}!`, true);
+        this.showToast({
+            icon: equipType.icon,
+            title: 'Equipment Upgraded!',
+            message: `${equipType.name} → Level ${equipment.level}`,
+            type: 'success'
+        });
         this.checkAchievements();
         this.triggerHaptic('medium');
         this.render();
@@ -529,34 +502,47 @@ class RestaurantGame {
     }
     
     showAchievementToast(achievement) {
+        // Use generic toast system with achievement styling
+        this.showToast({
+            icon: achievement.icon,
+            title: achievement.name,
+            message: achievement.description,
+            type: 'achievement'
+        });
+    }
+    
+    showToast({ icon = '💬', title = '', message = '', type = 'info', duration = 4000 }) {
         // Create toast element if it doesn't exist
-        let toast = document.getElementById('achievement-toast');
+        let toast = document.getElementById('game-toast');
         if (!toast) {
             toast = document.createElement('div');
-            toast.id = 'achievement-toast';
-            toast.className = 'achievement-toast';
+            toast.id = 'game-toast';
+            toast.className = 'game-toast';
             toast.innerHTML = `
-                <div class="achievement-toast-icon"></div>
-                <div class="achievement-toast-content">
-                    <div class="achievement-toast-title"></div>
-                    <div class="achievement-toast-description"></div>
+                <div class="toast-icon"></div>
+                <div class="toast-content">
+                    <div class="toast-title"></div>
+                    <div class="toast-message"></div>
                 </div>
             `;
             document.body.appendChild(toast);
         }
         
+        // Set toast type for color styling
+        toast.className = 'game-toast toast-' + type;
+        
         // Update content
-        toast.querySelector('.achievement-toast-icon').textContent = achievement.icon;
-        toast.querySelector('.achievement-toast-title').textContent = achievement.name;
-        toast.querySelector('.achievement-toast-description').textContent = achievement.description;
+        toast.querySelector('.toast-icon').textContent = icon;
+        toast.querySelector('.toast-title').textContent = title;
+        toast.querySelector('.toast-message').textContent = message;
         
         // Show toast
         setTimeout(() => toast.classList.add('show'), 100);
         
-        // Hide after 4 seconds
+        // Hide after duration
         setTimeout(() => {
             toast.classList.remove('show');
-        }, 4000);
+        }, duration);
     }
     
     initializeEmployeeOfMonth() {
@@ -698,6 +684,11 @@ class RestaurantGame {
     }
     
     updateMonthlyLeaderboard() {
+        // Calculate scores for all staff before sorting
+        this.staff.forEach(staff => {
+            this.calculateMonthlyScore(staff);
+        });
+        
         // Sort staff by monthly score
         this.monthlyLeaderboard = [...this.staff].sort((a, b) => b.monthlyScore - a.monthlyScore);
     }
@@ -752,8 +743,15 @@ class RestaurantGame {
             
             this.currentMonthWinner = winner;
             
-            // Show announcement
+            // Show announcement with toast
             this.addFeedback(`🏆 Employee of the Month: ${winner.name} - ${winner.employeeOfMonthTitle}!`, true);
+            this.showToast({
+                icon: '🏆',
+                title: 'Employee of the Month!',
+                message: `${winner.name} - ${winner.employeeOfMonthTitle}`,
+                type: 'achievement',
+                duration: 5000
+            });
             this.playSuccessSound();
         }
         
@@ -803,6 +801,12 @@ class RestaurantGame {
         };
         
         this.addFeedback(`✅ Hired ${newStaff.name} (${newStaff.role}) - Efficiency: ${(newStaff.efficiency * 100).toFixed(0)}%`, true);
+        this.showToast({
+            icon: '👨‍🍳',
+            title: 'New Staff Hired!',
+            message: `${newStaff.name} - ${newStaff.role}`,
+            type: 'success'
+        });
         this.checkAchievements();
         this.triggerHaptic('medium');
         this.render();
@@ -1200,6 +1204,12 @@ class RestaurantGame {
         
         if (isVIP) {
             this.addFeedback('⭐ VIP Customer arrived! High reward, strict deadline!', true);
+            this.showToast({
+                icon: '⭐',
+                title: 'VIP Customer!',
+                message: 'High reward, strict deadline!',
+                type: 'warning'
+            });
         }
         
         this.render();
@@ -1225,10 +1235,15 @@ class RestaurantGame {
         if (availableStaff.length === 0) {
             // If this is a priority order and no staff available, reassign from current work
             if (order.isPriority) {
-                // Find busy staff with the highest morale
-                const busyStaff = this.staff.filter(s => s.status === 'busy');
+                // Find busy staff NOT already working on priority orders
+                const busyStaff = this.staff.filter(s => {
+                    if (s.status !== 'busy') return false;
+                    const currentOrder = this.orders.find(o => o.id === s.currentOrder);
+                    return currentOrder && !currentOrder.isPriority;
+                });
+                
                 if (busyStaff.length === 0) {
-                    this.addFeedback('⚠️ No available staff to assign order!', false);
+                    this.addFeedback('⚠️ No available staff to assign priority order! All staff busy with other priorities.', false);
                     return;
                 }
                 
@@ -1334,7 +1349,9 @@ class RestaurantGame {
                     const effectiveEfficiency = this.applyEmployeeOfMonthBonus(staff);
                     
                     // Progress based on staff efficiency with specialty bonus and Employee of Month bonus
-                    order.progress += effectiveEfficiency * 1.5 * efficiencyBonus;
+                    // Staff efficiency (0.6-0.9) provides the base speed modifier
+                    // Specialty bonus (1.15x) and Employee of Month bonus (1.2x) further enhance speed
+                    order.progress += effectiveEfficiency * 2.0 * efficiencyBonus;
                     
                     if (order.progress >= 100) {
                         this.completeOrder(order.id, true);
@@ -2716,17 +2733,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 if ('ontouchstart' in window) {
                     e.stopPropagation();
                     
-                    // Toggle tap-active class
-                    const wasActive = container.classList.contains('tap-active');
+                    const mobileTooltip = document.getElementById('mobile-tooltip');
+                    const mobileTooltipContent = mobileTooltip.querySelector('.mobile-tooltip-content');
                     
-                    // Remove active from all others
-                    document.querySelectorAll('.tap-active').forEach(el => {
-                        el.classList.remove('tap-active');
-                    });
+                    // Get tooltip content
+                    let tooltipElement = container.querySelector('.card-tooltip .tooltip-content, .stat-tooltip .tooltip-content');
                     
-                    // Toggle current
-                    if (!wasActive) {
-                        container.classList.add('tap-active');
+                    if (tooltipElement && mobileTooltip.classList.contains('active') && 
+                        mobileTooltipContent.innerHTML === tooltipElement.innerHTML) {
+                        // If clicking the same element, hide tooltip
+                        mobileTooltip.classList.remove('active');
+                    } else if (tooltipElement) {
+                        // Show tooltip with content
+                        mobileTooltipContent.innerHTML = tooltipElement.innerHTML;
+                        mobileTooltip.classList.add('active');
                     }
                 }
             });
@@ -2736,10 +2756,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // Close tooltips when clicking outside
     document.addEventListener('click', (e) => {
         if ('ontouchstart' in window) {
-            if (!e.target.closest('.tooltip-container') && !e.target.closest('.stat-tooltip-container')) {
-                document.querySelectorAll('.tap-active').forEach(el => {
-                    el.classList.remove('tap-active');
-                });
+            if (!e.target.closest('.tooltip-container') && 
+                !e.target.closest('.stat-tooltip-container') &&
+                !e.target.closest('.mobile-tooltip')) {
+                const mobileTooltip = document.getElementById('mobile-tooltip');
+                mobileTooltip.classList.remove('active');
             }
         }
     });
