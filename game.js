@@ -23,6 +23,9 @@ class RestaurantGame {
         this.dayStartRevenue = 200; // Track revenue at day start
         this.dayStartHappyCustomers = 0; // Track happy customers at day start
         this.dayStartUnhappyCustomers = 0; // Track unhappy customers at day start
+        this.dayStartOrdersCompleted = 0; // Track orders completed at day start
+        this.dayStartVipCustomers = 0; // Track VIP customers at day start
+        this.dayStartStaffLevels = 0; // Track total staff levels at day start
         this.isGameOver = false; // Track game over state
         this.vipCustomers = 0; // Track VIP customers served
         this.maxActiveOrders = 8; // Maximum active orders at once
@@ -887,6 +890,9 @@ class RestaurantGame {
         this.dayStartRevenue = 200;
         this.dayStartHappyCustomers = 0;
         this.dayStartUnhappyCustomers = 0;
+        this.dayStartOrdersCompleted = 0;
+        this.dayStartVipCustomers = 0;
+        this.dayStartStaffLevels = 0;
         this.vipCustomers = 0;
         this.totalOrdersCompleted = 0;
         this.achievements = [];
@@ -930,6 +936,28 @@ class RestaurantGame {
         const unhappyToday = this.unhappyCustomers - this.dayStartUnhappyCustomers;
         const successRate = customersServed > 0 ? ((happyToday / customersServed) * 100).toFixed(1) : '100.0';
         
+        // Calculate penalties for unfinished orders
+        let penaltyAmount = 0;
+        const unfinishedAssignedOrders = this.orders.filter(o => 
+            (o.status === 'in-progress' || o.status === 'paused') && o.assignedStaff !== null
+        );
+        
+        if (unfinishedAssignedOrders.length > 0) {
+            unfinishedAssignedOrders.forEach(order => {
+                const timeElapsed = order.timeLimit - order.timeRemaining;
+                const completionPercent = timeElapsed / order.timeLimit;
+                const incompletePercent = 1 - completionPercent;
+                const penalty = Math.floor(order.totalPrice * incompletePercent);
+                penaltyAmount += penalty;
+            });
+        }
+        
+        // Calculate additional stats
+        const ordersCompletedToday = this.totalOrdersCompleted - (this.dayStartOrdersCompleted || 0);
+        const vipServedToday = this.vipCustomers - (this.dayStartVipCustomers || 0);
+        const staffUpgradesToday = this.staff.reduce((sum, s) => sum + s.level, 0) - (this.dayStartStaffLevels || 0);
+        const isPerfectDay = this.customerSatisfaction === 100 && unhappyToday === 0;
+        
         // End of day bonus
         const bonus = Math.floor(this.revenue * 0.1);
         
@@ -939,11 +967,27 @@ class RestaurantGame {
         document.getElementById('next-day-number').textContent = this.day + 1;
         document.getElementById('summary-revenue-earned').textContent = `$${revenueEarned}`;
         document.getElementById('summary-bonus').textContent = `$${bonus}`;
-        document.getElementById('summary-total-revenue').textContent = `$${this.revenue + bonus}`;
+        document.getElementById('summary-total-revenue').textContent = `$${this.revenue + bonus - penaltyAmount}`;
         document.getElementById('summary-customers-served').textContent = customersServed;
         document.getElementById('summary-happy-customers').textContent = happyToday;
         document.getElementById('summary-unhappy-customers').textContent = unhappyToday;
         document.getElementById('summary-success-rate').textContent = `${successRate}%`;
+        
+        // Show penalties if any
+        const penaltiesItem = document.getElementById('summary-penalties-item');
+        if (penaltyAmount > 0) {
+            penaltiesItem.style.display = 'flex';
+            document.getElementById('summary-penalties').textContent = `-$${penaltyAmount}`;
+        } else {
+            penaltiesItem.style.display = 'none';
+        }
+        
+        // Additional stats
+        document.getElementById('summary-orders-completed').textContent = ordersCompletedToday;
+        document.getElementById('summary-vip-served').textContent = vipServedToday;
+        document.getElementById('summary-staff-upgrades').textContent = staffUpgradesToday;
+        document.getElementById('summary-perfect-day').textContent = isPerfectDay ? '✅ Yes' : 'No';
+        document.getElementById('summary-perfect-day').className = isPerfectDay ? 'summary-value success' : 'summary-value';
         
         modal.classList.add('modal-active');
     }
@@ -1045,6 +1089,9 @@ class RestaurantGame {
         this.dayStartRevenue = this.revenue;
         this.dayStartHappyCustomers = this.happyCustomers;
         this.dayStartUnhappyCustomers = this.unhappyCustomers;
+        this.dayStartOrdersCompleted = this.totalOrdersCompleted;
+        this.dayStartVipCustomers = this.vipCustomers;
+        this.dayStartStaffLevels = this.staff.reduce((sum, s) => sum + s.level, 0);
         
         // Increase difficulty gradually (keep for backward compatibility)
         this.orderGenerationChance = Math.min(0.8, 0.4 + (this.day - 1) * 0.05);
