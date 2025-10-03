@@ -263,9 +263,9 @@ class RestaurantGame {
         // Assign 2 random permanent traits
         const traits = this.getRandomTraits(2);
         
-        // Calculate base performance from traits
-        const traitsModifier = traits.reduce((acc, trait) => acc * trait.modifier, 1.0);
-        const basePerformance = Math.round(100 * traitsModifier);
+        // Calculate base performance from traits (additive, not multiplicative)
+        const traitsModifier = traits.reduce((acc, trait) => acc + trait.modifier, 0);
+        const basePerformance = 100 + traitsModifier; // Start at 100, add trait bonuses
 
         return {
             id: this.nextStaffId++,
@@ -317,7 +317,7 @@ class RestaurantGame {
         return shuffled.slice(0, count);
     }
     
-    getRandomMood() {
+    getRandomMood(currentMood = null, staff = null) {
         const moods = Array.isArray(this.moodsData) && this.moodsData.length ? this.moodsData : [
             { name: 'Happy', emoji: '😊', performanceModifier: 1.15, description: '+15% performance' },
             { name: 'Focused', emoji: '😎', performanceModifier: 1.10, description: '+10% performance' },
@@ -326,7 +326,35 @@ class RestaurantGame {
             { name: 'Stressed', emoji: '😰', performanceModifier: 0.85, description: '-15% performance' },
             { name: 'Energized', emoji: '🤩', performanceModifier: 1.20, description: '+20% performance' }
         ];
-        return moods[Math.floor(Math.random() * moods.length)];
+        
+        // Filter out logically inconsistent moods based on staff state
+        let availableMoods = [...moods];
+        if (staff) {
+            // Don't allow "Tired" mood if fatigue is low (< 40)
+            if (staff.fatigue < 40) {
+                availableMoods = availableMoods.filter(m => m.name !== 'Tired');
+            }
+            // Don't allow "Energized" mood if fatigue is very high (> 70)
+            if (staff.fatigue > 70) {
+                availableMoods = availableMoods.filter(m => m.name !== 'Energized');
+            }
+            // Don't allow "Stressed" mood if morale is high (> 80) and fatigue is low (< 30)
+            if (staff.morale > 80 && staff.fatigue < 30) {
+                availableMoods = availableMoods.filter(m => m.name !== 'Stressed');
+            }
+        }
+        
+        // Filter out current mood to ensure mood always changes
+        if (currentMood) {
+            availableMoods = availableMoods.filter(m => m.name !== currentMood.name);
+        }
+        
+        // If filtering resulted in no moods, use all moods except current
+        if (availableMoods.length === 0) {
+            availableMoods = currentMood ? moods.filter(m => m.name !== currentMood.name) : moods;
+        }
+        
+        return availableMoods[Math.floor(Math.random() * availableMoods.length)];
     }
     
     applyMoraleFactor(staff, factorId, eventData = {}) {
@@ -681,17 +709,35 @@ class RestaurantGame {
             return true;
         });
         
-        // Show new toasts if there's room
+        // Show new toasts if there's room, with slight delays between them
         while (this.toastQueue.length > 0 && this.activeToasts.length < this.maxVisibleToasts) {
             const toastData = this.toastQueue.shift();
-            this.displayToast(toastData);
+            // Add a small delay (200ms) between each toast for smoother stacking
+            const delay = this.activeToasts.length * 200;
+            setTimeout(() => this.displayToast(toastData), delay);
         }
     }
     
     displayToast({ icon, title, message, type, duration }) {
+        // Determine color variant based on title for variety within same category
+        let colorVariant = '';
+        if (type === 'info') {
+            if (title.includes('Mood')) {
+                colorVariant = 'mood';
+            } else if (title.includes('Resting')) {
+                colorVariant = 'rest';
+            }
+        } else if (type === 'success') {
+            if (title.includes('VIP')) {
+                colorVariant = 'vip';
+            } else if (title.includes('Tip')) {
+                colorVariant = 'tip';
+            }
+        }
+        
         // Create new toast element
         const toast = document.createElement('div');
-        toast.className = 'game-toast toast-' + type;
+        toast.className = `game-toast toast-${type}${colorVariant ? ' toast-' + type + '-' + colorVariant : ''}`;
         toast.innerHTML = `
             <div class="toast-icon">${icon}</div>
             <div class="toast-content">
@@ -916,16 +962,31 @@ class RestaurantGame {
                 winner.employeeOfMonthTitle = 'Reliable Star';
             }
             
-            // Add to Hall of Fame
-            this.hallOfFame.push({
-                name: winner.name,
-                month: Math.floor(this.day / this.monthDuration),
-                score: winner.monthlyScore,
-                title: winner.employeeOfMonthTitle,
-                orders: winner.monthlyOrders,
-                revenue: winner.monthlyRevenue,
-                tips: winner.monthlyTips
-            });
+            // Add to Hall of Fame or update existing entry
+            const existingEntry = this.hallOfFame.find(entry => entry.name === winner.name);
+            if (existingEntry) {
+                // Update existing entry
+                existingEntry.prestige++;
+                existingEntry.lastWinDay = this.day;
+                existingEntry.score = winner.monthlyScore;
+                existingEntry.title = winner.employeeOfMonthTitle;
+                existingEntry.orders = winner.monthlyOrders;
+                existingEntry.revenue = winner.monthlyRevenue;
+                existingEntry.tips = winner.monthlyTips;
+            } else {
+                // Create new entry
+                this.hallOfFame.push({
+                    name: winner.name,
+                    prestige: 1,
+                    lastWinDay: this.day,
+                    month: Math.floor(this.day / this.monthDuration),
+                    score: winner.monthlyScore,
+                    title: winner.employeeOfMonthTitle,
+                    orders: winner.monthlyOrders,
+                    revenue: winner.monthlyRevenue,
+                    tips: winner.monthlyTips
+                });
+            }
             
             this.currentMonthWinner = winner;
             
@@ -1628,6 +1689,10 @@ class RestaurantGame {
             }
         }
         
+        // Calculate food cost (15% of order price) and deduct from revenue as expense
+        const foodCost = Math.floor(order.totalPrice * 0.15);
+        this.revenue -= foodCost;
+        
         // Show toast notification for ingredients used
         if (Object.keys(ingredientsUsed).length > 0) {
             const ingredientsList = Object.entries(ingredientsUsed)
@@ -1636,7 +1701,7 @@ class RestaurantGame {
             this.showToast({
                 icon: '📦',
                 title: 'Ingredients Used',
-                message: ingredientsList,
+                message: `${ingredientsList} (Cost: $${foodCost})`,
                 type: 'info',
                 duration: 3000
             });
@@ -1895,14 +1960,14 @@ class RestaurantGame {
             // Initialize traits if not present (backward compatibility)
             if (!staff.traits || staff.traits.length === 0) {
                 staff.traits = this.getRandomTraits(2);
-                // Recalculate base performance from traits
-                const traitsModifier = staff.traits.reduce((acc, trait) => acc * trait.modifier, 1.0);
-                staff.basePerformance = Math.round(100 * traitsModifier);
+                // Recalculate base performance from traits (additive)
+                const traitsModifier = staff.traits.reduce((acc, trait) => acc + trait.modifier, 0);
+                staff.basePerformance = 100 + traitsModifier;
             }
             
             // Update mood timer
             if (!staff.mood) {
-                staff.mood = this.getRandomMood();
+                staff.mood = this.getRandomMood(null, staff);
             }
             if (!staff.moodChangeTimer) {
                 staff.moodChangeTimer = 0;
@@ -1916,7 +1981,7 @@ class RestaurantGame {
             // Change mood periodically
             if (staff.moodChangeTimer >= staff.moodChangeDuration) {
                 const oldMood = staff.mood.name;
-                staff.mood = this.getRandomMood();
+                staff.mood = this.getRandomMood(staff.mood, staff);
                 staff.moodChangeTimer = 0;
                 staff.moodChangeDuration = 60 + Math.floor(Math.random() * 60); // Next mood change in 60-120 seconds
                 
@@ -2558,8 +2623,8 @@ class RestaurantGame {
         this.staff.forEach(staff => {
             // Build detailed tooltip with math breakdown
             const traitsModifier = staff.traits && staff.traits.length > 0 
-                ? staff.traits.reduce((acc, trait) => acc * trait.modifier, 1.0) 
-                : 1.0;
+                ? staff.traits.reduce((acc, trait) => acc + trait.modifier, 0) 
+                : 0;
             const basePerf = staff.basePerformance || 100;
             
             // Calculate efficiency breakdown
@@ -2570,9 +2635,9 @@ class RestaurantGame {
             
             const tooltipContent = `
 <strong>Performance Breakdown:</strong>
-Base: 100% × Traits
-${staff.traits && staff.traits.length > 0 ? staff.traits.map(t => `  × ${(t.modifier * 100).toFixed(0)}% (${t.name})`).join('\n') : ''}
-= ${basePerf.toFixed(0)}% Base Performance
+Base: 100
+${staff.traits && staff.traits.length > 0 ? staff.traits.map(t => `  ${t.modifier >= 0 ? '+' : ''}${t.modifier} (${t.name})`).join('\n') : ''}
+= ${basePerf} Base Performance
 
 <strong>Efficiency Calculation:</strong>
 Base Efficiency: ${(staff.baseEfficiency * 100).toFixed(0)}%
@@ -2589,7 +2654,6 @@ Fatigue: ${staff.fatigue.toFixed(0)}%
             
             const staffCard = document.createElement('div');
             staffCard.className = 'staff-card';
-            staffCard.title = tooltipContent;
             
             const upgradeCost = 100 + (staff.upgradeLevel * 50);
             const canUpgrade = staff.upgradeLevel < staff.maxUpgradeLevel;
@@ -2658,7 +2722,7 @@ Fatigue: ${staff.fatigue.toFixed(0)}%
             if (staff.traits && staff.traits.length > 0) {
                 traitsDisplay = `<div class="staff-traits">
                     ${staff.traits.map(trait => 
-                        `<span class="trait-badge ${trait.modifier >= 1 ? 'trait-positive' : 'trait-negative'}" title="${trait.description}">
+                        `<span class="trait-badge ${trait.modifier >= 0 ? 'trait-positive' : 'trait-negative'}" title="${trait.description}">
                             ${trait.emoji} ${trait.name}
                         </span>`
                     ).join('')}
@@ -2671,7 +2735,7 @@ Fatigue: ${staff.fatigue.toFixed(0)}%
                 </button>
                 <div class="staff-header">
                     <div>
-                        <div class="staff-name">${staff.name} ${eotmBadge} ${upgradeStars} ${efficiencyBadge}</div>
+                        <div class="staff-name" title="${tooltipContent}">${staff.name} ${eotmBadge} ${upgradeStars} ${efficiencyBadge}</div>
                         <div class="staff-role">${staff.role} ${canUpgrade ? `(Level ${staff.upgradeLevel}/${staff.maxUpgradeLevel})` : '(MAX)'}</div>
                         ${staff.isEmployeeOfMonth ? `<div class="eotm-title">${staff.employeeOfMonthTitle} (+${staff.employeeOfMonthBonus}% bonus)</div>` : ''}
                         ${traitsDisplay}
@@ -3313,22 +3377,31 @@ Fatigue: ${staff.fatigue.toFixed(0)}%
         hofContainer.innerHTML = '';
         
         if (this.hallOfFame.length === 0) {
-            hofContainer.innerHTML = '<div class="empty-state">No winners yet. Complete 30 days to see the first Employee of the Month!</div>';
+            hofContainer.innerHTML = '<div class="empty-state">No winners yet. Complete your first day to see the first Staff of the Day!</div>';
             return;
         }
         
-        // Show most recent winners first
-        const recentWinners = [...this.hallOfFame].reverse().slice(0, 5);
+        // Sort by prestige, then by last win day
+        const sortedWinners = [...this.hallOfFame].sort((a, b) => {
+            if (b.prestige !== a.prestige) {
+                return b.prestige - a.prestige;
+            }
+            return b.lastWinDay - a.lastWinDay;
+        });
         
-        recentWinners.forEach(winner => {
+        // Show top 5 winners
+        const topWinners = sortedWinners.slice(0, 5);
+        
+        topWinners.forEach(winner => {
             const hofCard = document.createElement('div');
             hofCard.className = 'hall-of-fame-card';
             
             hofCard.innerHTML = `
                 <div class="hof-header">
                     <span class="hof-icon">🌟</span>
-                    <span class="hof-month">Month ${winner.month}</span>
+                    <span class="hof-month">Day ${winner.lastWinDay}</span>
                 </div>
+                ${winner.prestige > 1 ? `<div class="hof-prestige">🏆 Prestige: ${winner.prestige}x Champion</div>` : ''}
                 <div class="hof-name">${winner.name}</div>
                 <div class="hof-title">${winner.title}</div>
                 <div class="hof-stats">
