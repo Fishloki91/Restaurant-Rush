@@ -118,6 +118,19 @@
                     </div>
                     <button class="view-details-btn" data-view="equipment">View Details →</button>
                 </div>
+
+                <!-- Achievements Overview Card -->
+                <div class="overview-card" id="achievements-overview-card">
+                    <div class="card-icon">🏆</div>
+                    <div class="card-content">
+                        <h3>Achievements</h3>
+                        <div class="card-stats">
+                            <span id="overview-achievements-count" class="big-stat">0</span>
+                            <span class="stat-sublabel">Unlocked</span>
+                        </div>
+                    </div>
+                    <button class="view-details-btn" data-view="achievements">View Details →</button>
+                </div>
             </div>
         </div>
 
@@ -212,6 +225,18 @@
             </div>
             <div id="equipment-container" class="equipment-container">
                 <!-- Equipment will be dynamically added here -->
+            </div>
+        </div>
+
+        <!-- Achievements View -->
+        <div id="achievements-view" class="dashboard-content detail-view">
+            <div class="detail-view-header">
+                <button class="back-btn" data-back="overview">← Back to Overview</button>
+                <h2>🏆 Achievements</h2>
+                <span id="achievements-badge" class="badge" style="background: #D89E54;">0 / 19 Unlocked</span>
+            </div>
+            <div id="achievements-container" class="achievements-container">
+                <!-- Achievements will be dynamically added here -->
             </div>
         </div>
 
