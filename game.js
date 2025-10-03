@@ -146,7 +146,8 @@ class RestaurantGame {
                 maxUpgradeLevel: 3, // Maximum upgrade level
                 fatigue: 0, // Fatigue level (0-100)
                 morale: 100, // Morale level (0-100)
-                lastRestTime: 0 // Track when staff last rested
+                lastRestTime: 0, // Track when staff last rested
+                orderHistory: [] // Track last 5 orders
             });
         });
     }
