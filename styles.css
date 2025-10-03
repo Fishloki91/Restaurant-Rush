@@ -2026,12 +2026,11 @@ body {
     font-weight: bold;
 }
 
-/* Achievement Toast Notification */
-.achievement-toast {
+/* Toast Notification System */
+.game-toast {
     position: fixed;
     top: 80px;
     right: 20px;
-    background: linear-gradient(135deg, #FFD700, #FFA500);
     color: #333;
     padding: 16px 20px;
     border-radius: 12px;
@@ -2048,35 +2047,59 @@ body {
     pointer-events: none;
 }
 
-.achievement-toast.show {
+.game-toast.show {
     opacity: 1;
     transform: translateX(0);
     pointer-events: auto;
 }
 
-.achievement-toast-icon {
+/* Toast type colors */
+.game-toast.toast-achievement {
+    background: linear-gradient(135deg, #FFD700, #FFA500);
+}
+
+.game-toast.toast-success {
+    background: linear-gradient(135deg, #4CAF50, #45a049);
+    color: white;
+}
+
+.game-toast.toast-warning {
+    background: linear-gradient(135deg, #FF9800, #F57C00);
+    color: white;
+}
+
+.game-toast.toast-error {
+    background: linear-gradient(135deg, #f44336, #d32f2f);
+    color: white;
+}
+
+.game-toast.toast-info {
+    background: linear-gradient(135deg, #2196F3, #1976D2);
+    color: white;
+}
+
+.toast-icon {
     font-size: 2rem;
     line-height: 1;
 }
 
-.achievement-toast-content {
+.toast-content {
     flex: 1;
 }
 
-.achievement-toast-title {
+.toast-title {
     font-weight: bold;
     font-size: 1rem;
     margin-bottom: 4px;
-    color: #333;
 }
 
-.achievement-toast-description {
+.toast-message {
     font-size: 0.85rem;
-    color: #555;
+    opacity: 0.9;
 }
 
 @media (max-width: 600px) {
-    .achievement-toast {
+    .game-toast {
         top: 60px;
         right: 10px;
         left: 10px;
@@ -2087,16 +2110,53 @@ body {
 
 /* Mobile Tooltip Tap Functionality */
 @media (hover: none) and (pointer: coarse) {
-    .tooltip-container.tap-active .card-tooltip,
-    .stat-tooltip-container.tap-active .stat-tooltip {
-        opacity: 1;
-        bottom: -120px;
-        pointer-events: auto;
-    }
-    
+    /* Hide default tooltips on mobile */
     .tooltip-container .card-tooltip,
     .stat-tooltip-container .stat-tooltip {
+        display: none;
+    }
+    
+    /* Mobile Centralized Tooltip */
+    .mobile-tooltip {
+        position: fixed;
+        bottom: 80px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: white;
+        padding: 16px 20px;
+        border-radius: 12px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+        border: 2px solid #D4A574;
+        max-width: 90%;
+        width: 400px;
+        z-index: 9999;
+        opacity: 0;
+        pointer-events: none;
         transition: all 0.3s ease;
+        color: #333;
+        font-size: 0.95rem;
+        line-height: 1.6;
+    }
+    
+    .mobile-tooltip.active {
+        opacity: 1;
+        pointer-events: auto;
+        bottom: 100px;
+    }
+    
+    .mobile-tooltip-content {
+        text-align: center;
+    }
+    
+    .mobile-tooltip::before {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        border-left: 10px solid transparent;
+        border-right: 10px solid transparent;
+        border-top: 10px solid #D4A574;
     }
 }
 
