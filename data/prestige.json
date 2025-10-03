@@ -1,0 +1,79 @@
+{
+  "levels": [
+    {
+      "level": 1,
+      "name": "Culinary Novice",
+      "requirements": {
+        "totalRevenue": 5000,
+        "daysCompleted": 10
+      },
+      "bonuses": {
+        "startingRevenue": 50,
+        "startingStaff": 1,
+        "recipeDiscoveryRate": 0.1
+      }
+    },
+    {
+      "level": 2,
+      "name": "Rising Chef",
+      "requirements": {
+        "totalRevenue": 15000,
+        "daysCompleted": 25
+      },
+      "bonuses": {
+        "startingRevenue": 100,
+        "startingStaff": 1,
+        "recipeDiscoveryRate": 0.15,
+        "staffEfficiencyBonus": 0.05
+      }
+    },
+    {
+      "level": 3,
+      "name": "Master Chef",
+      "requirements": {
+        "totalRevenue": 40000,
+        "daysCompleted": 50
+      },
+      "bonuses": {
+        "startingRevenue": 200,
+        "startingStaff": 2,
+        "recipeDiscoveryRate": 0.2,
+        "staffEfficiencyBonus": 0.1,
+        "equipmentDiscount": 0.1
+      }
+    },
+    {
+      "level": 4,
+      "name": "Restaurant Tycoon",
+      "requirements": {
+        "totalRevenue": 100000,
+        "daysCompleted": 100
+      },
+      "bonuses": {
+        "startingRevenue": 300,
+        "startingStaff": 2,
+        "recipeDiscoveryRate": 0.25,
+        "staffEfficiencyBonus": 0.15,
+        "equipmentDiscount": 0.15,
+        "customerSatisfactionBonus": 5
+      }
+    },
+    {
+      "level": 5,
+      "name": "Culinary Legend",
+      "requirements": {
+        "totalRevenue": 250000,
+        "daysCompleted": 200
+      },
+      "bonuses": {
+        "startingRevenue": 500,
+        "startingStaff": 3,
+        "recipeDiscoveryRate": 0.3,
+        "staffEfficiencyBonus": 0.2,
+        "equipmentDiscount": 0.2,
+        "customerSatisfactionBonus": 10,
+        "unlockAllLocations": true
+      }
+    }
+  ]
+}

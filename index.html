@@ -63,9 +63,23 @@
                     </div>
                 </div>
                 <div class="stat stat-tooltip-container">
+                    <span class="stat-label">Season:</span>
+                    <span id="game-season" class="stat-value">🌸 Spring</span>
+                    <div class="stat-tooltip" id="season-tooltip">
+                        <div class="tooltip-content"></div>
+                    </div>
+                </div>
+                <div class="stat stat-tooltip-container">
                     <span class="stat-label">Revenue:</span>
                     <span id="revenue" class="stat-value">$0</span>
                     <div class="stat-tooltip" id="revenue-tooltip">
+                        <div class="tooltip-content"></div>
+                    </div>
+                </div>
+                <div class="stat stat-tooltip-container">
+                    <span class="stat-label">Reputation:</span>
+                    <span id="reputation" class="stat-value">⭐ 0</span>
+                    <div class="stat-tooltip" id="reputation-tooltip">
                         <div class="tooltip-content"></div>
                     </div>
                 </div>
@@ -87,6 +101,13 @@
                     <span class="stat-label">Staff:</span>
                     <span id="header-staff" class="stat-value">0/0</span>
                     <div class="stat-tooltip" id="staff-tooltip">
+                        <div class="tooltip-content"></div>
+                    </div>
+                </div>
+                <div class="stat stat-tooltip-container" style="display: none;" id="prestige-stat">
+                    <span class="stat-label">Prestige:</span>
+                    <span id="prestige-level" class="stat-value">👑 0</span>
+                    <div class="stat-tooltip" id="prestige-tooltip">
                         <div class="tooltip-content"></div>
                     </div>
                 </div>
@@ -271,6 +292,85 @@
                     <div style="display:none"></div>
                     <div 
                       data-tippy-content="<strong>Staff of the Day</strong><br>Track staff performance through daily leaderboards, challenges, and rewards. Top performers earn titles, bonuses, and a place in the Hall of Fame!"
+                      class="tippy-init"
+                    ></div>
+                </div>
+
+                <!-- NEW: Active Events Card -->
+                <div class="overview-card tooltip-container" id="events-overview-card">
+                    <div class="card-icon">🎪</div>
+                    <div class="card-content">
+                        <h3>Active Events</h3>
+                        <div class="card-stats-multi">
+                            <div class="stat-item">
+                                <span id="overview-events-count" class="stat-number">0</span>
+                                <span class="stat-label-small">Active</span>
+                            </div>
+                            <div class="stat-item">
+                                <span id="overview-events-type" class="stat-number event-type">None</span>
+                                <span class="stat-label-small">Type</span>
+                            </div>
+                        </div>
+                        <div id="overview-events-list" class="event-preview">
+                            No active events
+                        </div>
+                    </div>
+                    <div style="display:none"></div>
+                    <div 
+                      data-tippy-content="<strong>Dynamic Events</strong><br>Random events bring challenges and opportunities! Events can boost rewards, add difficulty, or unlock special features. Stay alert for new events each day!"
+                      class="tippy-init"
+                    ></div>
+                </div>
+
+                <!-- NEW: Recipe Mastery Card -->
+                <div class="overview-card tooltip-container" id="mastery-overview-card">
+                    <div class="card-icon">✨</div>
+                    <div class="card-content">
+                        <h3>Recipe Mastery</h3>
+                        <div class="card-stats-multi">
+                            <div class="stat-item">
+                                <span id="overview-mastery-expert" class="stat-number">0</span>
+                                <span class="stat-label-small">Expert+</span>
+                            </div>
+                            <div class="stat-item">
+                                <span id="overview-mastery-avg" class="stat-number">1.0</span>
+                                <span class="stat-label-small">Avg Level</span>
+                            </div>
+                        </div>
+                        <div id="overview-mastery-best" class="mastery-preview">
+                            Cook recipes to improve mastery!
+                        </div>
+                    </div>
+                    <div style="display:none"></div>
+                    <div 
+                      data-tippy-content="<strong>Recipe Mastery</strong><br>Recipes improve with practice! Higher mastery means faster cooking, better quality, and higher prices. Master recipes unlock variations!"
+                      class="tippy-init"
+                    ></div>
+                </div>
+
+                <!-- NEW: Prestige Progress Card (only shown if prestige > 0) -->
+                <div class="overview-card tooltip-container" id="prestige-overview-card" style="display: none;">
+                    <div class="card-icon">👑</div>
+                    <div class="card-content">
+                        <h3>Prestige Progress</h3>
+                        <div class="card-stats-multi">
+                            <div class="stat-item">
+                                <span id="overview-prestige-level" class="stat-number">0</span>
+                                <span class="stat-label-small">Level</span>
+                            </div>
+                            <div class="stat-item">
+                                <span id="overview-prestige-runs" class="stat-number">1</span>
+                                <span class="stat-label-small">Runs</span>
+                            </div>
+                            <div class="stat-item">
+                                <span id="overview-prestige-lifetime" class="stat-number">$0</span>
+                                <span class="stat-label-small">Lifetime</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="display:none"></div>
+                    <div 
+                      data-tippy-content="<strong>Prestige System</strong><br>Complete runs to earn prestige levels! Each level grants permanent bonuses that carry over to new runs. Build your culinary empire across multiple restaurant lifetimes!"
                       class="tippy-init"
                     ></div>
                 </div>

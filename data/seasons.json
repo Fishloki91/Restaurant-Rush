@@ -1,0 +1,74 @@
+{
+  "seasons": [
+    {
+      "id": "spring",
+      "name": "Spring Fresh",
+      "icon": "🌸",
+      "durationDays": 7,
+      "ingredientModifiers": {
+        "Vegetables": { "availability": 1.5, "cost": 0.8 },
+        "Berries": { "availability": 1.3, "cost": 0.9 },
+        "Mushrooms": { "availability": 1.2, "cost": 0.9 }
+      },
+      "customerPreferences": {
+        "Appetizer": 1.2,
+        "Salads": 1.3
+      },
+      "bonusEvents": ["farmers_market", "spring_festival"]
+    },
+    {
+      "id": "summer",
+      "name": "Summer Heat",
+      "icon": "☀️",
+      "durationDays": 7,
+      "ingredientModifiers": {
+        "Fish": { "availability": 1.4, "cost": 0.85 },
+        "Shrimp": { "availability": 1.3, "cost": 0.9 },
+        "Tomatoes": { "availability": 1.5, "cost": 0.7 },
+        "Avocado": { "availability": 1.2, "cost": 0.95 }
+      },
+      "customerPreferences": {
+        "Seafood": 1.4,
+        "Drinks": 1.5,
+        "Light": 1.2
+      },
+      "bonusEvents": ["beach_party", "grilling_contest"]
+    },
+    {
+      "id": "autumn",
+      "name": "Autumn Harvest",
+      "icon": "🍂",
+      "durationDays": 7,
+      "ingredientModifiers": {
+        "Chicken": { "availability": 1.3, "cost": 0.9 },
+        "Mushrooms": { "availability": 1.5, "cost": 0.8 },
+        "Pasta": { "availability": 1.2, "cost": 0.9 }
+      },
+      "customerPreferences": {
+        "Italian": 1.3,
+        "Comfort Food": 1.4,
+        "Grill": 1.2
+      },
+      "bonusEvents": ["harvest_festival", "thanksgiving_rush"]
+    },
+    {
+      "id": "winter",
+      "name": "Winter Comfort",
+      "icon": "❄️",
+      "durationDays": 7,
+      "ingredientModifiers": {
+        "Beef": { "availability": 1.3, "cost": 0.9 },
+        "Cheese": { "availability": 1.2, "cost": 0.95 },
+        "Cream": { "availability": 1.2, "cost": 0.95 },
+        "Chocolate": { "availability": 1.4, "cost": 0.85 }
+      },
+      "customerPreferences": {
+        "Grill": 1.4,
+        "French": 1.3,
+        "Dessert": 1.5,
+        "Hot Drinks": 1.6
+      },
+      "bonusEvents": ["holiday_rush", "new_year_celebration"]
+    }
+  ]
+}

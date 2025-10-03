@@ -1,0 +1,53 @@
+{
+  "reputation": {
+    "name": "Reputation",
+    "icon": "⭐",
+    "description": "Your restaurant's fame and standing in the community",
+    "tiers": [
+      { "level": 1, "name": "Unknown", "threshold": 0, "icon": "📍" },
+      { "level": 2, "name": "Local Favorite", "threshold": 200, "icon": "🏪", "benefits": ["Unlock customer reviews", "+5% tips"] },
+      { "level": 3, "name": "Well Known", "threshold": 500, "icon": "⭐", "benefits": ["Unlock VIP customers", "+10% order frequency"] },
+      { "level": 4, "name": "Acclaimed", "threshold": 1000, "icon": "🌟", "benefits": ["Unlock food critics", "+15% prices", "Upscale location"] },
+      { "level": 5, "name": "Renowned", "threshold": 2000, "icon": "✨", "benefits": ["Unlock competitions", "+20% tips", "All locations"] },
+      { "level": 6, "name": "Legendary", "threshold": 4000, "icon": "👑", "benefits": ["Celebrity customers", "+30% prices", "Special recipes"] }
+    ]
+  },
+  "loyalty": {
+    "name": "Staff Loyalty",
+    "icon": "❤️",
+    "description": "How devoted your staff are to the restaurant",
+    "gainSources": [
+      { "action": "upgrade_staff", "amount": 10 },
+      { "action": "bonus_pay", "amount": 15 },
+      { "action": "perfect_day", "amount": 5 },
+      { "action": "win_competition", "amount": 20 },
+      { "action": "good_morale", "amount": 2, "perDay": true }
+    ],
+    "lossSources": [
+      { "action": "overwork", "amount": -5 },
+      { "action": "low_morale", "amount": -10 },
+      { "action": "failed_orders", "amount": -3 },
+      { "action": "no_pay_raise", "amount": -8, "threshold": 30 }
+    ],
+    "benefits": [
+      { "threshold": 50, "effect": "Reduced quit chance", "value": 0.5 },
+      { "threshold": 100, "effect": "Can train new staff", "value": true },
+      { "threshold": 200, "effect": "+10% efficiency", "value": 0.10 },
+      { "threshold": 300, "effect": "Unlock mentor system", "value": true },
+      { "threshold": 500, "effect": "+20% efficiency, guaranteed stay", "value": 0.20 }
+    ]
+  },
+  "satisfaction": {
+    "name": "Customer Satisfaction",
+    "icon": "😊",
+    "description": "Overall happiness of your customers",
+    "effects": [
+      { "range": [0, 20], "effect": "Losing customers fast", "orderFrequency": 0.3, "tipRate": 0 },
+      { "range": [21, 40], "effect": "Customers leaving", "orderFrequency": 0.5, "tipRate": 0.05 },
+      { "range": [41, 60], "effect": "Mixed reviews", "orderFrequency": 0.8, "tipRate": 0.10 },
+      { "range": [61, 80], "effect": "Satisfied customers", "orderFrequency": 1.0, "tipRate": 0.15 },
+      { "range": [81, 95], "effect": "Happy customers", "orderFrequency": 1.2, "tipRate": 0.20 },
+      { "range": [96, 100], "effect": "Delighted customers", "orderFrequency": 1.5, "tipRate": 0.30 }
+    ]
+  }
+}

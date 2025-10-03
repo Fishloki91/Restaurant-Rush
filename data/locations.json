@@ -1,0 +1,106 @@
+{
+  "locations": [
+    {
+      "id": "downtown",
+      "name": "Downtown District",
+      "icon": "🏙️",
+      "unlockRequirements": {
+        "prestigeLevel": 0
+      },
+      "description": "Bustling city center with diverse clientele",
+      "modifiers": {
+        "orderFrequency": 1.0,
+        "priceMultiplier": 1.0,
+        "competitionLevel": 0.5
+      },
+      "customerTypes": {
+        "business": 0.4,
+        "tourist": 0.3,
+        "local": 0.3
+      }
+    },
+    {
+      "id": "upscale",
+      "name": "Upscale District",
+      "icon": "💎",
+      "unlockRequirements": {
+        "prestigeLevel": 2,
+        "reputation": 500
+      },
+      "description": "High-end neighborhood demanding quality",
+      "modifiers": {
+        "orderFrequency": 0.7,
+        "priceMultiplier": 1.8,
+        "competitionLevel": 0.8,
+        "qualityRequirement": 1.3
+      },
+      "customerTypes": {
+        "vip": 0.5,
+        "business": 0.3,
+        "foodie": 0.2
+      }
+    },
+    {
+      "id": "suburban",
+      "name": "Suburban Area",
+      "icon": "🏡",
+      "unlockRequirements": {
+        "prestigeLevel": 1,
+        "revenue": 5000
+      },
+      "description": "Family-friendly neighborhood with steady traffic",
+      "modifiers": {
+        "orderFrequency": 1.2,
+        "priceMultiplier": 0.9,
+        "competitionLevel": 0.3
+      },
+      "customerTypes": {
+        "family": 0.6,
+        "local": 0.4
+      }
+    },
+    {
+      "id": "waterfront",
+      "name": "Waterfront Marina",
+      "icon": "⛵",
+      "unlockRequirements": {
+        "prestigeLevel": 3,
+        "reputation": 800,
+        "specialtyRecipes": 5
+      },
+      "description": "Scenic location perfect for seafood specialties",
+      "modifiers": {
+        "orderFrequency": 0.9,
+        "priceMultiplier": 1.5,
+        "competitionLevel": 0.6,
+        "seafoodBonus": 1.4
+      },
+      "customerTypes": {
+        "tourist": 0.5,
+        "foodie": 0.3,
+        "local": 0.2
+      }
+    },
+    {
+      "id": "university",
+      "name": "University Campus",
+      "icon": "🎓",
+      "unlockRequirements": {
+        "prestigeLevel": 1,
+        "totalOrders": 200
+      },
+      "description": "High volume, budget-conscious students",
+      "modifiers": {
+        "orderFrequency": 1.5,
+        "priceMultiplier": 0.7,
+        "competitionLevel": 0.7,
+        "speedBonus": 1.2
+      },
+      "customerTypes": {
+        "student": 0.7,
+        "faculty": 0.2,
+        "local": 0.1
+      }
+    }
+  ]
+}

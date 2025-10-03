@@ -1,0 +1,174 @@
+{
+  "mastery": {
+    "description": "Recipes improve with practice - each completion increases mastery level",
+    "levels": [
+      {
+        "level": 1,
+        "name": "Novice",
+        "icon": "📝",
+        "completionsRequired": 0,
+        "bonuses": {
+          "cookingSpeed": 1.0,
+          "qualityBonus": 1.0,
+          "priceMultiplier": 1.0
+        }
+      },
+      {
+        "level": 2,
+        "name": "Familiar",
+        "icon": "📖",
+        "completionsRequired": 5,
+        "bonuses": {
+          "cookingSpeed": 0.95,
+          "qualityBonus": 1.05,
+          "priceMultiplier": 1.05
+        }
+      },
+      {
+        "level": 3,
+        "name": "Competent",
+        "icon": "⭐",
+        "completionsRequired": 15,
+        "bonuses": {
+          "cookingSpeed": 0.90,
+          "qualityBonus": 1.10,
+          "priceMultiplier": 1.10,
+          "tipBonus": 0.05
+        }
+      },
+      {
+        "level": 4,
+        "name": "Skilled",
+        "icon": "🌟",
+        "completionsRequired": 30,
+        "bonuses": {
+          "cookingSpeed": 0.85,
+          "qualityBonus": 1.20,
+          "priceMultiplier": 1.20,
+          "tipBonus": 0.10,
+          "ingredientEfficiency": 0.90
+        }
+      },
+      {
+        "level": 5,
+        "name": "Expert",
+        "icon": "✨",
+        "completionsRequired": 50,
+        "bonuses": {
+          "cookingSpeed": 0.80,
+          "qualityBonus": 1.30,
+          "priceMultiplier": 1.30,
+          "tipBonus": 0.20,
+          "ingredientEfficiency": 0.85,
+          "criticalSuccessChance": 0.10
+        }
+      },
+      {
+        "level": 6,
+        "name": "Master",
+        "icon": "👑",
+        "completionsRequired": 100,
+        "bonuses": {
+          "cookingSpeed": 0.70,
+          "qualityBonus": 1.50,
+          "priceMultiplier": 1.50,
+          "tipBonus": 0.30,
+          "ingredientEfficiency": 0.75,
+          "criticalSuccessChance": 0.20,
+          "unlockVariations": true
+        }
+      }
+    ]
+  },
+  "discovery": {
+    "description": "New recipes discovered through experimentation and special conditions",
+    "methods": [
+      {
+        "type": "experimentation",
+        "name": "Kitchen Experimentation",
+        "description": "Staff with high creativity can discover new recipes randomly",
+        "requirements": {
+          "staffCreativity": 70,
+          "baseChance": 0.05
+        }
+      },
+      {
+        "type": "ingredient_combination",
+        "name": "Ingredient Discovery",
+        "description": "Using specific ingredient combinations unlocks recipes",
+        "examples": [
+          {
+            "ingredients": ["Shrimp", "Avocado", "Rice"],
+            "unlocks": "California Roll",
+            "category": "Asian"
+          },
+          {
+            "ingredients": ["Beef", "Mushrooms", "Cream"],
+            "unlocks": "Beef Stroganoff",
+            "category": "French"
+          }
+        ]
+      },
+      {
+        "type": "customer_request",
+        "name": "Customer Request",
+        "description": "Regular customers sometimes request special dishes",
+        "requirements": {
+          "customerLoyalty": 3,
+          "reputation": 200
+        }
+      },
+      {
+        "type": "seasonal_special",
+        "name": "Seasonal Discovery",
+        "description": "Seasonal ingredients inspire new recipes",
+        "seasonBased": true
+      },
+      {
+        "type": "competition_reward",
+        "name": "Competition Prize",
+        "description": "Win cooking competitions to learn new recipes",
+        "eventRequired": "cooking_competition"
+      }
+    ]
+  },
+  "variations": {
+    "description": "Master-level recipes unlock variations with different properties",
+    "examples": [
+      {
+        "baseRecipe": "Beef Steak",
+        "variations": [
+          {
+            "name": "Peppercorn Crusted Steak",
+            "modifier": "Spicy kick",
+            "priceIncrease": 0.20,
+            "satisfactionBonus": 0.15
+          },
+          {
+            "name": "Herb Butter Steak",
+            "modifier": "Rich and savory",
+            "priceIncrease": 0.25,
+            "tipBonus": 0.20
+          }
+        ]
+      },
+      {
+        "baseRecipe": "Chicken Pasta",
+        "variations": [
+          {
+            "name": "Spicy Arrabbiata Chicken",
+            "modifier": "Extra heat",
+            "priceIncrease": 0.15,
+            "speedBonus": 0.10
+          },
+          {
+            "name": "Creamy Alfredo Chicken",
+            "modifier": "Rich and creamy",
+            "priceIncrease": 0.20,
+            "satisfactionBonus": 0.20
+          }
+        ]
+      }
+    ]
+  }
+}
