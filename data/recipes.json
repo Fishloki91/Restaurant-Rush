@@ -1,0 +1,90 @@
+{
+  "ingredients": [
+    { "name": "Beef", "max": 100, "current": 100 },
+    { "name": "Chicken", "max": 100, "current": 100 },
+    { "name": "Fish", "max": 100, "current": 100 },
+    { "name": "Vegetables", "max": 100, "current": 100 },
+    { "name": "Pasta", "max": 100, "current": 100 },
+    { "name": "Rice", "max": 100, "current": 100 },
+    { "name": "Cheese", "max": 80, "current": 80 },
+    { "name": "Tomatoes", "max": 80, "current": 80 },
+    { "name": "Mushrooms", "max": 80, "current": 80 },
+    { "name": "Spinach", "max": 80, "current": 80 },
+    { "name": "Shrimp", "max": 80, "current": 80 },
+    { "name": "Bacon", "max": 80, "current": 80 },
+    { "name": "Avocado", "max": 60, "current": 60 },
+    { "name": "Berries", "max": 60, "current": 60 },
+    { "name": "Chocolate", "max": 60, "current": 60 },
+    { "name": "Beans", "max": 80, "current": 80 },
+    { "name": "Chilies", "max": 60, "current": 60 },
+    { "name": "Cream", "max": 60, "current": 60 }
+  ],
+  "foods": {
+    "appetizers": [
+      { "id": 100, "name": "Bruschetta", "category": "Appetizer", "ingredients": ["Tomatoes", "Cheese"], "price": 12, "time": 60, "unlockAt": 0 },
+      { "id": 101, "name": "Stuffed Mushrooms", "category": "Appetizer", "ingredients": ["Mushrooms", "Cheese", "Bacon"], "price": 14, "time": 80, "unlockAt": 10 },
+      { "id": 102, "name": "Shrimp Cocktail", "category": "Appetizer", "ingredients": ["Shrimp", "Tomatoes"], "price": 16, "time": 70, "unlockAt": 15 },
+      { "id": 103, "name": "Spinach Artichoke Dip", "category": "Appetizer", "ingredients": ["Spinach", "Cheese", "Cream"], "price": 13, "time": 90, "unlockAt": 20 },
+      { "id": 104, "name": "Bacon-Wrapped Dates", "category": "Appetizer", "ingredients": ["Bacon", "Cheese"], "price": 15, "time": 75, "unlockAt": 25 }
+    ],
+    "mains": [
+      { "id": 1, "name": "Beef Steak", "category": "Grill", "ingredients": ["Beef", "Vegetables"], "price": 25, "time": 180, "unlockAt": 0 },
+      { "id": 2, "name": "Chicken Pasta", "category": "Italian", "ingredients": ["Chicken", "Pasta", "Tomatoes"], "price": 18, "time": 120, "unlockAt": 0 },
+      { "id": 3, "name": "Grilled Fish", "category": "Seafood", "ingredients": ["Fish", "Vegetables"], "price": 22, "time": 150, "unlockAt": 0 },
+      { "id": 4, "name": "Vegetable Stir Fry", "category": "Asian", "ingredients": ["Vegetables", "Rice"], "price": 15, "time": 90, "unlockAt": 0 },
+      { "id": 5, "name": "Chicken Rice Bowl", "category": "Asian", "ingredients": ["Chicken", "Rice", "Vegetables"], "price": 16, "time": 100, "unlockAt": 0 },
+      { "id": 6, "name": "Cheese Pizza", "category": "Italian", "ingredients": ["Cheese", "Tomatoes"], "price": 14, "time": 120, "unlockAt": 0 },
+      { "id": 7, "name": "Pasta Primavera", "category": "Italian", "ingredients": ["Pasta", "Vegetables", "Cheese"], "price": 17, "time": 110, "unlockAt": 0 },
+      { "id": 8, "name": "Premium Ribeye", "category": "Grill", "ingredients": ["Beef", "Vegetables", "Cheese"], "price": 35, "time": 200, "unlockAt": 10 },
+      { "id": 9, "name": "Seafood Linguine", "category": "Italian", "ingredients": ["Fish", "Pasta", "Tomatoes"], "price": 28, "time": 160, "unlockAt": 15 },
+      { "id": 10, "name": "Sushi Platter", "category": "Asian", "ingredients": ["Fish", "Rice", "Vegetables"], "price": 32, "time": 180, "unlockAt": 20 },
+      { "id": 11, "name": "Beef Tacos", "category": "Mexican", "ingredients": ["Beef", "Cheese", "Tomatoes"], "price": 20, "time": 100, "unlockAt": 25 },
+      { "id": 12, "name": "French Onion Soup", "category": "French", "ingredients": ["Vegetables", "Cheese"], "price": 18, "time": 140, "unlockAt": 30 },
+      { "id": 13, "name": "Lobster Thermidor", "category": "Seafood", "ingredients": ["Fish", "Cheese", "Vegetables"], "price": 45, "time": 220, "unlockAt": 40 },
+      { "id": 14, "name": "Chicken Tikka Masala", "category": "Asian", "ingredients": ["Chicken", "Rice", "Tomatoes"], "price": 24, "time": 140, "unlockAt": 35 },
+      { "id": 15, "name": "Filet Mignon", "category": "French", "ingredients": ["Beef", "Vegetables"], "price": 40, "time": 200, "unlockAt": 50 },
+      { "id": 16, "name": "Mushroom Risotto", "category": "Italian", "ingredients": ["Rice", "Mushrooms", "Cheese", "Cream"], "price": 22, "time": 150, "unlockAt": 30 },
+      { "id": 17, "name": "Spinach Stuffed Chicken", "category": "Grill", "ingredients": ["Chicken", "Spinach", "Cheese"], "price": 26, "time": 170, "unlockAt": 35 },
+      { "id": 18, "name": "Garlic Butter Shrimp", "category": "Seafood", "ingredients": ["Shrimp", "Vegetables"], "price": 24, "time": 130, "unlockAt": 40 },
+      { "id": 19, "name": "Bacon Cheeseburger", "category": "Grill", "ingredients": ["Beef", "Bacon", "Cheese"], "price": 19, "time": 110, "unlockAt": 20 },
+      { "id": 20, "name": "Avocado Toast Deluxe", "category": "Breakfast", "ingredients": ["Avocado", "Tomatoes", "Bacon"], "price": 17, "time": 80, "unlockAt": 25 },
+      { "id": 21, "name": "Spicy Chili Con Carne", "category": "Mexican", "ingredients": ["Beef", "Beans", "Chilies", "Tomatoes"], "price": 21, "time": 140, "unlockAt": 45 },
+      { "id": 22, "name": "Shrimp Pad Thai", "category": "Asian", "ingredients": ["Shrimp", "Rice", "Vegetables"], "price": 23, "time": 130, "unlockAt": 50 },
+      { "id": 23, "name": "Mushroom Bacon Pasta", "category": "Italian", "ingredients": ["Pasta", "Mushrooms", "Bacon", "Cream"], "price": 20, "time": 120, "unlockAt": 30 }
+    ],
+    "desserts": [
+      { "id": 200, "name": "Chocolate Lava Cake", "category": "Dessert", "ingredients": ["Chocolate", "Cream"], "price": 12, "time": 100, "unlockAt": 15 },
+      { "id": 201, "name": "Berry Cheesecake", "category": "Dessert", "ingredients": ["Berries", "Cheese", "Cream"], "price": 14, "time": 110, "unlockAt": 20 },
+      { "id": 202, "name": "Chocolate Mousse", "category": "Dessert", "ingredients": ["Chocolate", "Cream"], "price": 11, "time": 90, "unlockAt": 10 },
+      { "id": 203, "name": "Berry Tart", "category": "Dessert", "ingredients": ["Berries", "Cream"], "price": 13, "time": 95, "unlockAt": 25 },
+      { "id": 204, "name": "Chocolate Strawberry Parfait", "category": "Dessert", "ingredients": ["Chocolate", "Berries", "Cream"], "price": 15, "time": 85, "unlockAt": 30 }
+    ]
+  },
+  "drinks": {
+    "smoothies": [
+      { "id": 300, "name": "Berry Blast Smoothie", "category": "Drink", "ingredients": ["Berries"], "price": 8, "time": 40, "unlockAt": 0 },
+      { "id": 301, "name": "Tropical Smoothie", "category": "Drink", "ingredients": ["Berries"], "price": 8, "time": 40, "unlockAt": 5 },
+      { "id": 302, "name": "Green Power Smoothie", "category": "Drink", "ingredients": ["Spinach", "Berries"], "price": 9, "time": 45, "unlockAt": 10 }
+    ],
+    "specialty_coffees": [
+      { "id": 310, "name": "Cappuccino", "category": "Drink", "ingredients": ["Cream"], "price": 6, "time": 35, "unlockAt": 0 },
+      { "id": 311, "name": "Mocha", "category": "Drink", "ingredients": ["Chocolate", "Cream"], "price": 7, "time": 40, "unlockAt": 5 },
+      { "id": 312, "name": "Caramel Macchiato", "category": "Drink", "ingredients": ["Cream"], "price": 7, "time": 40, "unlockAt": 10 }
+    ],
+    "bubble_tea": [
+      { "id": 320, "name": "Classic Bubble Tea", "category": "Drink", "ingredients": ["Cream"], "price": 7, "time": 45, "unlockAt": 5 },
+      { "id": 321, "name": "Taro Bubble Tea", "category": "Drink", "ingredients": ["Cream"], "price": 8, "time": 45, "unlockAt": 10 },
+      { "id": 322, "name": "Matcha Bubble Tea", "category": "Drink", "ingredients": ["Cream"], "price": 8, "time": 45, "unlockAt": 15 }
+    ],
+    "milkshakes": [
+      { "id": 330, "name": "Chocolate Milkshake", "category": "Drink", "ingredients": ["Chocolate", "Cream"], "price": 9, "time": 50, "unlockAt": 0 },
+      { "id": 331, "name": "Berry Milkshake", "category": "Drink", "ingredients": ["Berries", "Cream"], "price": 9, "time": 50, "unlockAt": 5 },
+      { "id": 332, "name": "Cookies & Cream Shake", "category": "Drink", "ingredients": ["Chocolate", "Cream"], "price": 10, "time": 50, "unlockAt": 10 }
+    ],
+    "mocktails": [
+      { "id": 340, "name": "Virgin Mojito", "category": "Drink", "ingredients": ["Berries"], "price": 7, "time": 40, "unlockAt": 0 },
+      { "id": 341, "name": "Strawberry Lemonade", "category": "Drink", "ingredients": ["Berries"], "price": 6, "time": 35, "unlockAt": 5 },
+      { "id": 342, "name": "Tropical Paradise", "category": "Drink", "ingredients": ["Berries"], "price": 8, "time": 40, "unlockAt": 10 }
+    ]
+  }
+}
