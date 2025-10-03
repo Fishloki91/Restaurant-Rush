@@ -684,6 +684,11 @@ class RestaurantGame {
     }
     
     updateMonthlyLeaderboard() {
+        // Calculate scores for all staff before sorting
+        this.staff.forEach(staff => {
+            this.calculateMonthlyScore(staff);
+        });
+        
         // Sort staff by monthly score
         this.monthlyLeaderboard = [...this.staff].sort((a, b) => b.monthlyScore - a.monthlyScore);
     }
