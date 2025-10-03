@@ -68,6 +68,45 @@ class RestaurantGame {
             foodCostByDay: [] // Track food cost per day
         };
         
+        // NEW: Prestige and Run History System
+        this.prestigeLevel = 0; // Current prestige level
+        this.currentRun = 1; // Current run number
+        this.runHistory = []; // History of all previous runs
+        this.totalLifetimeRevenue = 0; // Total revenue across all runs
+        this.totalLifetimeDays = 0; // Total days across all runs
+        this.legacyBonuses = {}; // Permanent bonuses from prestige
+        this.prestigePoints = 0; // Points to spend on bonuses
+        
+        // NEW: Multi-Resource Economy
+        this.reputation = 0; // Restaurant reputation
+        this.staffLoyalty = {}; // Loyalty per staff member
+        
+        // NEW: Season System
+        this.currentSeason = null; // Current season
+        this.seasonDay = 0; // Day within current season
+        this.activeSeasonalEvents = []; // Active seasonal events
+        
+        // NEW: Location System
+        this.currentLocation = 'downtown'; // Current restaurant location
+        this.unlockedLocations = ['downtown']; // Available locations
+        
+        // NEW: Staff Skill Trees and Relationships
+        this.staffSkillTrees = {}; // Skill tree progress per staff
+        this.staffRelationships = []; // Staff relationships
+        this.staffSkillPoints = {}; // Available skill points per staff
+        
+        // NEW: Recipe Mastery System
+        this.recipeMastery = {}; // Mastery level per recipe
+        this.discoveredRecipes = []; // Recipes discovered through experimentation
+        
+        // NEW: Regular Customers
+        this.regularCustomers = {}; // Regular customer visit counts
+        this.activeRegularCustomers = []; // Currently active regular customers
+        
+        // NEW: Dynamic Events
+        this.activeEvents = []; // Currently active events
+        this.eventHistory = []; // Past events
+        
         // Initialize Audio Context for sound effects
         this.audioContext = null;
         this.initializeAudio();
@@ -78,7 +117,7 @@ class RestaurantGame {
     
     async loadRecipeData() {
         try {
-            // Load all external data files in parallel
+            // Load all external data files in parallel (including new systems)
             const [
                 recipeRes,
                 ordersRes,
@@ -91,7 +130,16 @@ class RestaurantGame {
                 moodsRes,
                 orderStatesRes,
                 traitsRes,
-                moraleFactorsRes
+                moraleFactorsRes,
+                prestigeRes,
+                seasonsRes,
+                skillTreesRes,
+                eventsRes,
+                locationsRes,
+                resourcesRes,
+                relationshipsRes,
+                customersRes,
+                recipeMasteryRes
             ] = await Promise.all([
                 fetch('data/recipes.json'),
                 fetch('data/orders.json'),
@@ -104,7 +152,16 @@ class RestaurantGame {
                 fetch('data/moods.json'),
                 fetch('data/order_states.json'),
                 fetch('data/traits.json'),
-                fetch('data/morale_factors.json')
+                fetch('data/morale_factors.json'),
+                fetch('data/prestige.json'),
+                fetch('data/seasons.json'),
+                fetch('data/skill_trees.json'),
+                fetch('data/events.json'),
+                fetch('data/locations.json'),
+                fetch('data/resources.json'),
+                fetch('data/relationships.json'),
+                fetch('data/customers.json'),
+                fetch('data/recipe_mastery.json')
             ]);
 
             this.recipeData = await recipeRes.json();
@@ -119,6 +176,17 @@ class RestaurantGame {
             this.orderStatesData = orderStatesRes.ok ? await orderStatesRes.json() : [];
             this.traitsData = traitsRes.ok ? await traitsRes.json() : [];
             this.moraleFactorsData = moraleFactorsRes.ok ? await moraleFactorsRes.json() : null;
+            
+            // NEW: Load new system data
+            this.prestigeData = prestigeRes.ok ? await prestigeRes.json() : null;
+            this.seasonsData = seasonsRes.ok ? await seasonsRes.json() : null;
+            this.skillTreesData = skillTreesRes.ok ? await skillTreesRes.json() : null;
+            this.eventsData = eventsRes.ok ? await eventsRes.json() : null;
+            this.locationsData = locationsRes.ok ? await locationsRes.json() : null;
+            this.resourcesData = resourcesRes.ok ? await resourcesRes.json() : null;
+            this.relationshipsData = relationshipsRes.ok ? await relationshipsRes.json() : null;
+            this.customersData = customersRes.ok ? await customersRes.json() : null;
+            this.recipeMasteryData = recipeMasteryRes.ok ? await recipeMasteryRes.json() : null;
 
             this.initializeInventory();
             this.initializeStaff();
@@ -126,6 +194,13 @@ class RestaurantGame {
             this.initializeEquipment();
             this.initializeAchievements();
             this.initializeStaffOfDay();
+            
+            // NEW: Initialize new systems
+            this.initializePrestigeSystem();
+            this.initializeSeasonSystem();
+            this.initializeLocationSystem();
+            this.initializeRecipeMastery();
+            this.initializeRegularCustomers();
 
             // Render after initialization is complete
             this.render();
@@ -613,6 +688,261 @@ class RestaurantGame {
         this.allAchievements = Array.isArray(this.achievementsData) && this.achievementsData.length ? this.achievementsData.map(a => ({...a, unlocked: false})) : [];
         this.achievements = [];
     }
+    
+    // NEW: Initialize Prestige System
+    initializePrestigeSystem() {
+        if (!this.prestigeData) return;
+        
+        // Apply prestige bonuses if any
+        if (this.prestigeLevel > 0 && this.prestigeData.levels[this.prestigeLevel - 1]) {
+            const prestigeBonus = this.prestigeData.levels[this.prestigeLevel - 1].bonuses;
+            
+            // Apply starting revenue bonus
+            if (prestigeBonus.startingRevenue) {
+                this.revenue += prestigeBonus.startingRevenue;
+                this.dayStartRevenue = this.revenue;
+            }
+            
+            // Store bonuses for later use
+            this.legacyBonuses = prestigeBonus;
+        }
+    }
+    
+    // NEW: Initialize Season System
+    initializeSeasonSystem() {
+        if (!this.seasonsData || !this.seasonsData.seasons) return;
+        
+        // Start with spring season
+        this.currentSeason = this.seasonsData.seasons[0];
+        this.seasonDay = 0;
+    }
+    
+    // NEW: Initialize Location System
+    initializeLocationSystem() {
+        if (!this.locationsData) return;
+        
+        // Set current location (default is downtown)
+        const location = this.locationsData.locations.find(l => l.id === this.currentLocation);
+        if (location) {
+            this.currentLocationData = location;
+        }
+    }
+    
+    // NEW: Initialize Recipe Mastery
+    initializeRecipeMastery() {
+        if (!this.recipeMasteryData) return;
+        
+        // Initialize mastery levels for all recipes
+        this.allRecipes.forEach(recipe => {
+            if (!this.recipeMastery[recipe.id]) {
+                this.recipeMastery[recipe.id] = {
+                    level: 1,
+                    completions: 0
+                };
+            }
+        });
+    }
+    
+    // NEW: Initialize Regular Customers
+    initializeRegularCustomers() {
+        if (!this.customersData || !this.customersData.regularCustomers) return;
+        
+        // Initialize visit counts for regular customers
+        this.customersData.regularCustomers.forEach(customer => {
+            if (!this.regularCustomers[customer.id]) {
+                this.regularCustomers[customer.id] = {
+                    visits: 0,
+                    lastVisit: 0,
+                    loyaltyTier: 0
+                };
+            }
+        });
+    }
+    
+    // NEW: Update Recipe Mastery after completing an order
+    updateRecipeMastery(recipeId) {
+        if (!this.recipeMastery[recipeId]) {
+            this.recipeMastery[recipeId] = {
+                level: 1,
+                completions: 0
+            };
+        }
+        
+        this.recipeMastery[recipeId].completions++;
+        
+        // Check for level up
+        if (this.recipeMasteryData && this.recipeMasteryData.mastery) {
+            const masteryLevels = this.recipeMasteryData.mastery.levels;
+            const currentLevel = this.recipeMastery[recipeId].level;
+            
+            if (currentLevel < masteryLevels.length) {
+                const nextLevel = masteryLevels[currentLevel];
+                if (this.recipeMastery[recipeId].completions >= nextLevel.completionsRequired) {
+                    this.recipeMastery[recipeId].level++;
+                    
+                    const recipe = this.allRecipes.find(r => r.id === recipeId);
+                    if (recipe) {
+                        this.addFeedback(`${nextLevel.icon} ${recipe.name} mastery increased to ${nextLevel.name}!`, true);
+                        this.showToast({
+                            icon: nextLevel.icon,
+                            title: 'Recipe Mastery Up!',
+                            message: `${recipe.name} → ${nextLevel.name}`,
+                            type: 'success'
+                        });
+                    }
+                }
+            }
+        }
+    }
+    
+    // NEW: Get Recipe Mastery Bonus
+    getRecipeMasteryBonus(recipeId) {
+        if (!this.recipeMastery[recipeId] || !this.recipeMasteryData) {
+            return { cookingSpeed: 1.0, qualityBonus: 1.0, priceMultiplier: 1.0 };
+        }
+        
+        const mastery = this.recipeMastery[recipeId];
+        const masteryLevel = this.recipeMasteryData.mastery.levels[mastery.level - 1];
+        
+        return masteryLevel ? masteryLevel.bonuses : { cookingSpeed: 1.0, qualityBonus: 1.0, priceMultiplier: 1.0 };
+    }
+    
+    // NEW: Advance Season
+    advanceSeason() {
+        if (!this.seasonsData || !this.seasonsData.seasons) return;
+        
+        this.seasonDay++;
+        
+        // Check if season should change
+        if (this.seasonDay >= this.currentSeason.durationDays) {
+            this.seasonDay = 0;
+            
+            // Move to next season
+            const currentIndex = this.seasonsData.seasons.findIndex(s => s.id === this.currentSeason.id);
+            const nextIndex = (currentIndex + 1) % this.seasonsData.seasons.length;
+            this.currentSeason = this.seasonsData.seasons[nextIndex];
+            
+            this.addFeedback(`${this.currentSeason.icon} ${this.currentSeason.name} has arrived!`, true);
+            this.showToast({
+                icon: this.currentSeason.icon,
+                title: 'New Season!',
+                message: this.currentSeason.name,
+                type: 'info',
+                duration: 5000
+            });
+        }
+    }
+    
+    // NEW: Check and trigger random events
+    checkAndTriggerEvents() {
+        if (!this.eventsData || !this.eventsData.events) return;
+        
+        // Check for event triggers
+        this.eventsData.events.forEach(event => {
+            // Skip if event is already active
+            if (this.activeEvents.find(e => e.id === event.id)) return;
+            
+            // Check trigger conditions
+            const conditions = event.triggerConditions;
+            
+            // Check minimum day requirement
+            if (conditions.minDay && this.day < conditions.minDay) return;
+            
+            // Check reputation requirement
+            if (conditions.minReputation && this.reputation < conditions.minReputation) return;
+            
+            // Check seasonal requirement
+            if (event.seasonalOnly && this.currentSeason.id !== event.seasonalOnly) return;
+            
+            // Check probability
+            if (conditions.probability && Math.random() > conditions.probability) return;
+            
+            // Event triggered!
+            this.activateEvent(event);
+        });
+    }
+    
+    // NEW: Activate an event
+    activateEvent(eventData) {
+        const event = {
+            ...eventData,
+            startDay: this.day,
+            endDay: this.day + (eventData.duration || 1),
+            active: true
+        };
+        
+        this.activeEvents.push(event);
+        
+        this.addFeedback(`${event.icon} ${event.name}: ${event.description}`, true);
+        this.showToast({
+            icon: event.icon,
+            title: event.name,
+            message: event.description,
+            type: 'event',
+            duration: 6000
+        });
+        
+        this.playSuccessSound();
+    }
+    
+    // NEW: Update active events
+    updateActiveEvents() {
+        // Remove expired events
+        this.activeEvents = this.activeEvents.filter(event => {
+            if (this.day >= event.endDay) {
+                // Event ended
+                this.eventHistory.push({
+                    ...event,
+                    completed: true
+                });
+                return false;
+            }
+            return true;
+        });
+    }
+    
+    // NEW: Calculate reputation gain
+    gainReputation(amount, reason = '') {
+        this.reputation += amount;
+        
+        if (amount > 0) {
+            this.addFeedback(`⭐ +${amount} Reputation${reason ? ': ' + reason : ''}`, true);
+        } else {
+            this.addFeedback(`⭐ ${amount} Reputation${reason ? ': ' + reason : ''}`, false);
+        }
+        
+        // Check for reputation tier unlocks
+        if (this.resourcesData && this.resourcesData.reputation) {
+            const tiers = this.resourcesData.reputation.tiers;
+            tiers.forEach(tier => {
+                if (this.reputation >= tier.threshold && this.reputation - amount < tier.threshold) {
+                    this.showToast({
+                        icon: tier.icon,
+                        title: 'Reputation Tier Unlocked!',
+                        message: `${tier.name}: ${tier.benefits.join(', ')}`,
+                        type: 'success',
+                        duration: 6000
+                    });
+                }
+            });
+        }
+    }
+    
+    // NEW: Update staff loyalty
+    updateStaffLoyalty(staffId, amount, reason = '') {
+        if (!this.staffLoyalty[staffId]) {
+            this.staffLoyalty[staffId] = 50; // Start at 50
+        }
+        
+        this.staffLoyalty[staffId] += amount;
+        this.staffLoyalty[staffId] = Math.max(0, Math.min(500, this.staffLoyalty[staffId]));
+        
+        const staff = this.staff.find(s => s.id === staffId);
+        if (staff && amount > 0) {
+            this.addFeedback(`❤️ ${staff.name} loyalty +${amount}${reason ? ': ' + reason : ''}`, true);
+        }
+    }
+    
     
     checkAchievements() {
         // Check for newly unlocked achievements
@@ -1179,11 +1509,36 @@ class RestaurantGame {
     }
     
     restartGame() {
+        // NEW: Store run history before resetting
+        const runData = {
+            run: this.currentRun,
+            daysCompleted: this.day,
+            revenueEarned: this.revenue,
+            totalOrdersCompleted: this.totalOrdersCompleted,
+            happyCustomers: this.happyCustomers,
+            reputation: this.reputation,
+            prestigeLevelAtEnd: this.prestigeLevel
+        };
+        this.runHistory.push(runData);
+        
+        // NEW: Update lifetime totals
+        this.totalLifetimeRevenue += this.revenue;
+        this.totalLifetimeDays += this.day;
+        
+        // NEW: Check for prestige level up
+        this.checkPrestigeUnlock();
+        
         // Clear intervals
         if (this.gameInterval) clearInterval(this.gameInterval);
         if (this.orderInterval) clearInterval(this.orderInterval);
         
-        // Reset game state
+        // Reset game state (but keep prestige data)
+        const preservedPrestigeLevel = this.prestigeLevel;
+        const preservedRunHistory = this.runHistory;
+        const preservedLifetimeRevenue = this.totalLifetimeRevenue;
+        const preservedLifetimeDays = this.totalLifetimeDays;
+        const preservedLegacyBonuses = this.legacyBonuses;
+        
         this.isRunning = false;
         this.isPaused = false;
         this.isGameOver = false;
@@ -1214,6 +1569,22 @@ class RestaurantGame {
         this.totalRestocks = 0;
         this.perfectDays = 0;
         
+        // NEW: Reset new systems but preserve some data
+        this.reputation = 0;
+        this.staffLoyalty = {};
+        this.recipeMastery = {};
+        this.regularCustomers = {};
+        this.activeEvents = [];
+        this.eventHistory = [];
+        
+        // Restore prestige data
+        this.prestigeLevel = preservedPrestigeLevel;
+        this.runHistory = preservedRunHistory;
+        this.totalLifetimeRevenue = preservedLifetimeRevenue;
+        this.totalLifetimeDays = preservedLifetimeDays;
+        this.legacyBonuses = preservedLegacyBonuses;
+        this.currentRun++;
+        
         // Re-initialize with loaded data
         this.loadRecipeData();
         
@@ -1227,6 +1598,32 @@ class RestaurantGame {
         document.getElementById('new-order-btn').disabled = true;
         
         this.switchView('overview');
+    }
+    
+    // NEW: Check if player qualifies for prestige level up
+    checkPrestigeUnlock() {
+        if (!this.prestigeData || !this.prestigeData.levels) return;
+        
+        const nextLevel = this.prestigeData.levels[this.prestigeLevel];
+        if (!nextLevel) return; // Already at max prestige
+        
+        const requirements = nextLevel.requirements;
+        
+        if (this.totalLifetimeRevenue >= requirements.totalRevenue &&
+            this.totalLifetimeDays >= requirements.daysCompleted) {
+            
+            this.prestigeLevel++;
+            
+            this.showToast({
+                icon: '👑',
+                title: 'Prestige Level Up!',
+                message: `${nextLevel.name} - New bonuses unlocked!`,
+                type: 'success',
+                duration: 8000
+            });
+            
+            this.addFeedback(`👑 Prestige Level ${this.prestigeLevel}: ${nextLevel.name}!`, true);
+        }
     }
     
     updateDayProgression() {
@@ -1467,6 +1864,13 @@ class RestaurantGame {
         // Check if day was perfect (100% satisfaction maintained)
         if (this.customerSatisfaction === 100) {
             this.perfectDays++;
+            // NEW: Perfect day reputation bonus
+            this.gainReputation(10, 'Perfect Day');
+            
+            // NEW: Perfect day loyalty bonus for all staff
+            this.staff.forEach(staff => {
+                this.updateStaffLoyalty(staff.id, 5, 'Perfect Day');
+            });
         }
         
         // Calculate revenue trend
@@ -1482,6 +1886,15 @@ class RestaurantGame {
         const bonus = Math.floor(this.revenue * 0.1);
         this.revenue += bonus;
         
+        // NEW: Reputation-based revenue bonus
+        if (this.reputation > 0) {
+            const reputationBonus = Math.floor(this.revenue * (this.reputation / 10000));
+            this.revenue += reputationBonus;
+            if (reputationBonus > 0) {
+                this.addFeedback(`⭐ Reputation bonus: +$${reputationBonus}`, true);
+            }
+        }
+        
         // Track highest revenue for achievements
         if (this.revenue > this.highestRevenue) {
             this.highestRevenue = this.revenue;
@@ -1490,6 +1903,15 @@ class RestaurantGame {
         // Advance to next day
         this.day++;
         this.dayTimer = 0;
+        
+        // NEW: Advance season system
+        this.advanceSeason();
+        
+        // NEW: Check for random events
+        this.checkAndTriggerEvents();
+        
+        // NEW: Update active events
+        this.updateActiveEvents();
         
         // Check achievements after day progression
         this.checkAchievements();
@@ -1853,9 +2275,28 @@ class RestaurantGame {
         
         if (success) {
             order.status = 'completed';
+            
+            // NEW: Apply recipe mastery bonuses to price
+            let masteryBonus = { priceMultiplier: 1.0 };
+            if (order.items && order.items.length > 0) {
+                const mainItem = order.items[0]; // Use first item for mastery
+                masteryBonus = this.getRecipeMasteryBonus(mainItem.id);
+                order.totalPrice = Math.floor(order.totalPrice * masteryBonus.priceMultiplier);
+                
+                // Update mastery for completed recipe
+                this.updateRecipeMastery(mainItem.id);
+            }
+            
             this.revenue += order.totalPrice;
             this.happyCustomers++;
             this.totalOrdersCompleted++; // Track for recipe unlocks
+            
+            // NEW: Gain reputation for successful orders
+            let reputationGain = order.isVIP ? 5 : 1;
+            if (order.timeRemaining > order.timeLimit * 0.5) {
+                reputationGain *= 1.5; // Bonus for fast completion
+            }
+            this.gainReputation(Math.floor(reputationGain), 'Order completed');
             
             // Track highest revenue for achievements
             if (this.revenue > this.highestRevenue) {
@@ -1880,6 +2321,9 @@ class RestaurantGame {
                 staff.consecutiveOrders++;
                 staff.lastOrderTime = this.dayTimer;
                 
+                // NEW: Update staff loyalty for completing order
+                this.updateStaffLoyalty(staff.id, 2, 'Order completed');
+                
                 // Apply morale factors for completing order
                 this.applyMoraleFactor(staff, 'completed_order');
                 
@@ -1889,6 +2333,8 @@ class RestaurantGame {
                 );
                 if (hasMatchingSpecialty) {
                     this.applyMoraleFactor(staff, 'specialty_match');
+                    // NEW: Extra loyalty for specialty match
+                    this.updateStaffLoyalty(staff.id, 3, 'Specialty match');
                 }
                 
                 // Check for overworked
