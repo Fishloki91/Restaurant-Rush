@@ -1208,19 +1208,47 @@ class RestaurantGame {
         
         // Deduct ingredients from inventory (with possible efficiency bonus)
         const ingredientEfficiency = this.getEquipmentBonus('ingredient_efficiency');
+        const ingredientsUsed = {};
         for (const [ingredient, amount] of Object.entries(order.requiredIngredients)) {
             // Chance to not consume ingredient based on efficiency
+            let actualUsed = 0;
             for (let i = 0; i < amount; i++) {
                 if (Math.random() > ingredientEfficiency) {
                     this.inventory[ingredient].current -= 1;
+                    actualUsed++;
                 }
             }
+            if (actualUsed > 0) {
+                ingredientsUsed[ingredient] = actualUsed;
+            }
+        }
+        
+        // Show toast notification for ingredients used
+        if (Object.keys(ingredientsUsed).length > 0) {
+            const ingredientsList = Object.entries(ingredientsUsed)
+                .map(([ing, amt]) => `${amt}x ${ing}`)
+                .join(', ');
+            this.showToast({
+                icon: '📦',
+                title: 'Ingredients Used',
+                message: ingredientsList,
+                type: 'info',
+                duration: 3000
+            });
         }
         
         order.status = 'in-progress';
         order.assignedStaff = staffMember.id;
         staffMember.status = 'busy';
         staffMember.currentOrder = orderId;
+        
+        // Show toast notification for staff starting order
+        this.showToast({
+            icon: '👨‍🍳',
+            title: 'Order Started',
+            message: `${staffMember.name} started making Order #${orderId}`,
+            type: 'info'
+        });
         
         this.triggerHaptic('light');
         this.render();
