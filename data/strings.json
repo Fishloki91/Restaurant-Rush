@@ -1,0 +1,24 @@
+{
+  "tooltips": {
+    "orders": "Track all active customer orders. Urgent orders need immediate attention. VIP orders have stricter deadlines but offer higher rewards.",
+    "staff": "Monitor your team's status. Available staff can take orders. Busy staff are working. Resting staff recover from fatigue.",
+    "inventory": "Track ingredient levels. Low items need restocking soon. Empty items block orders.",
+    "satisfaction": "Monitor customer satisfaction. Successful orders increase happiness. Failed orders decrease it.",
+    "equipment": "Upgrade equipment to boost performance and unlock new recipes.",
+    "achievements": "Unlock achievements by reaching milestones in revenue, staff, and customer satisfaction.",
+    "eotm": "Track staff performance through monthly leaderboards, weekly challenges, and rewards."
+  },
+  "buttons": {
+    "start": "Start Game",
+    "pause": "Pause",
+    "auto": "Auto: OFF",
+    "sound": "Sound On",
+    "shortcuts": "Shortcuts"
+  },
+  "messages": {
+    "restock_success": "Inventory restocked!",
+    "restock_fail": "Not enough revenue to restock!",
+    "sound_on": "Sound enabled",
+    "sound_off": "Sound disabled"
+  }
+}

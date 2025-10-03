@@ -1,0 +1,14 @@
+[
+  { "id": "revenue_500", "name": "Small Business", "icon": "💵", "description": "Reach $500 in revenue", "requirement": 500, "category": "revenue" },
+  { "id": "revenue_1000", "name": "Growing Business", "icon": "💰", "description": "Reach $1,000 in revenue", "requirement": 1000, "category": "revenue" },
+  { "id": "revenue_2500", "name": "Thriving Restaurant", "icon": "🏆", "description": "Reach $2,500 in revenue", "requirement": 2500, "category": "revenue" },
+  { "id": "revenue_5000", "name": "Restaurant Empire", "icon": "👑", "description": "Reach $5,000 in revenue", "requirement": 5000, "category": "revenue" },
+  { "id": "hire_first", "name": "Team Builder", "icon": "👥", "description": "Hire your first employee", "requirement": 1, "category": "staff" },
+  { "id": "hire_five", "name": "Growing Team", "icon": "🤝", "description": "Hire 5 employees", "requirement": 5, "category": "staff" },
+  { "id": "hire_ten", "name": "HR Manager", "icon": "📋", "description": "Hire 10 employees", "requirement": 10, "category": "staff" },
+  { "id": "survive_5", "name": "First Week", "icon": "📅", "description": "Survive 5 days", "requirement": 5, "category": "days" },
+  { "id": "survive_10", "name": "Established", "icon": "🗓️", "description": "Survive 10 days", "requirement": 10, "category": "days" },
+  { "id": "survive_20", "name": "Restaurant Veteran", "icon": "🎖️", "description": "Survive 20 days", "requirement": 20, "category": "days" },
+  { "id": "perfect_day", "name": "Perfect Service", "icon": "😊", "description": "Complete a day with 100% satisfaction", "requirement": 1, "category": "perfect_days" },
+  { "id": "vip_ten", "name": "VIP Favorite", "icon": "⭐", "description": "Serve 10 VIP customers", "requirement": 10, "category": "vip" }
+]

@@ -5,11 +5,52 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>Restaurant Rush - Dashboard</title>
     <link rel="stylesheet" href="styles.css">
+            <!-- Tippy.js CSS -->
+            <link rel="stylesheet" href="https://unpkg.com/tippy.js@6/dist/tippy.css" />
+            <style>
+                /* Shared tooltip style */
+                .tippy-box[data-theme~='rrush'] {
+                    background: #3a2c18;
+                    color: #fff;
+                    border-radius: 10px;
+                    box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+                    font-size: 1rem;
+                    padding: 0.7em 1em;
+                    border: 2px solid #d89e54;
+                }
+                .tippy-box[data-theme~='rrush'] .tippy-arrow {
+                    color: #3a2c18;
+                }
+                /* Centralized mobile tooltip */
+                #mobile-tooltip {
+                    display: none;
+                    position: fixed;
+                    left: 50%;
+                    bottom: 2.5em;
+                    transform: translateX(-50%);
+                    z-index: 9999;
+                    min-width: 260px;
+                    max-width: 90vw;
+                    background: #3a2c18;
+                    color: #fff;
+                    border-radius: 10px;
+                    box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+                    font-size: 1rem;
+                    padding: 0.7em 1em;
+                    border: 2px solid #d89e54;
+                    text-align: left;
+                    transition: opacity 0.2s;
+                }
+                #mobile-tooltip.show {
+                    display: block;
+                    opacity: 1;
+                }
+            </style>
 </head>
 <body>
     <div class="dashboard">
         <header class="dashboard-header">
-            <h1>🍽️ Restaurant Rush</h1>
+            <h1>🍽️ Restaurant Rush - Free To Play</h1>
             <div class="game-stats">
                 <div class="stat stat-tooltip-container">
                     <span class="stat-label">Day:</span>
@@ -62,12 +103,11 @@
                         </div>
                     </div>
                     <button class="view-details-btn" data-view="orders">View Details →</button>
-                    <div class="card-tooltip">
-                        <div class="tooltip-content">
-                            <strong>Orders Dashboard</strong><br>
-                            Track all active customer orders. Urgent orders need immediate attention (time &lt; 30%). VIP orders have stricter deadlines but offer 50% higher rewards.
-                        </div>
-                    </div>
+                    <div style="display:none"></div>
+                    <div 
+                      data-tippy-content="<strong>Orders Dashboard</strong><br>Track all active customer orders. Urgent orders need immediate attention (time &lt; 30%). VIP orders have stricter deadlines but offer 50% higher rewards."
+                      class="tippy-init"
+                    ></div>
                 </div>
 
                 <!-- Staff Overview Card -->
@@ -91,12 +131,11 @@
                         </div>
                     </div>
                     <button class="view-details-btn" data-view="staff">View Details →</button>
-                    <div class="card-tooltip">
-                        <div class="tooltip-content">
-                            <strong>Staff Management</strong><br>
-                            Monitor your team's status. Available staff can take orders. Busy staff are working. Resting staff recover from fatigue. Keep staff rested for peak performance!
-                        </div>
-                    </div>
+                    <div style="display:none"></div>
+                    <div 
+                      data-tippy-content="<strong>Staff Management</strong><br>Monitor your team's status. Available staff can take orders. Busy staff are working. Resting staff recover from fatigue. Keep staff rested for peak performance!"
+                      class="tippy-init"
+                    ></div>
                 </div>
 
                 <!-- Inventory Overview Card -->
@@ -120,12 +159,11 @@
                         </div>
                     </div>
                     <button class="view-details-btn" data-view="inventory">View Details →</button>
-                    <div class="card-tooltip">
-                        <div class="tooltip-content">
-                            <strong>Inventory Management</strong><br>
-                            Track ingredient levels. Low items (&lt;30%) need restocking soon. Empty items (0%) block orders. Restock all for $50 or individual items for $10.
-                        </div>
-                    </div>
+                    <div style="display:none"></div>
+                    <div 
+                      data-tippy-content="<strong>Inventory Management</strong><br>Track ingredient levels. Low items (&lt;30%) need restocking soon. Empty items (0%) block orders. Restock all for $50 or individual items for $10."
+                      class="tippy-init"
+                    ></div>
                 </div>
 
                 <!-- Satisfaction Overview Card -->
@@ -149,12 +187,11 @@
                         </div>
                     </div>
                     <button class="view-details-btn" data-view="satisfaction">View Details →</button>
-                    <div class="card-tooltip">
-                        <div class="tooltip-content">
-                            <strong>Customer Feedback</strong><br>
-                            Monitor customer satisfaction. Successful orders increase happiness. Failed orders decrease it. Keep satisfaction high to maintain your restaurant's reputation!
-                        </div>
-                    </div>
+                    <div style="display:none"></div>
+                    <div 
+                      data-tippy-content="<strong>Customer Feedback</strong><br>Monitor customer satisfaction. Successful orders increase happiness. Failed orders decrease it. Keep satisfaction high to maintain your restaurant's reputation!"
+                      class="tippy-init"
+                    ></div>
                 </div>
 
                 <!-- Recipes Overview Card -->
@@ -217,12 +254,11 @@
                         </div>
                     </div>
                     <button class="view-details-btn" data-view="eotm">View Details →</button>
-                    <div class="card-tooltip">
-                        <div class="tooltip-content">
-                            <strong>Employee of the Month</strong><br>
-                            Track staff performance through monthly leaderboards, weekly challenges, and rewards. Top performers earn titles, bonuses, and a place in the Hall of Fame!
-                        </div>
-                    </div>
+                    <div style="display:none"></div>
+                    <div 
+                      data-tippy-content="<strong>Employee of the Month</strong><br>Track staff performance through monthly leaderboards, weekly challenges, and rewards. Top performers earn titles, bonuses, and a place in the Hall of Fame!"
+                      class="tippy-init"
+                    ></div>
                 </div>
             </div>
         </div>
@@ -371,7 +407,6 @@
         <div class="control-panel">
             <button id="start-game-btn" class="btn btn-success">Start Game</button>
             <button id="pause-game-btn" class="btn btn-warning" disabled>Pause</button>
-            <button id="new-order-btn" class="btn btn-primary" disabled>Generate Order</button>
             <button id="auto-assign-btn" class="btn btn-secondary">🤖 Auto: OFF</button>
             <button id="sound-toggle-btn" class="btn btn-secondary">🔊 Sound On</button>
             <button id="shortcuts-help-btn" class="btn btn-secondary">⌨️ Shortcuts</button>

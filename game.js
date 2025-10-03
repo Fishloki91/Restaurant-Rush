@@ -58,29 +58,47 @@ class RestaurantGame {
     
     async loadRecipeData() {
         try {
-            const response = await fetch('data/recipes.json');
-            this.recipeData = await response.json();
-            
-            // Load orders configuration
-            try {
-                const ordersResponse = await fetch('data/orders.json');
-                this.ordersConfig = await ordersResponse.json();
-            } catch (e) {
-                console.warn('Orders config not found, using defaults');
-                this.ordersConfig = null;
-            }
-            
+            // Load all external data files in parallel
+            const [
+                recipeRes,
+                ordersRes,
+                achievementsRes,
+                equipmentRes,
+                challengesRes,
+                staffRolesRes,
+                specialtiesRes,
+                stringsRes
+            ] = await Promise.all([
+                fetch('data/recipes.json'),
+                fetch('data/orders.json'),
+                fetch('data/achievements.json'),
+                fetch('data/equipment.json'),
+                fetch('data/challenges.json'),
+                fetch('data/staff_roles.json'),
+                fetch('data/specialties.json'),
+                fetch('data/strings.json')
+            ]);
+
+            this.recipeData = await recipeRes.json();
+            this.ordersConfig = ordersRes.ok ? await ordersRes.json() : null;
+            this.achievementsData = achievementsRes.ok ? await achievementsRes.json() : [];
+            this.equipmentData = equipmentRes.ok ? await equipmentRes.json() : [];
+            this.challengesData = challengesRes.ok ? await challengesRes.json() : [];
+            this.staffRolesData = staffRolesRes.ok ? await staffRolesRes.json() : [];
+            this.specialtiesData = specialtiesRes.ok ? await specialtiesRes.json() : [];
+            this.stringsData = stringsRes.ok ? await stringsRes.json() : {};
+
             this.initializeInventory();
             this.initializeStaff();
             this.initializeRecipes();
             this.initializeEquipment();
             this.initializeAchievements();
             this.initializeEmployeeOfMonth();
-            
+
             // Render after initialization is complete
             this.render();
         } catch (error) {
-            console.error('Error loading recipe data:', error);
+            console.error('Error loading game data:', error);
             // Fallback to original initialization if file not found
             this.initializeInventoryLegacy();
             this.initializeStaff();
@@ -88,7 +106,7 @@ class RestaurantGame {
             this.initializeEquipment();
             this.initializeAchievements();
             this.initializeEmployeeOfMonth();
-            
+
             // Render after initialization is complete
             this.render();
         }
@@ -210,15 +228,15 @@ class RestaurantGame {
     generateRandomStaff() {
         const firstNames = ['Alex', 'Jordan', 'Sam', 'Taylor', 'Morgan', 'Casey', 'Jamie', 'Riley', 'Quinn', 'Blake'];
         const lastNames = ['Smith', 'Johnson', 'Brown', 'Davis', 'Wilson', 'Martinez', 'Garcia', 'Lee', 'Wang', 'Chen'];
-        const roles = ['Line Cook', 'Prep Cook', 'Sous Chef', 'Head Chef'];
-        const specialities = ['Italian', 'Asian', 'Grill', 'Prep', 'Mexican', 'French', 'Pastry', 'Seafood'];
-        
+        const roles = Array.isArray(this.staffRolesData) && this.staffRolesData.length ? this.staffRolesData : ['Line Cook', 'Prep Cook', 'Sous Chef', 'Head Chef'];
+        const specialities = Array.isArray(this.specialtiesData) && this.specialtiesData.length ? this.specialtiesData : ['Italian', 'Asian', 'Grill', 'Prep', 'Mexican', 'French', 'Pastry', 'Seafood'];
+
         const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
         const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
         const role = roles[Math.floor(Math.random() * roles.length)];
         const speciality = specialities[Math.floor(Math.random() * specialities.length)];
         const randomEfficiency = 0.6 + Math.random() * 0.3; // Random efficiency between 0.6 and 0.9
-        
+
         return {
             id: this.nextStaffId++,
             name: `${firstName} ${lastName}`,
@@ -325,51 +343,10 @@ class RestaurantGame {
     }
     
     initializeEquipment() {
-        // Define all equipment types with their upgrade levels
-        this.equipmentTypes = [
-            {
-                id: 'stove',
-                name: 'Industrial Stove',
-                icon: '🔥',
-                description: 'Faster cooking times',
-                maxLevel: 3,
-                baseCost: 200,
-                effect: 'cooking_speed',
-                effectPerLevel: 0.1 // 10% faster per level
-            },
-            {
-                id: 'fridge',
-                name: 'Commercial Fridge',
-                icon: '❄️',
-                description: 'Reduced ingredient waste',
-                maxLevel: 3,
-                baseCost: 250,
-                effect: 'ingredient_efficiency',
-                effectPerLevel: 0.15 // 15% chance to not consume ingredients per level
-            },
-            {
-                id: 'counter',
-                name: 'Premium Counter',
-                icon: '🔲',
-                description: 'Increased dish prices',
-                maxLevel: 3,
-                baseCost: 300,
-                effect: 'price_boost',
-                effectPerLevel: 0.08 // 8% price increase per level
-            },
-            {
-                id: 'dishwasher',
-                name: 'Auto Dishwasher',
-                icon: '🧽',
-                description: 'Staff fatigue reduction',
-                maxLevel: 3,
-                baseCost: 180,
-                effect: 'fatigue_reduction',
-                effectPerLevel: 0.2 // 20% less fatigue gain per level
-            }
-        ];
-        
+        // Use external equipment data if available
+        this.equipmentTypes = Array.isArray(this.equipmentData) && this.equipmentData.length ? this.equipmentData : [];
         // Initialize all equipment at level 0
+        this.equipment = {};
         this.equipmentTypes.forEach(type => {
             this.equipment[type.id] = {
                 level: 0,
@@ -424,39 +401,8 @@ class RestaurantGame {
     }
     
     initializeAchievements() {
-        // Define all achievements with unlock conditions
-        this.allAchievements = [
-            // Getting Started
-            { id: 'first_order', name: 'First Steps', icon: '🎯', description: 'Complete your first order', requirement: 1, category: 'orders', unlocked: false },
-            { id: 'ten_orders', name: 'Gaining Momentum', icon: '📈', description: 'Complete 10 orders', requirement: 10, category: 'orders', unlocked: false },
-            { id: 'fifty_orders', name: 'Experienced Chef', icon: '👨‍🍳', description: 'Complete 50 orders', requirement: 50, category: 'orders', unlocked: false },
-            { id: 'hundred_orders', name: 'Master Chef', icon: '⭐', description: 'Complete 100 orders', requirement: 100, category: 'orders', unlocked: false },
-            
-            // Revenue Milestones
-            { id: 'revenue_500', name: 'Small Business', icon: '💵', description: 'Reach $500 in revenue', requirement: 500, category: 'revenue', unlocked: false },
-            { id: 'revenue_1000', name: 'Growing Business', icon: '💰', description: 'Reach $1,000 in revenue', requirement: 1000, category: 'revenue', unlocked: false },
-            { id: 'revenue_2500', name: 'Thriving Restaurant', icon: '🏆', description: 'Reach $2,500 in revenue', requirement: 2500, category: 'revenue', unlocked: false },
-            { id: 'revenue_5000', name: 'Restaurant Empire', icon: '👑', description: 'Reach $5,000 in revenue', requirement: 5000, category: 'revenue', unlocked: false },
-            
-            // Staff Management
-            { id: 'hire_first', name: 'Team Builder', icon: '👥', description: 'Hire your first employee', requirement: 1, category: 'staff', unlocked: false },
-            { id: 'hire_five', name: 'Growing Team', icon: '🤝', description: 'Hire 5 employees', requirement: 5, category: 'staff', unlocked: false },
-            { id: 'hire_ten', name: 'HR Manager', icon: '📋', description: 'Hire 10 employees', requirement: 10, category: 'staff', unlocked: false },
-            
-            // Days Survived
-            { id: 'survive_5', name: 'First Week', icon: '📅', description: 'Survive 5 days', requirement: 5, category: 'days', unlocked: false },
-            { id: 'survive_10', name: 'Established', icon: '🗓️', description: 'Survive 10 days', requirement: 10, category: 'days', unlocked: false },
-            { id: 'survive_20', name: 'Restaurant Veteran', icon: '🎖️', description: 'Survive 20 days', requirement: 20, category: 'days', unlocked: false },
-            
-            // Customer Satisfaction
-            { id: 'perfect_day', name: 'Perfect Service', icon: '😊', description: 'Complete a day with 100% satisfaction', requirement: 1, category: 'perfect_days', unlocked: false },
-            { id: 'vip_ten', name: 'VIP Favorite', icon: '⭐', description: 'Serve 10 VIP customers', requirement: 10, category: 'vip', unlocked: false },
-            
-            // Equipment
-            { id: 'first_upgrade', name: 'Modernizing', icon: '🔧', description: 'Upgrade any equipment to Level 1', requirement: 1, category: 'equipment', unlocked: false },
-            { id: 'all_max', name: 'Fully Equipped', icon: '🏭', description: 'Max out all equipment to Level 3', requirement: 12, category: 'equipment', unlocked: false }
-        ];
-        
+        // Use external achievements data if available
+        this.allAchievements = Array.isArray(this.achievementsData) && this.achievementsData.length ? this.achievementsData.map(a => ({...a, unlocked: false})) : [];
         this.achievements = [];
     }
     
@@ -561,14 +507,8 @@ class RestaurantGame {
     }
     
     generateWeeklyChallenge() {
-        const challenges = [
-            { id: 'fastest_fulfillment', name: 'Speed Demon', description: 'Complete an order in under 60 seconds', target: 60, icon: '⚡' },
-            { id: 'highest_tips', name: 'Tip Master', description: 'Earn $50 in tips in one day', target: 50, icon: '💰' },
-            { id: 'most_orders', name: 'Order Champion', description: 'Complete 15 orders in one day', target: 15, icon: '📋' },
-            { id: 'perfect_streak', name: 'Perfectionist', description: 'Complete 5 orders without any failures', target: 5, icon: '⭐' },
-            { id: 'teamwork_hero', name: 'Team Player', description: 'Maintain 100% performance while completing 10 orders', target: 10, icon: '🤝' }
-        ];
-        
+        const challenges = Array.isArray(this.challengesData) && this.challengesData.length ? this.challengesData : [];
+        if (challenges.length === 0) return;
         this.weeklyChallenge = challenges[Math.floor(Math.random() * challenges.length)];
         this.weeklyChallenge.startDay = this.day;
         this.weeklyChallenge.endDay = this.day + 7;

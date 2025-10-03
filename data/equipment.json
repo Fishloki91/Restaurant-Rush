@@ -1,0 +1,5 @@
+[
+  { "id": "oven", "name": "Oven", "upgrades": ["Faster Cooking", "Energy Efficient"], "bonus": { "speed": 10 } },
+  { "id": "fridge", "name": "Fridge", "upgrades": ["More Storage", "Eco Mode"], "bonus": { "storage": 20 } },
+  { "id": "grill", "name": "Grill", "upgrades": ["Non-stick", "High Heat"], "bonus": { "quality": 5 } }
+]

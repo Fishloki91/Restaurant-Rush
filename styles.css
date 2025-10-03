@@ -133,6 +133,7 @@ body {
     font-size: 0.9rem;
     line-height: 1.6;
     border: 2px solid #D4A574;
+    pointer-events: none;
 }
 
 .stat-tooltip .tooltip-content::before {
@@ -148,14 +149,14 @@ body {
 
 .dashboard-content {
     padding: 20px;
-    display: none;
+    display: none !important;
     animation: fadeIn 0.3s ease-in-out;
     flex: 1;
     overflow-y: auto;
 }
 
 .dashboard-content.view-active {
-    display: block;
+    display: block !important;
 }
 
 @keyframes fadeIn {
@@ -320,6 +321,7 @@ body {
     white-space: nowrap;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     border: 1px solid #D4A574;
+    pointer-events: none;
 }
 
 .card-tooltip .tooltip-content::before {
@@ -914,15 +916,16 @@ body {
 
 .inventory-item {
     background: #FDFBF7;
-    border-radius: 8px;
-    padding: 10px;
-    box-shadow: 0 2px 5px rgba(139, 90, 60, 0.15);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    cursor: help;
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 4px 15px rgba(139, 90, 60, 0.15);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    position: relative;
     border: 1px solid rgba(193, 123, 91, 0.2);
-}
-
-.inventory-item:hover {
+    pointer-events: auto;
     transform: translateY(-2px);
     box-shadow: 0 6px 12px rgba(139, 90, 60, 0.25);
 }
@@ -1177,18 +1180,19 @@ body {
 
 /* Scrollbar styling */
 ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-}
-
-::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb {
-    background: #888;
-    border-radius: 4px;
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(135deg, #C17B5B 0%, #8B5A3C 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-height: 44px; /* Touch-friendly minimum */
+    box-shadow: 0 2px 8px rgba(139, 90, 60, 0.3);
+    pointer-events: auto;
 }
 
 ::-webkit-scrollbar-thumb:hover {

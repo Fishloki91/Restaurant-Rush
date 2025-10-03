@@ -1,0 +1,7 @@
+[
+  { "id": "fastest_fulfillment", "name": "Speed Demon", "description": "Complete an order in under 60 seconds", "target": 60, "icon": "⚡" },
+  { "id": "highest_tips", "name": "Tip Master", "description": "Earn $50 in tips in one day", "target": 50, "icon": "💰" },
+  { "id": "most_orders", "name": "Order Champion", "description": "Complete 15 orders in one day", "target": 15, "icon": "📋" },
+  { "id": "perfect_streak", "name": "Perfectionist", "description": "Complete 5 orders without any failures", "target": 5, "icon": "⭐" },
+  { "id": "teamwork_hero", "name": "Team Player", "description": "Maintain 100% performance while completing 10 orders", "target": 10, "icon": "🤝" }
+]
