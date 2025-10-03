@@ -11,20 +11,29 @@
         <header class="dashboard-header">
             <h1>🍽️ Restaurant Rush</h1>
             <div class="game-stats">
-                <div class="stat">
+                <div class="stat stat-tooltip-container">
                     <span class="stat-label">Day:</span>
                     <span id="game-day" class="stat-value">1</span>
                     <div class="day-progress">
                         <div id="day-progress-bar" class="day-progress-bar"></div>
                     </div>
+                    <div class="stat-tooltip" id="day-tooltip">
+                        <div class="tooltip-content"></div>
+                    </div>
                 </div>
-                <div class="stat">
+                <div class="stat stat-tooltip-container">
                     <span class="stat-label">Revenue:</span>
                     <span id="revenue" class="stat-value">$0</span>
+                    <div class="stat-tooltip" id="revenue-tooltip">
+                        <div class="tooltip-content"></div>
+                    </div>
                 </div>
-                <div class="stat">
+                <div class="stat stat-tooltip-container">
                     <span class="stat-label">Overall Rating:</span>
                     <span id="overall-rating" class="stat-value">5.0</span>
+                    <div class="stat-tooltip" id="rating-tooltip">
+                        <div class="tooltip-content"></div>
+                    </div>
                 </div>
             </div>
         </header>
@@ -95,6 +104,19 @@
                         </div>
                     </div>
                     <button class="view-details-btn" data-view="recipes">View Details →</button>
+                </div>
+
+                <!-- Equipment Overview Card -->
+                <div class="overview-card" id="equipment-overview-card">
+                    <div class="card-icon">🔧</div>
+                    <div class="card-content">
+                        <h3>Equipment</h3>
+                        <div class="card-stats">
+                            <span id="overview-equipment-upgrades" class="big-stat">0</span>
+                            <span class="stat-sublabel">Total Upgrades</span>
+                        </div>
+                    </div>
+                    <button class="view-details-btn" data-view="equipment">View Details →</button>
                 </div>
             </div>
         </div>
@@ -178,6 +200,18 @@
             </div>
             <div id="recipes-container" class="recipes-container">
                 <!-- Recipes will be dynamically added here -->
+            </div>
+        </div>
+
+        <!-- Equipment View -->
+        <div id="equipment-view" class="dashboard-content detail-view">
+            <div class="detail-view-header">
+                <button class="back-btn" data-back="overview">← Back to Overview</button>
+                <h2>🔧 Equipment Upgrades</h2>
+                <span class="badge" style="background: #D89E54;">Boost your restaurant!</span>
+            </div>
+            <div id="equipment-container" class="equipment-container">
+                <!-- Equipment will be dynamically added here -->
             </div>
         </div>
 

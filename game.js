@@ -30,6 +30,7 @@ class RestaurantGame {
         this.totalOrdersCompleted = 0; // Track total orders completed for unlocks
         this.previousDayRevenue = 0; // Track previous day's revenue for trend
         this.revenueTrend = 0; // Revenue trend (positive or negative)
+        this.equipment = {}; // Track equipment upgrades
         
         // Initialize Audio Context for sound effects
         this.audioContext = null;
@@ -38,6 +39,7 @@ class RestaurantGame {
         this.initializeInventory();
         this.initializeStaff();
         this.initializeRecipes();
+        this.initializeEquipment();
     }
     
     initializeAudio() {
@@ -215,6 +217,97 @@ class RestaurantGame {
         return this.allRecipes.filter(r => this.unlockedRecipes.includes(r.id));
     }
     
+    initializeEquipment() {
+        // Define all equipment types with their upgrade levels
+        this.equipmentTypes = [
+            {
+                id: 'stove',
+                name: 'Industrial Stove',
+                icon: '🔥',
+                description: 'Faster cooking times',
+                maxLevel: 3,
+                baseCost: 200,
+                effect: 'cooking_speed',
+                effectPerLevel: 0.1 // 10% faster per level
+            },
+            {
+                id: 'fridge',
+                name: 'Commercial Fridge',
+                icon: '❄️',
+                description: 'Reduced ingredient waste',
+                maxLevel: 3,
+                baseCost: 250,
+                effect: 'ingredient_efficiency',
+                effectPerLevel: 0.15 // 15% chance to not consume ingredients per level
+            },
+            {
+                id: 'counter',
+                name: 'Premium Counter',
+                icon: '🔲',
+                description: 'Increased dish prices',
+                maxLevel: 3,
+                baseCost: 300,
+                effect: 'price_boost',
+                effectPerLevel: 0.08 // 8% price increase per level
+            },
+            {
+                id: 'dishwasher',
+                name: 'Auto Dishwasher',
+                icon: '🧽',
+                description: 'Staff fatigue reduction',
+                maxLevel: 3,
+                baseCost: 180,
+                effect: 'fatigue_reduction',
+                effectPerLevel: 0.2 // 20% less fatigue gain per level
+            }
+        ];
+        
+        // Initialize all equipment at level 0
+        this.equipmentTypes.forEach(type => {
+            this.equipment[type.id] = {
+                level: 0,
+                type: type
+            };
+        });
+    }
+    
+    upgradeEquipment(equipmentId) {
+        const equipment = this.equipment[equipmentId];
+        if (!equipment) return;
+        
+        const equipType = equipment.type;
+        
+        if (equipment.level >= equipType.maxLevel) {
+            this.addFeedback(`⚠️ ${equipType.name} is already at maximum level!`, false);
+            return;
+        }
+        
+        // Calculate cost (increases with each level)
+        const upgradeCost = equipType.baseCost + (equipment.level * equipType.baseCost * 0.5);
+        
+        if (this.revenue < upgradeCost) {
+            this.addFeedback(`⚠️ Not enough revenue to upgrade ${equipType.name}! Cost: $${upgradeCost}`, false);
+            return;
+        }
+        
+        // Apply upgrade
+        this.revenue -= upgradeCost;
+        equipment.level++;
+        
+        this.addFeedback(`${equipType.icon} ${equipType.name} upgraded to Level ${equipment.level}!`, true);
+        this.render();
+    }
+    
+    getEquipmentBonus(effectType) {
+        let totalBonus = 0;
+        Object.values(this.equipment).forEach(eq => {
+            if (eq.type.effect === effectType) {
+                totalBonus += eq.level * eq.type.effectPerLevel;
+            }
+        });
+        return totalBonus;
+    }
+    
     hireStaff() {
         const hireCost = 150;
         if (this.revenue < hireCost) {
@@ -313,6 +406,7 @@ class RestaurantGame {
         this.initializeInventory();
         this.initializeStaff();
         this.initializeRecipes();
+        this.initializeEquipment();
         
         // Hide modal
         const modal = document.getElementById('game-over-modal');
@@ -438,6 +532,14 @@ class RestaurantGame {
             maxTime = Math.floor(maxTime * 0.8); // 20% less time
         }
         
+        // Apply equipment price boost
+        const priceBoost = this.getEquipmentBonus('price_boost');
+        totalPrice = Math.floor(totalPrice * (1 + priceBoost));
+        
+        // Apply equipment cooking speed bonus
+        const speedBonus = this.getEquipmentBonus('cooking_speed');
+        maxTime = Math.floor(maxTime * (1 - speedBonus));
+        
         // Check if we have enough ingredients
         const requiredIngredients = {};
         orderItems.forEach(item => {
@@ -505,9 +607,15 @@ class RestaurantGame {
         // Pick the most efficient available staff
         const staffMember = availableStaff.sort((a, b) => b.efficiency - a.efficiency)[0];
         
-        // Deduct ingredients from inventory
+        // Deduct ingredients from inventory (with possible efficiency bonus)
+        const ingredientEfficiency = this.getEquipmentBonus('ingredient_efficiency');
         for (const [ingredient, amount] of Object.entries(order.requiredIngredients)) {
-            this.inventory[ingredient].current -= amount;
+            // Chance to not consume ingredient based on efficiency
+            for (let i = 0; i < amount; i++) {
+                if (Math.random() > ingredientEfficiency) {
+                    this.inventory[ingredient].current -= 1;
+                }
+            }
         }
         
         order.status = 'in-progress';
@@ -624,12 +732,16 @@ class RestaurantGame {
     }
     
     updateStaff() {
+        // Get fatigue reduction bonus from equipment
+        const fatigueReduction = this.getEquipmentBonus('fatigue_reduction');
+        
         // Gradually recover performance for available staff
         this.staff.forEach(staff => {
             // Update fatigue
             if (staff.status === 'busy') {
-                // Increase fatigue while working (0.5 per second)
-                staff.fatigue = Math.min(100, staff.fatigue + 0.5);
+                // Increase fatigue while working (reduced by equipment)
+                const fatigueGain = 0.5 * (1 - fatigueReduction);
+                staff.fatigue = Math.min(100, staff.fatigue + fatigueGain);
             } else if (staff.status === 'available') {
                 // Decrease fatigue while idle (0.3 per second)
                 staff.fatigue = Math.max(0, staff.fatigue - 0.3);
@@ -794,6 +906,7 @@ class RestaurantGame {
         this.renderGameStats();
         this.renderOverview();
         this.renderRecipes();
+        this.renderEquipment();
     }
     
     renderOverview() {
@@ -815,6 +928,13 @@ class RestaurantGame {
         const recipesUnlockedEl = document.getElementById('overview-recipes-unlocked');
         if (recipesUnlockedEl) {
             recipesUnlockedEl.textContent = this.unlockedRecipes.length;
+        }
+        
+        // Update equipment overview
+        const equipmentUpgradesEl = document.getElementById('overview-equipment-upgrades');
+        if (equipmentUpgradesEl) {
+            const totalUpgrades = Object.values(this.equipment).reduce((sum, eq) => sum + eq.level, 0);
+            equipmentUpgradesEl.textContent = totalUpgrades;
         }
         
         // Add notification badges
@@ -859,6 +979,20 @@ class RestaurantGame {
             progressBar.style.width = `${dayProgress}%`;
         }
         
+        // Update day tooltip (QOL1)
+        const dayTooltip = document.querySelector('#day-tooltip .tooltip-content');
+        if (dayTooltip) {
+            const timeRemaining = this.dayDuration - this.dayTimer;
+            const minutes = Math.floor(timeRemaining / 60);
+            const seconds = timeRemaining % 60;
+            dayTooltip.innerHTML = `
+                <strong>Day ${this.day}</strong><br>
+                Progress: ${Math.floor(dayProgress)}%<br>
+                Time Remaining: ${minutes}:${seconds.toString().padStart(2, '0')}<br>
+                Order Chance: ${(this.orderGenerationChance * 100).toFixed(0)}%
+            `;
+        }
+        
         // Update revenue display with trend indicator
         const revenueEl = document.getElementById('revenue');
         let trendIndicator = '';
@@ -867,15 +1001,43 @@ class RestaurantGame {
             if (this.revenueTrend > 0) {
                 trendIndicator = ` <span style="color: #28a745; font-size: 0.8rem;">▲ ${trendValue}%</span>`;
             } else if (this.revenueTrend < 0) {
-                trendIndicator = ` <span style="color: #dc3545; font-size: 0.8rem;">▼ ${trendValue}%</span>`;
+                trendIndicator = ` <span style="color: #666; font-size: 0.8rem;">▼ ${trendValue}%</span>`;
             } else {
                 trendIndicator = ` <span style="color: #666; font-size: 0.8rem;">━ 0%</span>`;
             }
         }
         revenueEl.innerHTML = `$${this.revenue}${trendIndicator}`;
         
+        // Update revenue tooltip (QOL1)
+        const revenueTooltip = document.querySelector('#revenue-tooltip .tooltip-content');
+        if (revenueTooltip) {
+            const staffCost = this.staff.length * 50; // Estimated upkeep
+            const netRevenue = this.revenue - this.dayStartRevenue;
+            revenueTooltip.innerHTML = `
+                <strong>Revenue Details</strong><br>
+                Total: $${this.revenue}<br>
+                Today's Gain: $${netRevenue}<br>
+                Staff Count: ${this.staff.length}<br>
+                ${this.day > 1 ? `Previous Day: $${this.previousDayRevenue}<br>` : ''}
+            `;
+        }
+        
         const avgRating = this.calculateAverageRating();
         document.getElementById('overall-rating').textContent = avgRating.toFixed(1);
+        
+        // Update rating tooltip (QOL1)
+        const ratingTooltip = document.querySelector('#rating-tooltip .tooltip-content');
+        if (ratingTooltip) {
+            const total = this.happyCustomers + this.unhappyCustomers;
+            const successRate = total > 0 ? ((this.happyCustomers / total) * 100).toFixed(1) : '100.0';
+            ratingTooltip.innerHTML = `
+                <strong>Customer Feedback</strong><br>
+                Happy: ${this.happyCustomers} 😊<br>
+                Unhappy: ${this.unhappyCustomers} 😞<br>
+                Success Rate: ${successRate}%<br>
+                VIP Served: ${this.vipCustomers} ⭐
+            `;
+        }
     }
     
     calculateAverageRating() {
@@ -1032,10 +1194,23 @@ class RestaurantGame {
             
             const canRest = staff.status === 'available' && staff.fatigue > 30;
             
+            // QOL3: Efficiency badge based on current performance
+            let efficiencyBadge = '';
+            const effPercent = staff.efficiency * 100;
+            if (effPercent >= 90) {
+                efficiencyBadge = '<span class="efficiency-badge excellent" title="Excellent Performance">⭐⭐⭐</span>';
+            } else if (effPercent >= 75) {
+                efficiencyBadge = '<span class="efficiency-badge good" title="Good Performance">⭐⭐</span>';
+            } else if (effPercent >= 60) {
+                efficiencyBadge = '<span class="efficiency-badge average" title="Average Performance">⭐</span>';
+            } else {
+                efficiencyBadge = '<span class="efficiency-badge poor" title="Needs Rest">⚠️</span>';
+            }
+            
             staffCard.innerHTML = `
                 <div class="staff-header">
                     <div>
-                        <div class="staff-name">${staff.name} ${upgradeStars}</div>
+                        <div class="staff-name">${staff.name} ${upgradeStars} ${efficiencyBadge}</div>
                         <div class="staff-role">${staff.role} ${canUpgrade ? `(Level ${staff.upgradeLevel}/${staff.maxUpgradeLevel})` : '(MAX)'}</div>
                     </div>
                     <span class="staff-status ${staff.status}">${staff.status.toUpperCase()}</span>
@@ -1109,6 +1284,14 @@ class RestaurantGame {
         const container = document.getElementById('inventory-container');
         container.innerHTML = '';
         
+        // QOL2: Calculate ingredient usage in active orders
+        const ingredientUsage = {};
+        this.orders.forEach(order => {
+            Object.keys(order.requiredIngredients).forEach(ing => {
+                ingredientUsage[ing] = (ingredientUsage[ing] || 0) + 1;
+            });
+        });
+        
         for (const [name, stock] of Object.entries(this.inventory)) {
             const percentage = (stock.current / stock.max) * 100;
             let levelClass = 'high';
@@ -1125,11 +1308,16 @@ class RestaurantGame {
             const restockCost = 10;
             const canRestock = this.revenue >= restockCost && stock.current < stock.max;
             
+            // QOL2: Show usage badge
+            const usageCount = ingredientUsage[name] || 0;
+            const usageBadge = usageCount > 0 ? `<span class="usage-badge" title="Used in ${usageCount} active order(s)">🍽️ ${usageCount}</span>` : '';
+            
             item.innerHTML = `
                 <div class="inventory-header">
                     <span class="ingredient-name">${name}</span>
                     <span class="stock-level ${levelClass}">${stock.current}/${stock.max}</span>
                 </div>
+                ${usageBadge}
                 <div class="stock-bar">
                     <div class="stock-bar-fill ${levelClass}" style="width: ${percentage}%"></div>
                 </div>
@@ -1229,6 +1417,68 @@ class RestaurantGame {
                 container.appendChild(recipeCard);
             });
         }
+    }
+    
+    renderEquipment() {
+        const container = document.getElementById('equipment-container');
+        if (!container) return;
+        
+        container.innerHTML = '';
+        
+        this.equipmentTypes.forEach(type => {
+            const equipment = this.equipment[type.id];
+            const currentLevel = equipment.level;
+            const maxLevel = type.maxLevel;
+            const upgradeCost = type.baseCost + (currentLevel * type.baseCost * 0.5);
+            const canUpgrade = this.revenue >= upgradeCost && currentLevel < maxLevel;
+            
+            const equipCard = document.createElement('div');
+            equipCard.className = 'equipment-card';
+            
+            const stars = '⭐'.repeat(currentLevel);
+            const emptyStars = '☆'.repeat(maxLevel - currentLevel);
+            
+            const bonusPerLevel = (type.effectPerLevel * 100).toFixed(0);
+            const currentBonus = (currentLevel * type.effectPerLevel * 100).toFixed(0);
+            
+            equipCard.innerHTML = `
+                <div class="equipment-header">
+                    <span class="equipment-icon">${type.icon}</span>
+                    <div class="equipment-info">
+                        <div class="equipment-name">${type.name}</div>
+                        <div class="equipment-level">${stars}${emptyStars} Level ${currentLevel}/${maxLevel}</div>
+                    </div>
+                </div>
+                <div class="equipment-description">${type.description}</div>
+                <div class="equipment-stats">
+                    <div class="stat-item">
+                        <span class="stat-label">Current Bonus:</span>
+                        <span class="stat-value">${currentBonus}%</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Per Level:</span>
+                        <span class="stat-value">+${bonusPerLevel}%</span>
+                    </div>
+                </div>
+                <button 
+                    class="upgrade-equipment-btn ${canUpgrade ? '' : 'disabled'}" 
+                    data-equipment-id="${type.id}"
+                    ${!canUpgrade ? 'disabled' : ''}
+                >
+                    ${currentLevel >= maxLevel ? 'Max Level' : `Upgrade ($${upgradeCost})`}
+                </button>
+            `;
+            
+            container.appendChild(equipCard);
+        });
+        
+        // Add event listeners to upgrade buttons
+        document.querySelectorAll('.upgrade-equipment-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const equipmentId = e.target.getAttribute('data-equipment-id');
+                this.upgradeEquipment(equipmentId);
+            });
+        });
     }
 }
 

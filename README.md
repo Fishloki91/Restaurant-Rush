@@ -11,12 +11,13 @@
 
 ## 🎮 Key Features
 - **Dynamic Staff Hiring** system to expand your team with randomly-generated employees
+- **Equipment Upgrades** to boost cooking speed, reduce waste, increase prices, and lower fatigue
 - **End-of-Day Summaries** with detailed performance metrics and bonus rewards
 - **Multi-View Navigation** with dedicated screens for each management area and smooth transitions
 - **Interactive Dashboard** with quick-stat overview cards and visual notification alerts
 - **Order System** with automatic generation, time-sensitive completion, and assigned staff tracking
 - **Staff Performance** tracking with efficiency ratings, workload management, and upgrades
-- **Inventory Management** with color-coded stock levels and one-click restocking
+- **Inventory Management** with color-coded stock levels, usage tracking, and one-click restocking
 - **Satisfaction Metrics** including customer feedback and restaurant ratings
 - **Game Over Detection** when funds run out with final statistics display
 
@@ -29,17 +30,26 @@
 - Ingredients are consumed when orders are assigned, requiring strategic restocking ($50 cost)
 - Hire new staff members for $150 with random efficiency stats (60-90%)
 - Upgrade staff up to Level 3 for increased efficiency
+- Upgrade equipment (Stove, Fridge, Counter, Dishwasher) to boost restaurant performance
 - Each day lasts 3 minutes with 10% end-of-day revenue bonus
 - Game over occurs when revenue reaches $0 or below
 
 ## 🎯 Objective
-Balance quick order fulfillment, staff workload, inventory management, and customer satisfaction to maximize revenue and maintain a high restaurant rating. Strategically hire and upgrade staff to handle increasing difficulty. Survive as many days as possible while growing your restaurant empire!
+Balance quick order fulfillment, staff workload, inventory management, and customer satisfaction to maximize revenue and maintain a high restaurant rating. Strategically hire and upgrade staff to handle increasing difficulty. Invest in equipment upgrades to boost your restaurant's efficiency. Survive as many days as possible while growing your restaurant empire!
 
 **Tech Stack**: Pure HTML5/CSS3/JavaScript with responsive design
 **Play Style**: Real-time strategy with resource management elements
 **Display**: Optimized for 1920x1080 screens with no scrolling
 
 ## Updates
+
+### v1.8.0 - Equipment Upgrade System
+**Major Feature:** Equipment upgrade system - Invest in professional-grade equipment! Upgrade your Stove (faster cooking), Fridge (reduced waste), Counter (higher prices), and Dishwasher (less fatigue). Each upgrades up to Level 3 with cumulative bonuses that transform your restaurant's efficiency.
+
+**Quality of Life Improvements:**
+- **Quick stats tooltips** - Hover over header stats (Day, Revenue, Rating) for detailed breakdowns with progress, gains, and customer feedback
+- **Ingredient usage tracker** - See which ingredients are currently in demand with usage badges (🍽️) showing active order count
+- **Staff efficiency badges** - Visual performance indicators (⭐⭐⭐/⭐⭐/⭐/⚠️) instantly identify your best performers and staff needing rest
 
 ### v1.7.0 - Staff Fatigue & Morale System
 **Major Feature:** Staff fatigue & morale system - Keep your team happy and rested! Staff now experience fatigue as they work (0-100%), and their morale affects performance. Send tired staff on breaks to rapidly recover fatigue and maintain peak efficiency.
