@@ -42,6 +42,11 @@ class RestaurantGame {
         this.recipeData = null; // Store loaded recipe data
         this.ordersConfig = null; // Store orders configuration
         
+        // Toast notification queue for stacking
+        this.toastQueue = [];
+        this.activeToasts = [];
+        this.maxVisibleToasts = 5;
+        
         // Staff of the Day tracking
         this.monthlyLeaderboard = []; // Track staff daily performance
         this.currentMonthWinner = null; // Current Staff of the Day
@@ -72,7 +77,8 @@ class RestaurantGame {
                 specialtiesRes,
                 stringsRes,
                 moodsRes,
-                orderStatesRes
+                orderStatesRes,
+                traitsRes
             ] = await Promise.all([
                 fetch('data/recipes.json'),
                 fetch('data/orders.json'),
@@ -83,7 +89,8 @@ class RestaurantGame {
                 fetch('data/specialties.json'),
                 fetch('data/strings.json'),
                 fetch('data/moods.json'),
-                fetch('data/order_states.json')
+                fetch('data/order_states.json'),
+                fetch('data/traits.json')
             ]);
 
             this.recipeData = await recipeRes.json();
@@ -96,6 +103,7 @@ class RestaurantGame {
             this.stringsData = stringsRes.ok ? await stringsRes.json() : {};
             this.moodsData = moodsRes.ok ? await moodsRes.json() : [];
             this.orderStatesData = orderStatesRes.ok ? await orderStatesRes.json() : [];
+            this.traitsData = traitsRes.ok ? await traitsRes.json() : [];
 
             this.initializeInventory();
             this.initializeStaff();
@@ -246,6 +254,13 @@ class RestaurantGame {
         const speciality = specialities[Math.floor(Math.random() * specialities.length)];
         const randomEfficiency = 0.6 + Math.random() * 0.3; // Random efficiency between 0.6 and 0.9
 
+        // Assign 2 random permanent traits
+        const traits = this.getRandomTraits(2);
+        
+        // Calculate base performance from traits
+        const traitsModifier = traits.reduce((acc, trait) => acc * trait.modifier, 1.0);
+        const basePerformance = Math.round(100 * traitsModifier);
+
         return {
             id: this.nextStaffId++,
             name: `${firstName} ${lastName}`,
@@ -256,7 +271,9 @@ class RestaurantGame {
             status: 'available',
             ordersCompleted: 0,
             currentOrder: null,
-            performance: 100,
+            performance: basePerformance,
+            basePerformance: basePerformance, // Store base performance for calculations
+            traits: traits, // Store permanent traits
             upgradeLevel: 0,
             maxUpgradeLevel: 3,
             fatigue: 0, // Fatigue level (0-100)
@@ -278,6 +295,18 @@ class RestaurantGame {
             employeeOfMonthBonus: 0,
             hallOfFameCount: 0
         };
+    }
+    
+    getRandomTraits(count) {
+        const availableTraits = Array.isArray(this.traitsData) && this.traitsData.length ? this.traitsData : [];
+        if (availableTraits.length === 0) {
+            // Fallback if traits not loaded
+            return [];
+        }
+        
+        // Shuffle and pick random traits
+        const shuffled = [...availableTraits].sort(() => Math.random() - 0.5);
+        return shuffled.slice(0, count);
     }
     
     getRandomMood() {
@@ -499,37 +528,75 @@ class RestaurantGame {
     }
     
     showToast({ icon = '💬', title = '', message = '', type = 'info', duration = 4000 }) {
-        // Create toast element if it doesn't exist
-        let toast = document.getElementById('game-toast');
-        if (!toast) {
-            toast = document.createElement('div');
-            toast.id = 'game-toast';
-            toast.className = 'game-toast';
-            toast.innerHTML = `
-                <div class="toast-icon"></div>
-                <div class="toast-content">
-                    <div class="toast-title"></div>
-                    <div class="toast-message"></div>
-                </div>
-            `;
-            document.body.appendChild(toast);
+        // Add toast to queue
+        this.toastQueue.push({ icon, title, message, type, duration });
+        
+        // Process queue
+        this.processToastQueue();
+    }
+    
+    processToastQueue() {
+        // Remove expired toasts from active list
+        const now = Date.now();
+        this.activeToasts = this.activeToasts.filter(toast => {
+            if (now >= toast.expireTime) {
+                toast.element.remove();
+                return false;
+            }
+            return true;
+        });
+        
+        // Show new toasts if there's room
+        while (this.toastQueue.length > 0 && this.activeToasts.length < this.maxVisibleToasts) {
+            const toastData = this.toastQueue.shift();
+            this.displayToast(toastData);
         }
-        
-        // Set toast type for color styling
+    }
+    
+    displayToast({ icon, title, message, type, duration }) {
+        // Create new toast element
+        const toast = document.createElement('div');
         toast.className = 'game-toast toast-' + type;
+        toast.innerHTML = `
+            <div class="toast-icon">${icon}</div>
+            <div class="toast-content">
+                <div class="toast-title">${title}</div>
+                <div class="toast-message">${message}</div>
+            </div>
+        `;
+        document.body.appendChild(toast);
         
-        // Update content
-        toast.querySelector('.toast-icon').textContent = icon;
-        toast.querySelector('.toast-title').textContent = title;
-        toast.querySelector('.toast-message').textContent = message;
+        // Calculate position based on active toasts
+        const index = this.activeToasts.length;
+        const topPosition = 80 + (index * 110); // Stack toasts vertically
+        toast.style.top = topPosition + 'px';
         
-        // Show toast
+        // Show toast with animation
         setTimeout(() => toast.classList.add('show'), 100);
+        
+        // Track active toast
+        const expireTime = Date.now() + duration;
+        this.activeToasts.push({ element: toast, expireTime });
         
         // Hide after duration
         setTimeout(() => {
             toast.classList.remove('show');
+            setTimeout(() => {
+                toast.remove();
+                this.activeToasts = this.activeToasts.filter(t => t.element !== toast);
+                // Reposition remaining toasts
+                this.repositionToasts();
+                // Process queue again in case there are pending toasts
+                this.processToastQueue();
+            }, 400); // Wait for fade out animation
         }, duration);
+    }
+    
+    repositionToasts() {
+        this.activeToasts.forEach((toast, index) => {
+            const topPosition = 80 + (index * 110);
+            toast.element.style.top = topPosition + 'px';
+        });
     }
     
     initializeStaffOfDay() {
@@ -1578,6 +1645,14 @@ class RestaurantGame {
         
         // Gradually recover performance for available staff
         this.staff.forEach(staff => {
+            // Initialize traits if not present (backward compatibility)
+            if (!staff.traits || staff.traits.length === 0) {
+                staff.traits = this.getRandomTraits(2);
+                // Recalculate base performance from traits
+                const traitsModifier = staff.traits.reduce((acc, trait) => acc * trait.modifier, 1.0);
+                staff.basePerformance = Math.round(100 * traitsModifier);
+            }
+            
             // Update mood timer
             if (!staff.mood) {
                 staff.mood = this.getRandomMood();
@@ -1598,8 +1673,14 @@ class RestaurantGame {
                 staff.moodChangeTimer = 0;
                 staff.moodChangeDuration = 60 + Math.floor(Math.random() * 60); // Next mood change in 60-120 seconds
                 
-                // Notify about mood change
-                this.addFeedback(`${staff.mood.emoji} ${staff.name}'s mood changed to ${staff.mood.name}!`, true);
+                // Show toast notification for mood change
+                this.showToast({
+                    icon: staff.mood.emoji,
+                    title: `${staff.name} Mood Changed`,
+                    message: `${oldMood} → ${staff.mood.name} (${staff.mood.description})`,
+                    type: 'info',
+                    duration: 3000
+                });
             }
             
             // Update fatigue
@@ -1639,9 +1720,10 @@ class RestaurantGame {
             const upgradeBonus = staff.upgradeLevel * 0.05;
             staff.efficiency = staff.baseEfficiency * (1 + upgradeBonus) * fatigueMultiplier * moraleMultiplier * moodMultiplier;
             
-            // Gradually recover performance for available staff
-            if (staff.status === 'available' && staff.performance < 100) {
-                staff.performance = Math.min(100, staff.performance + 0.5);
+            // Gradually recover performance for available staff (to their base performance)
+            const targetPerformance = staff.basePerformance || 100;
+            if (staff.status === 'available' && staff.performance < targetPerformance) {
+                staff.performance = Math.min(targetPerformance, staff.performance + 0.5);
             }
         });
     }
@@ -1743,6 +1825,35 @@ class RestaurantGame {
         staff.status = 'resting';
         staff.lastRestTime = this.dayTimer;
         this.addFeedback(`😴 ${staff.name} is taking a break to recover...`, true);
+        this.render();
+    }
+    
+    fireStaff(staffId) {
+        const staff = this.staff.find(s => s.id === staffId);
+        if (!staff) return;
+        
+        // Check if staff is currently working
+        if (staff.status === 'busy' && staff.currentOrder) {
+            this.addFeedback('⚠️ Cannot fire staff while working on an order!', false);
+            return;
+        }
+        
+        // Remove staff from the array
+        this.staff = this.staff.filter(s => s.id !== staffId);
+        
+        // Remove from challenge progress
+        if (this.challengeProgress[staffId]) {
+            delete this.challengeProgress[staffId];
+        }
+        
+        this.addFeedback(`👋 ${staff.name} has been let go. No penalty applied.`, true);
+        this.showToast({
+            icon: '👋',
+            title: 'Staff Dismissed',
+            message: `${staff.name} is no longer part of the team`,
+            type: 'info',
+            duration: 3000
+        });
         this.render();
     }
     
@@ -2207,12 +2318,25 @@ class RestaurantGame {
                 eotmBadge = `<span class="eotm-badge" title="Staff of the Day - ${staff.employeeOfMonthTitle}">👑</span>`;
             }
             
+            // Traits display
+            let traitsDisplay = '';
+            if (staff.traits && staff.traits.length > 0) {
+                traitsDisplay = `<div class="staff-traits">
+                    ${staff.traits.map(trait => 
+                        `<span class="trait-badge ${trait.modifier >= 1 ? 'trait-positive' : 'trait-negative'}" title="${trait.description}">
+                            ${trait.emoji} ${trait.name}
+                        </span>`
+                    ).join('')}
+                </div>`;
+            }
+            
             staffCard.innerHTML = `
                 <div class="staff-header">
                     <div>
                         <div class="staff-name">${staff.name} ${eotmBadge} ${upgradeStars} ${efficiencyBadge}</div>
                         <div class="staff-role">${staff.role} ${canUpgrade ? `(Level ${staff.upgradeLevel}/${staff.maxUpgradeLevel})` : '(MAX)'}</div>
                         ${staff.isEmployeeOfMonth ? `<div class="eotm-title">${staff.employeeOfMonthTitle} (+${staff.employeeOfMonthBonus}% bonus)</div>` : ''}
+                        ${traitsDisplay}
                     </div>
                     <span class="staff-status ${staff.status}">${staff.status.toUpperCase()}</span>
                 </div>
@@ -2256,7 +2380,7 @@ class RestaurantGame {
                     </div>
                 </div>
                 ${currentOrderState}
-                <div style="display: flex; gap: 5px; margin-top: 10px;">
+                <div style="display: flex; gap: 5px; margin-top: 10px; flex-wrap: wrap;">
                     ${canUpgrade ? `
                         <button class="upgrade-btn" onclick="game.upgradeStaff(${staff.id})" ${this.revenue < upgradeCost ? 'disabled' : ''}>
                             ⬆️ Upgrade ($${upgradeCost})
@@ -2267,6 +2391,9 @@ class RestaurantGame {
                             😴 Rest
                         </button>
                     ` : ''}
+                    <button class="fire-btn" onclick="game.fireStaff(${staff.id})" title="Dismiss staff member" ${staff.status === 'busy' ? 'disabled' : ''}>
+                        👋 Fire
+                    </button>
                 </div>
                 ${staff.orderHistory && staff.orderHistory.length > 0 ? `
                     <div class="order-history">
