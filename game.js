@@ -56,6 +56,9 @@ class RestaurantGame {
         this.monthStartDay = 1; // Track which day the current month started
         this.monthDuration = 1; // A month is 1 in-game day (Employee of the Day)
         
+        // Last day summary tracking
+        this.lastDaySummary = null; // Store last completed day's summary
+        
         // Initialize Audio Context for sound effects
         this.audioContext = null;
         this.initializeAudio();
@@ -78,7 +81,8 @@ class RestaurantGame {
                 stringsRes,
                 moodsRes,
                 orderStatesRes,
-                traitsRes
+                traitsRes,
+                moraleFactorsRes
             ] = await Promise.all([
                 fetch('data/recipes.json'),
                 fetch('data/orders.json'),
@@ -90,7 +94,8 @@ class RestaurantGame {
                 fetch('data/strings.json'),
                 fetch('data/moods.json'),
                 fetch('data/order_states.json'),
-                fetch('data/traits.json')
+                fetch('data/traits.json'),
+                fetch('data/morale_factors.json')
             ]);
 
             this.recipeData = await recipeRes.json();
@@ -104,6 +109,7 @@ class RestaurantGame {
             this.moodsData = moodsRes.ok ? await moodsRes.json() : [];
             this.orderStatesData = orderStatesRes.ok ? await orderStatesRes.json() : [];
             this.traitsData = traitsRes.ok ? await traitsRes.json() : [];
+            this.moraleFactorsData = moraleFactorsRes.ok ? await moraleFactorsRes.json() : null;
 
             this.initializeInventory();
             this.initializeStaff();
@@ -280,6 +286,8 @@ class RestaurantGame {
             morale: 100, // Morale level (0-100)
             lastRestTime: 0, // Track when staff last rested
             orderHistory: [], // QOL3: Track last 5 orders
+            consecutiveOrders: 0, // Track consecutive orders for morale
+            lastOrderTime: 0, // Track when last order was completed
             // Mood system
             mood: this.getRandomMood(),
             moodChangeTimer: 0,
@@ -320,6 +328,99 @@ class RestaurantGame {
         ];
         return moods[Math.floor(Math.random() * moods.length)];
     }
+    
+    applyMoraleFactor(staff, factorId, eventData = {}) {
+        if (!this.moraleFactorsData || !this.moraleFactorsData.moraleFactors) return;
+        
+        const factors = this.moraleFactorsData.moraleFactors;
+        const allFactors = [...factors.positiveFactors, ...factors.negativeFactors];
+        const factor = allFactors.find(f => f.id === factorId);
+        
+        if (!factor) return;
+        
+        // Check if factor conditions are met
+        let shouldApply = true;
+        if (factor.fatigueThreshold !== undefined) {
+            if (factor.moraleChange > 0) {
+                shouldApply = staff.fatigue <= factor.fatigueThreshold;
+            } else {
+                shouldApply = staff.fatigue >= factor.fatigueThreshold;
+            }
+        }
+        if (factor.performanceThreshold !== undefined) {
+            if (factor.moraleChange > 0) {
+                shouldApply = staff.performance >= factor.performanceThreshold;
+            } else {
+                shouldApply = staff.performance <= factor.performanceThreshold;
+            }
+        }
+        if (factor.consecutiveOrdersThreshold !== undefined) {
+            shouldApply = (eventData.consecutiveOrders || 0) >= factor.consecutiveOrdersThreshold;
+        }
+        if (factor.idleTimeThreshold !== undefined) {
+            shouldApply = (eventData.idleTime || 0) >= factor.idleTimeThreshold;
+        }
+        
+        if (shouldApply) {
+            const oldMorale = staff.morale;
+            staff.morale = Math.max(0, Math.min(100, staff.morale + factor.moraleChange));
+            
+            // Show feedback for significant morale changes
+            if (Math.abs(factor.moraleChange) >= 5) {
+                const emoji = factor.moraleChange > 0 ? '📈' : '📉';
+                this.showToast({
+                    icon: emoji,
+                    title: `${staff.name} Morale ${factor.moraleChange > 0 ? 'Increased' : 'Decreased'}`,
+                    message: factor.description,
+                    type: factor.moraleChange > 0 ? 'success' : 'warning',
+                    duration: 2500
+                });
+            }
+        }
+    }
+    
+    getMoralePerformanceModifier(morale) {
+        if (!this.moraleFactorsData || !this.moraleFactorsData.moraleFactors) {
+            // Fallback to simple calculation
+            return 0.5 + (morale / 200);
+        }
+        
+        const modifiers = this.moraleFactorsData.moraleFactors.performanceModifiers;
+        const thresholds = this.moraleFactorsData.moraleFactors.moraleThresholds;
+        
+        if (morale >= thresholds.veryHigh) return modifiers.veryHighMorale;
+        if (morale >= thresholds.high) return modifiers.highMorale;
+        if (morale >= thresholds.medium) return modifiers.mediumMorale;
+        if (morale >= thresholds.low) return modifiers.lowMorale;
+        return modifiers.veryLowMorale;
+    }
+    
+    calculateOrderTimeLimit(order) {
+        if (!this.moraleFactorsData || !this.moraleFactorsData.orderComplexity) {
+            // Fallback to default calculation
+            return 100 + (order.items.length * 20);
+        }
+        
+        const config = this.moraleFactorsData.orderComplexity;
+        const effConfig = this.moraleFactorsData.efficiencyImpact;
+        
+        // Calculate complexity based on items
+        let complexity = config.baseComplexity + (order.items.length * config.itemCountMultiplier);
+        
+        // VIP orders are more complex
+        if (order.isVIP) {
+            complexity *= config.vipMultiplier;
+        }
+        
+        // Calculate base time
+        let timeLimit = complexity * effConfig.baseTimePerComplexity;
+        
+        // Clamp to min/max
+        timeLimit = Math.max(effConfig.minCompletionTime, Math.min(effConfig.maxCompletionTime, timeLimit));
+        
+        return Math.floor(timeLimit);
+    }
+    
     
     getOrderState(progress) {
         const states = Array.isArray(this.orderStatesData) && this.orderStatesData.length ? this.orderStatesData : [
@@ -766,6 +867,9 @@ class RestaurantGame {
             winner.isEmployeeOfMonth = true;
             winner.hallOfFameCount++;
             winner.employeeOfMonthBonus = 20; // 20% bonus
+            
+            // Apply morale factor for being Staff of the Day
+            this.applyMoraleFactor(winner, 'employee_of_day');
             
             // Assign title based on performance
             if (winner.monthlyTips > 50) {
@@ -1307,12 +1411,15 @@ class RestaurantGame {
             return;
         }
         
+        // Calculate dynamic time limit based on order complexity
+        const calculatedTimeLimit = this.calculateOrderTimeLimit({ items: orderItems, isVIP: isVIP });
+        
         const order = {
             id: this.nextOrderId++,
             items: orderItems,
             totalPrice: totalPrice,
-            timeLimit: maxTime + 30, // Add buffer time
-            timeRemaining: maxTime + 30,
+            timeLimit: calculatedTimeLimit,
+            timeRemaining: calculatedTimeLimit,
             status: 'pending', // pending, in-progress, completed, failed
             assignedStaff: null,
             progress: 0,
@@ -1551,6 +1658,24 @@ class RestaurantGame {
                 staff.ordersCompleted++;
                 staff.performance = Math.min(100, staff.performance + 2);
                 
+                // Track consecutive orders and last order time
+                staff.consecutiveOrders++;
+                staff.lastOrderTime = this.dayTimer;
+                
+                // Apply morale factors for completing order
+                this.applyMoraleFactor(staff, 'completed_order');
+                
+                // Check if specialty matched for morale boost
+                const hasMatchingSpecialty = order.items.some(item => 
+                    item.category === staff.speciality
+                );
+                if (hasMatchingSpecialty) {
+                    this.applyMoraleFactor(staff, 'specialty_match');
+                }
+                
+                // Check for overworked
+                this.applyMoraleFactor(staff, 'overworked', { consecutiveOrders: staff.consecutiveOrders });
+                
                 // Update Staff of the Day metrics
                 const completionTime = order.timeLimit - order.timeRemaining;
                 this.updateStaffOfDayMetrics(staff, order, completionTime);
@@ -1559,6 +1684,7 @@ class RestaurantGame {
                 if (this.autoAssignEnabled && staff.fatigue > 70) {
                     staff.status = 'resting';
                     staff.lastRestTime = this.dayTimer;
+                    staff.consecutiveOrders = 0; // Reset consecutive orders when resting
                     this.addFeedback(`😴 ${staff.name} is auto-resting due to high fatigue...`, true);
                 } else {
                     staff.status = 'available';
@@ -1601,6 +1727,10 @@ class RestaurantGame {
             
             if (staff) {
                 staff.performance = Math.max(0, staff.performance - 5);
+                
+                // Apply morale factor for failed order
+                this.applyMoraleFactor(staff, 'failed_order');
+                staff.consecutiveOrders = 0; // Reset consecutive orders on failure
                 
                 // QoL 2: Auto-rest if fatigued in auto mode
                 if (this.autoAssignEnabled && staff.fatigue > 70) {
@@ -1702,18 +1832,21 @@ class RestaurantGame {
                 }
             }
             
-            // Update morale based on fatigue and performance
-            if (staff.fatigue > 80) {
-                // High fatigue decreases morale
-                staff.morale = Math.max(0, staff.morale - 0.3);
-            } else if (staff.fatigue < 20 && staff.performance > 80) {
-                // Low fatigue and good performance increases morale
-                staff.morale = Math.min(100, staff.morale + 0.2);
+            // Update morale based on fatigue and performance using morale factors system
+            this.applyMoraleFactor(staff, 'high_fatigue');
+            this.applyMoraleFactor(staff, 'low_fatigue');
+            this.applyMoraleFactor(staff, 'high_performance');
+            this.applyMoraleFactor(staff, 'low_performance');
+            
+            // Check for idle time morale factor
+            if (staff.status === 'available' && staff.lastOrderTime > 0) {
+                const idleTime = this.dayTimer - staff.lastOrderTime;
+                this.applyMoraleFactor(staff, 'idle_too_long', { idleTime });
             }
             
             // Adjust efficiency based on fatigue, morale, and mood
             const fatigueMultiplier = 1 - (staff.fatigue / 200); // Max 50% reduction
-            const moraleMultiplier = 0.5 + (staff.morale / 200); // Between 50% and 100%
+            const moraleMultiplier = this.getMoralePerformanceModifier(staff.morale); // Dynamic from morale factors
             const moodMultiplier = staff.mood ? staff.mood.performanceModifier : 1.0;
             
             // Calculate effective efficiency including upgrades and mood
@@ -1803,6 +1936,9 @@ class RestaurantGame {
         staff.upgradeLevel++;
         staff.efficiency = staff.baseEfficiency + (staff.upgradeLevel * 0.05); // +5% per level
         
+        // Apply morale factor for upgrade
+        this.applyMoraleFactor(staff, 'upgrade');
+        
         this.addFeedback(`⭐ ${staff.name} upgraded to Level ${staff.upgradeLevel}! Efficiency: ${(staff.efficiency * 100).toFixed(0)}%`, true);
         this.triggerHaptic('medium');
         this.render();
@@ -1824,6 +1960,11 @@ class RestaurantGame {
         
         staff.status = 'resting';
         staff.lastRestTime = this.dayTimer;
+        staff.consecutiveOrders = 0; // Reset consecutive orders when resting
+        
+        // Apply morale factor for rest break
+        this.applyMoraleFactor(staff, 'rest_break');
+        
         this.addFeedback(`😴 ${staff.name} is taking a break to recover...`, true);
         this.render();
     }
@@ -1837,6 +1978,13 @@ class RestaurantGame {
             this.addFeedback('⚠️ Cannot fire staff while working on an order!', false);
             return;
         }
+        
+        // Apply morale penalty to remaining staff
+        this.staff.forEach(s => {
+            if (s.id !== staffId) {
+                this.applyMoraleFactor(s, 'fired_colleague');
+            }
+        });
         
         // Remove staff from the array
         this.staff = this.staff.filter(s => s.id !== staffId);
@@ -2252,9 +2400,40 @@ class RestaurantGame {
         container.innerHTML = '';
         
         this.staff.forEach(staff => {
+            // Build detailed tooltip with math breakdown
+            const traitsModifier = staff.traits && staff.traits.length > 0 
+                ? staff.traits.reduce((acc, trait) => acc * trait.modifier, 1.0) 
+                : 1.0;
+            const basePerf = staff.basePerformance || 100;
+            
+            // Calculate efficiency breakdown
+            const upgradeBonus = staff.upgradeLevel * 0.05;
+            const fatigueMultiplier = 1 - (staff.fatigue / 200);
+            const moraleMultiplier = this.getMoralePerformanceModifier(staff.morale);
+            const moodMultiplier = staff.mood ? staff.mood.performanceModifier : 1.0;
+            
+            const tooltipContent = `
+<strong>Performance Breakdown:</strong>
+Base: 100% × Traits
+${staff.traits && staff.traits.length > 0 ? staff.traits.map(t => `  × ${(t.modifier * 100).toFixed(0)}% (${t.name})`).join('\n') : ''}
+= ${basePerf.toFixed(0)}% Base Performance
+
+<strong>Efficiency Calculation:</strong>
+Base Efficiency: ${(staff.baseEfficiency * 100).toFixed(0)}%
+× (1 + ${(upgradeBonus * 100).toFixed(0)}% upgrade bonus) = ${((staff.baseEfficiency * (1 + upgradeBonus)) * 100).toFixed(0)}%
+× ${(fatigueMultiplier * 100).toFixed(0)}% fatigue multiplier
+× ${(moraleMultiplier * 100).toFixed(0)}% morale multiplier
+× ${(moodMultiplier * 100).toFixed(0)}% mood multiplier
+= ${(staff.efficiency * 100).toFixed(0)}% Current Efficiency
+
+Current Mood: ${staff.mood ? staff.mood.name : 'Neutral'} ${staff.mood ? staff.mood.emoji : '😐'}
+Morale: ${staff.morale.toFixed(0)}%
+Fatigue: ${staff.fatigue.toFixed(0)}%
+            `.trim();
+            
             const staffCard = document.createElement('div');
             staffCard.className = 'staff-card';
-            staffCard.title = `Speciality: ${staff.speciality} | Orders Completed: ${staff.ordersCompleted}`;
+            staffCard.title = tooltipContent;
             
             const upgradeCost = 100 + (staff.upgradeLevel * 50);
             const canUpgrade = staff.upgradeLevel < staff.maxUpgradeLevel;
@@ -2331,6 +2510,9 @@ class RestaurantGame {
             }
             
             staffCard.innerHTML = `
+                <button class="fire-btn" onclick="game.fireStaff(${staff.id})" title="Dismiss staff member" ${staff.status === 'busy' ? 'disabled' : ''}>
+                    ×
+                </button>
                 <div class="staff-header">
                     <div>
                         <div class="staff-name">${staff.name} ${eotmBadge} ${upgradeStars} ${efficiencyBadge}</div>
@@ -2391,9 +2573,6 @@ class RestaurantGame {
                             😴 Rest
                         </button>
                     ` : ''}
-                    <button class="fire-btn" onclick="game.fireStaff(${staff.id})" title="Dismiss staff member" ${staff.status === 'busy' ? 'disabled' : ''}>
-                        👋 Fire
-                    </button>
                 </div>
                 ${staff.orderHistory && staff.orderHistory.length > 0 ? `
                     <div class="order-history">
