@@ -42,9 +42,9 @@ class RestaurantGame {
         this.recipeData = null; // Store loaded recipe data
         this.ordersConfig = null; // Store orders configuration
         
-        // Employee of the Month tracking
-        this.monthlyLeaderboard = []; // Track staff monthly performance
-        this.currentMonthWinner = null; // Current Employee of the Month
+        // Staff of the Day tracking
+        this.monthlyLeaderboard = []; // Track staff daily performance
+        this.currentMonthWinner = null; // Current Staff of the Day
         this.hallOfFame = []; // Past winners
         this.weeklyChallenge = null; // Current weekly challenge
         this.challengeProgress = {}; // Track challenge progress per staff
@@ -96,7 +96,7 @@ class RestaurantGame {
             this.initializeRecipes();
             this.initializeEquipment();
             this.initializeAchievements();
-            this.initializeEmployeeOfMonth();
+            this.initializeStaffOfDay();
 
             // Render after initialization is complete
             this.render();
@@ -108,7 +108,7 @@ class RestaurantGame {
             this.initializeRecipesLegacy();
             this.initializeEquipment();
             this.initializeAchievements();
-            this.initializeEmployeeOfMonth();
+            this.initializeStaffOfDay();
 
             // Render after initialization is complete
             this.render();
@@ -257,7 +257,11 @@ class RestaurantGame {
             morale: 100, // Morale level (0-100)
             lastRestTime: 0, // Track when staff last rested
             orderHistory: [], // QOL3: Track last 5 orders
-            // Employee of the Month metrics
+            // Mood system
+            mood: this.getRandomMood(),
+            moodChangeTimer: 0,
+            moodChangeDuration: 60 + Math.floor(Math.random() * 60), // Mood changes every 60-120 seconds
+            // Staff of the Day metrics
             monthlyScore: 0,
             monthlyOrders: 0,
             monthlyRevenue: 0,
@@ -268,6 +272,18 @@ class RestaurantGame {
             employeeOfMonthBonus: 0,
             hallOfFameCount: 0
         };
+    }
+    
+    getRandomMood() {
+        const moods = [
+            { name: 'Happy', emoji: '😊', performanceModifier: 1.15, description: '+15% performance' },
+            { name: 'Focused', emoji: '😎', performanceModifier: 1.10, description: '+10% performance' },
+            { name: 'Neutral', emoji: '😐', performanceModifier: 1.0, description: 'Normal performance' },
+            { name: 'Tired', emoji: '😴', performanceModifier: 0.90, description: '-10% performance' },
+            { name: 'Stressed', emoji: '😰', performanceModifier: 0.85, description: '-15% performance' },
+            { name: 'Energized', emoji: '🤩', performanceModifier: 1.20, description: '+20% performance' }
+        ];
+        return moods[Math.floor(Math.random() * moods.length)];
     }
     
     initializeRecipes() {
@@ -494,8 +510,8 @@ class RestaurantGame {
         }, duration);
     }
     
-    initializeEmployeeOfMonth() {
-        // Initialize weekly challenges
+    initializeStaffOfDay() {
+        // Initialize daily challenges
         this.generateWeeklyChallenge();
         
         // Initialize challenge progress for existing staff
@@ -517,15 +533,15 @@ class RestaurantGame {
         this.weeklyChallenge.endDay = this.day + 7;
     }
     
-    updateEmployeeOfMonthMetrics(staff, order, completionTime) {
-        // Update monthly metrics
+    updateStaffOfDayMetrics(staff, order, completionTime) {
+        // Update daily metrics
         staff.monthlyOrders++;
-        staff.monthlyRevenue += order.price;
+        staff.monthlyRevenue += order.totalPrice || 0;
         
         // Calculate tips based on speed (faster = better tips)
-        const expectedTime = order.time;
+        const expectedTime = order.timeLimit || 100;
         if (completionTime < expectedTime * 0.75) {
-            const tipAmount = order.price * 0.15; // 15% tip for fast service
+            const tipAmount = (order.totalPrice || 0) * 0.15; // 15% tip for fast service
             staff.monthlyTips += tipAmount;
             this.challengeProgress[staff.id].tipsToday += tipAmount;
         }
@@ -646,18 +662,18 @@ class RestaurantGame {
     processMonthEnd() {
         this.updateMonthlyLeaderboard();
         
-        // Award Employee of the Month
+        // Award Staff of the Day
         if (this.monthlyLeaderboard.length > 0) {
             const winner = this.monthlyLeaderboard[0];
             
-            // Remove previous Employee of the Month status
+            // Remove previous Staff of the Day status
             this.staff.forEach(s => {
                 s.isEmployeeOfMonth = false;
                 s.employeeOfMonthBonus = 0;
                 s.employeeOfMonthTitle = '';
             });
             
-            // Set new Employee of the Month
+            // Set new Staff of the Day
             winner.isEmployeeOfMonth = true;
             winner.hallOfFameCount++;
             winner.employeeOfMonthBonus = 20; // 20% bonus
@@ -687,10 +703,10 @@ class RestaurantGame {
             this.currentMonthWinner = winner;
             
             // Show announcement with toast
-            this.addFeedback(`🏆 Employee of the Month: ${winner.name} - ${winner.employeeOfMonthTitle}!`, true);
+            this.addFeedback(`🏆 Staff of the Day: ${winner.name} - ${winner.employeeOfMonthTitle}!`, true);
             this.showToast({
                 icon: '🏆',
-                title: 'Employee of the Month!',
+                title: 'Staff of the Day!',
                 message: `${winner.name} - ${winner.employeeOfMonthTitle}`,
                 type: 'achievement',
                 duration: 5000
@@ -714,8 +730,8 @@ class RestaurantGame {
         this.generateWeeklyChallenge();
     }
     
-    applyEmployeeOfMonthBonus(staff) {
-        // Apply temporary skill boost to Employee of the Month
+    applyStaffOfDayBonus(staff) {
+        // Apply temporary skill boost to Staff of the Day
         if (staff.isEmployeeOfMonth && staff.employeeOfMonthBonus > 0) {
             const bonusMultiplier = 1 + (staff.employeeOfMonthBonus / 100);
             return staff.efficiency * bonusMultiplier;
@@ -945,9 +961,9 @@ class RestaurantGame {
         if (unfinishedAssignedOrders.length > 0) {
             unfinishedAssignedOrders.forEach(order => {
                 const timeElapsed = order.timeLimit - order.timeRemaining;
-                const completionPercent = timeElapsed / order.timeLimit;
+                const completionPercent = (order.timeLimit && order.timeLimit > 0) ? timeElapsed / order.timeLimit : 0;
                 const incompletePercent = 1 - completionPercent;
-                const penalty = Math.floor(order.totalPrice * incompletePercent);
+                const penalty = Math.floor((order.totalPrice || 0) * incompletePercent);
                 penaltyAmount += penalty;
             });
         }
@@ -955,8 +971,21 @@ class RestaurantGame {
         // Calculate additional stats
         const ordersCompletedToday = this.totalOrdersCompleted - (this.dayStartOrdersCompleted || 0);
         const vipServedToday = this.vipCustomers - (this.dayStartVipCustomers || 0);
-        const staffUpgradesToday = this.staff.reduce((sum, s) => sum + s.level, 0) - (this.dayStartStaffLevels || 0);
+        const staffUpgradesToday = this.staff.reduce((sum, s) => sum + s.upgradeLevel, 0) - (this.dayStartStaffLevels || 0);
         const isPerfectDay = this.customerSatisfaction === 100 && unhappyToday === 0;
+        
+        // Calculate staff performance breakdown
+        const staffPerformance = this.staff.map(s => ({
+            name: s.name,
+            ordersToday: s.monthlyOrders,
+            revenueToday: s.monthlyRevenue || 0,
+            efficiency: (s.efficiency * 100).toFixed(0),
+            fatigue: s.fatigue.toFixed(0),
+            mood: s.mood ? s.mood.name : 'Neutral'
+        }));
+        
+        // Sort staff by orders completed today
+        staffPerformance.sort((a, b) => b.ordersToday - a.ordersToday);
         
         // End of day bonus
         const bonus = Math.floor(this.revenue * 0.1);
@@ -989,6 +1018,22 @@ class RestaurantGame {
         document.getElementById('summary-perfect-day').textContent = isPerfectDay ? '✅ Yes' : 'No';
         document.getElementById('summary-perfect-day').className = isPerfectDay ? 'summary-value success' : 'summary-value';
         
+        // Add staff performance breakdown
+        const staffBreakdownEl = document.getElementById('summary-staff-breakdown');
+        if (staffBreakdownEl) {
+            staffBreakdownEl.innerHTML = staffPerformance.map(staff => `
+                <div class="summary-staff-item">
+                    <span class="staff-summary-name">${staff.name}</span>
+                    <span class="staff-summary-stats">
+                        Orders: ${staff.ordersToday} | 
+                        Revenue: $${staff.revenueToday} | 
+                        Efficiency: ${staff.efficiency}% | 
+                        Mood: ${staff.mood}
+                    </span>
+                </div>
+            `).join('');
+        }
+        
         modal.classList.add('modal-active');
     }
     
@@ -1003,11 +1048,11 @@ class RestaurantGame {
             unfinishedAssignedOrders.forEach(order => {
                 // Calculate completion percentage
                 const timeElapsed = order.timeLimit - order.timeRemaining;
-                const completionPercent = timeElapsed / order.timeLimit;
+                const completionPercent = (order.timeLimit && order.timeLimit > 0) ? timeElapsed / order.timeLimit : 0;
                 
                 // Penalty is for the incomplete portion
                 const incompletePercent = 1 - completionPercent;
-                const penalty = Math.floor(order.totalPrice * incompletePercent);
+                const penalty = Math.floor((order.totalPrice || 0) * incompletePercent);
                 penaltyAmount += penalty;
             });
             
@@ -1069,7 +1114,7 @@ class RestaurantGame {
         // Check achievements after day progression
         this.checkAchievements();
         
-        // Check for monthly reset and Employee of the Month
+        // Check for daily reset and Staff of the Day
         this.checkMonthlyReset();
         
         // Update monthly leaderboard
@@ -1360,13 +1405,14 @@ class RestaurantGame {
                         efficiencyBonus = 1.15; // 15% bonus for matching specialty
                     }
                     
-                    // Apply Employee of the Month bonus
-                    const effectiveEfficiency = this.applyEmployeeOfMonthBonus(staff);
+                    // Apply Staff of the Day bonus
+                    const effectiveEfficiency = this.applyStaffOfDayBonus(staff);
                     
-                    // Progress based on staff efficiency with specialty bonus and Employee of Month bonus
+                    // Progress based on staff efficiency with specialty bonus and Staff of Day bonus
                     // Staff efficiency (0.6-0.9) provides the base speed modifier
-                    // Specialty bonus (1.15x) and Employee of Month bonus (1.2x) further enhance speed
-                    order.progress += effectiveEfficiency * 2.0 * efficiencyBonus;
+                    // Specialty bonus (1.15x) and Staff of Day bonus (1.2x) further enhance speed
+                    // Overall speed boost applied (2.5x base multiplier)
+                    order.progress += effectiveEfficiency * 2.5 * efficiencyBonus;
                     
                     if (order.progress >= 100) {
                         this.completeOrder(order.id, true);
@@ -1416,9 +1462,9 @@ class RestaurantGame {
                 staff.ordersCompleted++;
                 staff.performance = Math.min(100, staff.performance + 2);
                 
-                // Update Employee of the Month metrics
+                // Update Staff of the Day metrics
                 const completionTime = order.timeLimit - order.timeRemaining;
-                this.updateEmployeeOfMonthMetrics(staff, order, completionTime);
+                this.updateStaffOfDayMetrics(staff, order, completionTime);
                 
                 // QoL 2: Auto-rest if fatigued in auto mode
                 if (this.autoAssignEnabled && staff.fatigue > 70) {
@@ -1447,6 +1493,15 @@ class RestaurantGame {
             this.customerSatisfaction = Math.min(100, this.customerSatisfaction + satisfactionChange);
             const vipLabel = order.isVIP ? ' ⭐ VIP' : '';
             this.addFeedback(`✅ Order #${order.id}${vipLabel} completed! Customer is happy! +$${order.totalPrice}`, true);
+            
+            // Show toast notification for completed order
+            this.showToast({
+                icon: order.isVIP ? '⭐' : '✅',
+                title: order.isVIP ? 'VIP Order Complete!' : 'Order Complete!',
+                message: `Order #${order.id} - $${order.totalPrice}`,
+                type: 'success',
+                duration: 3000
+            });
             
             // Play success sound and haptic feedback
             this.playSuccessSound();
@@ -1501,6 +1556,30 @@ class RestaurantGame {
         
         // Gradually recover performance for available staff
         this.staff.forEach(staff => {
+            // Update mood timer
+            if (!staff.mood) {
+                staff.mood = this.getRandomMood();
+            }
+            if (!staff.moodChangeTimer) {
+                staff.moodChangeTimer = 0;
+            }
+            if (!staff.moodChangeDuration) {
+                staff.moodChangeDuration = 60 + Math.floor(Math.random() * 60);
+            }
+            
+            staff.moodChangeTimer++;
+            
+            // Change mood periodically
+            if (staff.moodChangeTimer >= staff.moodChangeDuration) {
+                const oldMood = staff.mood.name;
+                staff.mood = this.getRandomMood();
+                staff.moodChangeTimer = 0;
+                staff.moodChangeDuration = 60 + Math.floor(Math.random() * 60); // Next mood change in 60-120 seconds
+                
+                // Notify about mood change
+                this.addFeedback(`${staff.mood.emoji} ${staff.name}'s mood changed to ${staff.mood.name}!`, true);
+            }
+            
             // Update fatigue
             if (staff.status === 'busy') {
                 // Increase fatigue while working (reduced by equipment)
@@ -1529,13 +1608,14 @@ class RestaurantGame {
                 staff.morale = Math.min(100, staff.morale + 0.2);
             }
             
-            // Adjust efficiency based on fatigue and morale
+            // Adjust efficiency based on fatigue, morale, and mood
             const fatigueMultiplier = 1 - (staff.fatigue / 200); // Max 50% reduction
             const moraleMultiplier = 0.5 + (staff.morale / 200); // Between 50% and 100%
+            const moodMultiplier = staff.mood ? staff.mood.performanceModifier : 1.0;
             
-            // Calculate effective efficiency including upgrades
+            // Calculate effective efficiency including upgrades and mood
             const upgradeBonus = staff.upgradeLevel * 0.05;
-            staff.efficiency = staff.baseEfficiency * (1 + upgradeBonus) * fatigueMultiplier * moraleMultiplier;
+            staff.efficiency = staff.baseEfficiency * (1 + upgradeBonus) * fatigueMultiplier * moraleMultiplier * moodMultiplier;
             
             // Gradually recover performance for available staff
             if (staff.status === 'available' && staff.performance < 100) {
@@ -1680,7 +1760,7 @@ class RestaurantGame {
         this.renderRecipes();
         this.renderEquipment();
         this.renderAchievements();
-        this.renderEmployeeOfMonth();
+        this.renderStaffOfDay();
     }
     
     renderOverview() {
@@ -2038,10 +2118,10 @@ class RestaurantGame {
                 efficiencyBadge = '<span class="efficiency-badge poor" title="Needs Rest">⚠️</span>';
             }
             
-            // Employee of the Month badge
+            // Staff of the Day badge
             let eotmBadge = '';
             if (staff.isEmployeeOfMonth) {
-                eotmBadge = `<span class="eotm-badge" title="Employee of the Month - ${staff.employeeOfMonthTitle}">👑</span>`;
+                eotmBadge = `<span class="eotm-badge" title="Staff of the Day - ${staff.employeeOfMonthTitle}">👑</span>`;
             }
             
             staffCard.innerHTML = `
@@ -2067,7 +2147,7 @@ class RestaurantGame {
                         <span class="metric-value">${staff.ordersCompleted}</span>
                     </div>
                     <div class="metric">
-                        <span class="metric-label">Monthly Score</span>
+                        <span class="metric-label">Daily Score</span>
                         <span class="metric-value">${staff.monthlyScore}</span>
                     </div>
                 </div>
@@ -2086,6 +2166,10 @@ class RestaurantGame {
                         <div class="wellbeing-bar-container">
                             <div class="wellbeing-bar" style="width: ${staff.morale}%; background-color: ${moraleColor};"></div>
                         </div>
+                    </div>
+                    <div class="wellbeing-item">
+                        <span class="wellbeing-label">${staff.mood ? staff.mood.emoji : '😐'} Mood: ${staff.mood ? staff.mood.name : 'Neutral'}</span>
+                        <span class="mood-description">${staff.mood ? staff.mood.description : 'Normal performance'}</span>
                     </div>
                 </div>
                 <div style="display: flex; gap: 5px; margin-top: 10px;">
@@ -2424,7 +2508,7 @@ class RestaurantGame {
         });
     }
     
-    renderEmployeeOfMonth() {
+    renderStaffOfDay() {
         // Update overview card
         const winnerName = document.getElementById('overview-eotm-winner');
         const topScore = document.getElementById('overview-eotm-score');
@@ -2432,10 +2516,10 @@ class RestaurantGame {
         const monthBadge = document.getElementById('eotm-month-badge');
         
         if (winnerName && topScore && daysLeft && monthBadge) {
-            const currentMonth = Math.floor((this.day - 1) / this.monthDuration) + 1;
+            const currentDay = this.day;
             const daysUntilEnd = this.monthDuration - ((this.day - this.monthStartDay) % this.monthDuration);
             
-            monthBadge.textContent = `Month ${currentMonth}`;
+            monthBadge.textContent = `Day ${currentDay}`;
             daysLeft.textContent = daysUntilEnd;
             
             this.updateMonthlyLeaderboard();
