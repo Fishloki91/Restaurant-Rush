@@ -56,6 +56,9 @@ class RestaurantGame {
             this.initializeRecipes();
             this.initializeEquipment();
             this.initializeAchievements();
+            
+            // Render after initialization is complete
+            this.render();
         } catch (error) {
             console.error('Error loading recipe data:', error);
             // Fallback to original initialization if file not found
@@ -64,6 +67,9 @@ class RestaurantGame {
             this.initializeRecipesLegacy();
             this.initializeEquipment();
             this.initializeAchievements();
+            
+            // Render after initialization is complete
+            this.render();
         }
     }
     
@@ -562,11 +568,8 @@ class RestaurantGame {
         this.totalRestocks = 0;
         this.perfectDays = 0;
         
-        this.initializeInventory();
-        this.initializeStaff();
-        this.initializeRecipes();
-        this.initializeEquipment();
-        this.initializeAchievements();
+        // Re-initialize with loaded data
+        this.loadRecipeData();
         
         // Hide modal
         const modal = document.getElementById('game-over-modal');
@@ -578,7 +581,6 @@ class RestaurantGame {
         document.getElementById('new-order-btn').disabled = true;
         
         this.switchView('overview');
-        this.render();
     }
     
     updateDayProgression() {
@@ -1176,6 +1178,11 @@ class RestaurantGame {
     }
     
     render() {
+        // Skip rendering if not fully initialized
+        if (!this.staff || this.staff.length === 0) {
+            return;
+        }
+        
         this.renderOrders();
         this.renderStaff();
         this.renderInventory();
@@ -2016,6 +2023,5 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
     
-    // Initial render
-    game.render();
+    // Initial render is now handled in loadRecipeData()
 });
