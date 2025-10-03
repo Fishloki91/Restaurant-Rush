@@ -44,6 +44,11 @@ Balance quick order fulfillment, staff workload, inventory management, and custo
 
 ## Updates
 
+///
+### v1.9.1 - Bugfix Release
+Fixed staff order history tracking for initial employees and corrected achievement count display. Starting staff members now properly show their recent completed orders, and the achievements screen accurately displays 18 total achievements.
+///
+
 ### v1.9.0 - Achievement & Milestone System
 **Major Feature:** Achievement & Milestone System - Track your restaurant management prowess with 18 unique achievements across 7 categories! Unlock badges for order completion (First Steps to Master Chef), revenue milestones ($500 to $5,000), staff hiring, survival days, perfect service, VIP customers, and equipment upgrades. Real-time progress tracking with visual progress bars and instant notifications.
 
