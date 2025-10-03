@@ -1,0 +1,34 @@
+{
+  "spawnRates": {
+    "baseChance": 0.4,
+    "maxChance": 0.8,
+    "dayMultiplier": 0.05
+  },
+  "dayProgression": {
+    "early": {
+      "timeRange": [0, 0.33],
+      "spawnMultiplier": 0.6,
+      "description": "Early shift - fewer orders"
+    },
+    "middle": {
+      "timeRange": [0.33, 0.66],
+      "spawnMultiplier": 1.0,
+      "description": "Mid shift - steady flow"
+    },
+    "rush": {
+      "timeRange": [0.66, 1.0],
+      "spawnMultiplier": 1.5,
+      "description": "Rush hour - high volume"
+    }
+  },
+  "staffScaling": {
+    "enabled": true,
+    "minStaff": 1,
+    "bonusPerStaff": 0.08,
+    "description": "More staff = slightly higher order frequency"
+  },
+  "penalties": {
+    "unfinishedAssignedOrder": 0.05,
+    "description": "5% revenue loss for each unfinished assigned order at end of day"
+  }
+}

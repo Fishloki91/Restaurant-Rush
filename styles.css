@@ -31,6 +31,7 @@ body {
     border-radius: 15px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
     overflow: hidden;
+    overflow-x: hidden; /* Prevent horizontal scrolling */
     display: flex;
     flex-direction: column;
     /* Subtle matte texture */
@@ -2023,6 +2024,80 @@ body {
     font-size: 0.85rem;
     color: #8B5A3C;
     font-weight: bold;
+}
+
+/* Achievement Toast Notification */
+.achievement-toast {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    background: linear-gradient(135deg, #FFD700, #FFA500);
+    color: #333;
+    padding: 16px 20px;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 280px;
+    max-width: 400px;
+    opacity: 0;
+    transform: translateX(100%);
+    transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    pointer-events: none;
+}
+
+.achievement-toast.show {
+    opacity: 1;
+    transform: translateX(0);
+    pointer-events: auto;
+}
+
+.achievement-toast-icon {
+    font-size: 2rem;
+    line-height: 1;
+}
+
+.achievement-toast-content {
+    flex: 1;
+}
+
+.achievement-toast-title {
+    font-weight: bold;
+    font-size: 1rem;
+    margin-bottom: 4px;
+    color: #333;
+}
+
+.achievement-toast-description {
+    font-size: 0.85rem;
+    color: #555;
+}
+
+@media (max-width: 600px) {
+    .achievement-toast {
+        top: 60px;
+        right: 10px;
+        left: 10px;
+        min-width: auto;
+        max-width: none;
+    }
+}
+
+/* Mobile Tooltip Tap Functionality */
+@media (hover: none) and (pointer: coarse) {
+    .tooltip-container.tap-active .card-tooltip,
+    .stat-tooltip-container.tap-active .stat-tooltip {
+        opacity: 1;
+        bottom: -120px;
+        pointer-events: auto;
+    }
+    
+    .tooltip-container .card-tooltip,
+    .stat-tooltip-container .stat-tooltip {
+        transition: all 0.3s ease;
+    }
 }
 
 
