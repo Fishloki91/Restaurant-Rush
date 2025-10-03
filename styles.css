@@ -1376,6 +1376,11 @@ body {
     .inventory-container {
         grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
     }
+    
+    /* Tablet-specific satisfaction dashboard */
+    .satisfaction-metrics-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
 
 @media (max-width: 768px) {
@@ -1554,6 +1559,32 @@ body {
     
     .modal-content h2 {
         font-size: 1.3rem;
+    }
+    
+    /* Mobile-specific satisfaction dashboard improvements */
+    .satisfaction-metrics-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+    
+    .metric-card {
+        padding: 15px;
+    }
+    
+    .metric-icon {
+        font-size: 2rem;
+    }
+    
+    .metric-value {
+        font-size: 1.3rem;
+    }
+    
+    .satisfaction-card {
+        padding: 20px;
+    }
+    
+    .satisfaction-emoji {
+        font-size: 2.5rem;
     }
 }
 

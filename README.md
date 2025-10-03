@@ -19,9 +19,37 @@ Restaurant Rush is a fast-paced restaurant management game where you oversee sta
 - All game data (staff roles, recipes, achievements, equipment, challenges, UI strings) is loaded from the `/data` folder as JSON.
 - No gameplay data is hardcoded in the HTML; everything updates dynamically.
 
-## Updates & Bugfixes
+## Patch Notes
 
-### v1.9.1 Bugfix (Latest)
+### v2.0.0 - Major Gameplay & UX Overhaul (Latest)
+
+**Gameplay Balance:**
+- **Staff Fatigue Rebalance:** Changed fatigue-to-performance ratio from 1:2 to 1:5, reducing max performance penalty from 50% to 20%. Staff now maintain better efficiency even when fatigued, making the game more forgiving while still encouraging rest management.
+
+**Staff of the Day System:**
+- **Score Calculation Fixed:** Staff of the Day scores are now only calculated at the end of each day, preventing score fluctuations during gameplay and providing more stable leaderboard rankings.
+- **Visual Improvements:** Changed efficiency bonus displays from large bars to compact badge-style boxes for cleaner presentation.
+
+**Customer Satisfaction Dashboard:**
+- **Complete Overhaul:** Redesigned the satisfaction page into a comprehensive dashboard with:
+  - Large visual satisfaction meter with emoji feedback
+  - 8 key metrics in grid layout: Happy Customers, Unhappy Customers, VIP Served, Avg Wait Time, Success Rate, Today's Orders, Avg Order Value, and Performance Rating
+  - Dynamic performance ratings (Excellent/Good/Average/Poor) based on multiple factors
+  - Enhanced visual hierarchy and easier data scanning
+  
+**User Experience:**
+- **Notification Management:** Toasts/notifications are now disabled when viewing menus or modals, preventing distractions during important decisions.
+- **Reduced Visual Clutter:** Removed hover animations on cards for a calmer, more static interface while keeping button animations for interactive feedback.
+- **Mobile Optimization:** 
+  - Improved satisfaction dashboard layout for small screens (single column on mobile, 2 columns on tablets)
+  - Better touch targets and readability
+  - Streamlined menu system to avoid popup clutter
+
+*Files modified:* `game.js`, `index.html`, `styles.css`
+
+---
+
+### v1.9.1 Bugfix
 - **Staff Order History Not Initialized:** Fixed missing `orderHistory` arrays for initial staff, preventing errors and ensuring recent orders display correctly.
 - **Incorrect Achievement Count Display:** Updated achievement badge to show the correct total (18 achievements).
 - *Files modified:* `game.js`, `index.html`
