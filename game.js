@@ -70,7 +70,9 @@ class RestaurantGame {
                 challengesRes,
                 staffRolesRes,
                 specialtiesRes,
-                stringsRes
+                stringsRes,
+                moodsRes,
+                orderStatesRes
             ] = await Promise.all([
                 fetch('data/recipes.json'),
                 fetch('data/orders.json'),
@@ -79,7 +81,9 @@ class RestaurantGame {
                 fetch('data/challenges.json'),
                 fetch('data/staff_roles.json'),
                 fetch('data/specialties.json'),
-                fetch('data/strings.json')
+                fetch('data/strings.json'),
+                fetch('data/moods.json'),
+                fetch('data/order_states.json')
             ]);
 
             this.recipeData = await recipeRes.json();
@@ -90,6 +94,8 @@ class RestaurantGame {
             this.staffRolesData = staffRolesRes.ok ? await staffRolesRes.json() : [];
             this.specialtiesData = specialtiesRes.ok ? await specialtiesRes.json() : [];
             this.stringsData = stringsRes.ok ? await stringsRes.json() : {};
+            this.moodsData = moodsRes.ok ? await moodsRes.json() : [];
+            this.orderStatesData = orderStatesRes.ok ? await orderStatesRes.json() : [];
 
             this.initializeInventory();
             this.initializeStaff();
@@ -275,7 +281,7 @@ class RestaurantGame {
     }
     
     getRandomMood() {
-        const moods = [
+        const moods = Array.isArray(this.moodsData) && this.moodsData.length ? this.moodsData : [
             { name: 'Happy', emoji: '😊', performanceModifier: 1.15, description: '+15% performance' },
             { name: 'Focused', emoji: '😎', performanceModifier: 1.10, description: '+10% performance' },
             { name: 'Neutral', emoji: '😐', performanceModifier: 1.0, description: 'Normal performance' },
@@ -284,6 +290,22 @@ class RestaurantGame {
             { name: 'Energized', emoji: '🤩', performanceModifier: 1.20, description: '+20% performance' }
         ];
         return moods[Math.floor(Math.random() * moods.length)];
+    }
+    
+    getOrderState(progress) {
+        const states = Array.isArray(this.orderStatesData) && this.orderStatesData.length ? this.orderStatesData : [
+            { state: 'Prepping', minProgress: 0, maxProgress: 20 },
+            { state: 'Cooking', minProgress: 20, maxProgress: 50 },
+            { state: 'Finishing', minProgress: 50, maxProgress: 80 },
+            { state: 'Plating', minProgress: 80, maxProgress: 100 }
+        ];
+        
+        for (const stateData of states) {
+            if (progress >= stateData.minProgress && progress < stateData.maxProgress) {
+                return stateData.state;
+            }
+        }
+        return states[states.length - 1].state; // Return last state if 100%
     }
     
     initializeRecipes() {
@@ -1934,6 +1956,47 @@ class RestaurantGame {
         const avgRating = this.calculateAverageRating();
         document.getElementById('overall-rating').textContent = avgRating.toFixed(1);
         
+        // Update orders header stat
+        const pendingOrders = this.orders.filter(o => o.status === 'pending').length;
+        const inProgressOrders = this.orders.filter(o => o.status === 'in-progress').length;
+        document.getElementById('header-orders').textContent = this.orders.length;
+        
+        // Update staff header stat
+        const availableStaff = this.staff.filter(s => s.status === 'available').length;
+        const busyStaff = this.staff.filter(s => s.status === 'busy').length;
+        document.getElementById('header-staff').textContent = `${availableStaff}/${this.staff.length}`;
+        
+        // Update orders tooltip
+        const ordersTooltip = document.querySelector('#orders-tooltip .tooltip-content');
+        if (ordersTooltip) {
+            const urgentOrders = this.orders.filter(o => {
+                const timePercent = (o.timeRemaining / o.timeLimit) * 100;
+                return timePercent < 30;
+            }).length;
+            ordersTooltip.innerHTML = `
+                <strong>Active Orders</strong><br>
+                Total: ${this.orders.length}<br>
+                Pending: ${pendingOrders} 📋<br>
+                In Progress: ${inProgressOrders} 🔄<br>
+                ${urgentOrders > 0 ? `<span style="color: #B85450;">Urgent: ${urgentOrders} ⚠️</span>` : 'No Urgent Orders'}
+            `;
+        }
+        
+        // Update staff tooltip
+        const staffTooltip = document.querySelector('#staff-tooltip .tooltip-content');
+        if (staffTooltip) {
+            const restingStaff = this.staff.filter(s => s.status === 'resting').length;
+            const avgEfficiency = this.staff.length > 0 ? 
+                (this.staff.reduce((sum, s) => sum + s.efficiency, 0) / this.staff.length * 100).toFixed(0) : 0;
+            staffTooltip.innerHTML = `
+                <strong>Staff Status</strong><br>
+                Available: ${availableStaff} ✅<br>
+                Busy: ${busyStaff} 👨‍🍳<br>
+                Resting: ${restingStaff} 😴<br>
+                Avg Efficiency: ${avgEfficiency}%
+            `;
+        }
+        
         // Update rating tooltip (QOL1)
         const ratingTooltip = document.querySelector('#rating-tooltip .tooltip-content');
         if (ratingTooltip) {
@@ -2002,12 +2065,18 @@ class RestaurantGame {
             
             const itemsList = order.items.map(item => `• ${item.name}`).join('<br>');
             
-            // Get assigned staff name
+            // Get assigned staff name and order state
             let assignedStaffInfo = '';
+            let orderStateInfo = '';
             if (order.assignedStaff) {
                 const assignedStaff = this.staff.find(s => s.id === order.assignedStaff);
                 if (assignedStaff) {
                     assignedStaffInfo = `<div style="margin: 5px 0; font-size: 0.85rem; color: #667eea;">👨‍🍳 ${assignedStaff.name}</div>`;
+                }
+                // Show order state for in-progress orders
+                if (order.status === 'in-progress') {
+                    const state = this.getOrderState(order.progress);
+                    orderStateInfo = `<div style="margin: 5px 0; font-size: 0.85rem; color: #D89E54; font-weight: bold;">📍 ${state}</div>`;
                 }
             }
             
@@ -2042,6 +2111,7 @@ class RestaurantGame {
                 <div class="order-items">${itemsList}</div>
                 <div style="margin: 5px 0; font-weight: bold; color: #28a745;">Total: $${order.totalPrice}</div>
                 ${assignedStaffInfo}
+                ${orderStateInfo}
                 ${specializationHint}
                 <div class="order-status">
                     <div class="order-progress">
@@ -2104,6 +2174,19 @@ class RestaurantGame {
             }
             
             const canRest = staff.status === 'available' && staff.fatigue > 30;
+            
+            // Get current order state if staff is busy
+            let currentOrderState = '';
+            if (staff.status === 'busy' && staff.currentOrder) {
+                const order = this.orders.find(o => o.id === staff.currentOrder);
+                if (order) {
+                    const state = this.getOrderState(order.progress);
+                    currentOrderState = `<div style="margin-top: 8px; padding: 8px; background: rgba(216, 158, 84, 0.1); border-radius: 5px; border-left: 3px solid #D89E54;">
+                        <div style="font-size: 0.85rem; color: #666; margin-bottom: 3px;">Working on Order #${order.id}</div>
+                        <div style="font-size: 0.9rem; font-weight: bold; color: #D89E54;">📍 ${state}</div>
+                    </div>`;
+                }
+            }
             
             // QOL3: Efficiency badge based on current performance
             let efficiencyBadge = '';
@@ -2172,6 +2255,7 @@ class RestaurantGame {
                         <span class="mood-description">${staff.mood ? staff.mood.description : 'Normal performance'}</span>
                     </div>
                 </div>
+                ${currentOrderState}
                 <div style="display: flex; gap: 5px; margin-top: 10px;">
                     ${canUpgrade ? `
                         <button class="upgrade-btn" onclick="game.upgradeStaff(${staff.id})" ${this.revenue < upgradeCost ? 'disabled' : ''}>
@@ -2717,6 +2801,10 @@ class RestaurantGame {
                     <div class="hof-stat">
                         <span class="stat-label">Revenue:</span>
                         <span class="stat-value">$${winner.revenue.toFixed(0)}</span>
+                    </div>
+                    <div class="hof-stat">
+                        <span class="stat-label">Tips:</span>
+                        <span class="stat-value">$${(winner.tips || 0).toFixed(0)}</span>
                     </div>
                 </div>
             `;

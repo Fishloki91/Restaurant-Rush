@@ -1,0 +1,26 @@
+[
+    {
+        "state": "Prepping",
+        "minProgress": 0,
+        "maxProgress": 20,
+        "description": "Gathering ingredients"
+    },
+    {
+        "state": "Cooking",
+        "minProgress": 20,
+        "maxProgress": 50,
+        "description": "Preparing the dish"
+    },
+    {
+        "state": "Finishing",
+        "minProgress": 50,
+        "maxProgress": 80,
+        "description": "Adding final touches"
+    },
+    {
+        "state": "Plating",
+        "minProgress": 80,
+        "maxProgress": 100,
+        "description": "Ready to serve"
+    }
+]

@@ -520,7 +520,18 @@ body {
 
 .order-card.urgent {
     border-left-color: #B85450;
-    animation: pulse 1s infinite;
+    animation: pulse-urgent 1s infinite;
+}
+
+@keyframes pulse-urgent {
+    0%, 100% { 
+        opacity: 1; 
+        transform: scale(1);
+    }
+    50% { 
+        opacity: 0.9; 
+        transform: scale(1.005);
+    }
 }
 
 @keyframes pulse {
