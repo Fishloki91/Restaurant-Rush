@@ -635,6 +635,34 @@ class RestaurantGame {
             return; // Silently skip showing toast when in a menu
         }
         
+        // Context-aware notification filtering based on current view
+        // Don't show order-related notifications when viewing orders
+        if (this.currentView === 'orders') {
+            const orderRelatedToasts = [
+                'Order Started',
+                'Order Complete!',
+                'VIP Order Complete!',
+                'VIP Customer!'
+            ];
+            if (orderRelatedToasts.includes(title)) {
+                return; // Skip order-related notifications in orders view
+            }
+        }
+        
+        // Don't show staff-related notifications when viewing staff
+        if (this.currentView === 'staff') {
+            const staffRelatedToasts = [
+                'Mood Changed',
+                'Order Started',
+                'Order Complete!',
+                'VIP Order Complete!'
+            ];
+            // Check if title matches staff-related patterns
+            if (staffRelatedToasts.some(pattern => title.includes(pattern))) {
+                return; // Skip staff-related notifications in staff view
+            }
+        }
+        
         // Add toast to queue
         this.toastQueue.push({ icon, title, message, type, duration });
         
