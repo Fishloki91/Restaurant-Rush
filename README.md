@@ -38,7 +38,7 @@
 - Auto-assign mode with smart auto-rest for fatigued staff
 - Each day lasts 3 minutes with 10% end-of-day revenue bonus
 - Staff needs and orders reset at the start of each new day
-- Game over occurs when revenue reaches $0 or below
+- Unfinished assigned orders incur penalties based on incomplete progress at day's end
 - Game over occurs when revenue reaches $0 or below
 
 ## 🎯 Objective
@@ -54,6 +54,7 @@ Balance quick order fulfillment, staff workload, inventory management, and custo
 **Major Features:**
 - **Dynamic order system** - Orders now flow naturally with the day: fewer in early hours, steady mid-day, and rush hour volume at the end. More available staff = more orders!
 - **Fresh start each day** - Staff needs (fatigue, morale, hunger) and all orders reset at the start of each new day for a clean slate.
+- **Unfinished order penalties** - Assigned orders that aren't completed by day's end incur penalties based on their incomplete progress (e.g., 25% done = 75% penalty).
 - **Mobile gameplay improvements** - Tap tooltips, locked horizontal scrolling, achievement toast notifications, and haptic feedback on supported devices.
 
 **Configuration:**

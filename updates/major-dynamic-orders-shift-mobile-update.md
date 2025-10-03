@@ -14,17 +14,21 @@ Your restaurant now adapts to the flow of business throughout the day! Orders ar
 
 The game now feels more realistic with natural ebbs and flows throughout each business day, rewarding you for keeping staff available and ready to work!
 
-## Major Feature 2: Fresh Start Each Day
+## Major Feature 2: Fresh Start Each Day with Smart Penalties
 
-Every new day brings a clean slate for your restaurant! Staff and orders reset at the start of each business day.
+Every new day brings a clean slate for your restaurant, but unfinished work has consequences!
 
 **What Changed:**
 - **Staff needs reset** - Fatigue, morale, and hunger all reset to fresh levels at the start of each day
-- **All orders cleared** - The order queue clears completely when a new day begins, giving you a fresh start
+- **All orders cleared** - The order queue clears completely when a new day begins
 - **Staff status reset** - All staff return to 'available' status, ready to work the new shift
-- **No carry-over** - Each day is independent, allowing you to manage without worrying about yesterday's problems
+- **Progress-based penalties** - Unfinished assigned orders incur penalties based on incomplete work:
+  - If an order is 25% complete, you pay 75% of the order total
+  - If an order is 75% complete, you pay only 25% of the order total
+  - Unassigned orders are cleared without penalty
+- **Game over protection** - Penalties are applied before day advancement, triggering game over if revenue reaches $0
 
-This keeps each day feeling fresh and manageable, letting you focus on the current shift without the burden of previous day's unfinished work!
+This adds strategic depth: assign orders wisely and ensure your team can complete their work before the day ends, or face financial consequences!
 
 ## Major Feature 3: Mobile Gameplay QOL Improvements
 

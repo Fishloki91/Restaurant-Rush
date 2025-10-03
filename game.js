@@ -742,6 +742,37 @@ class RestaurantGame {
     }
     
     continueToNextDay() {
+        // Apply penalties for unfinished assigned orders based on incomplete progress
+        let penaltyAmount = 0;
+        const unfinishedAssignedOrders = this.orders.filter(o => 
+            (o.status === 'in-progress' || o.status === 'paused') && o.assignedStaff !== null
+        );
+        
+        if (unfinishedAssignedOrders.length > 0) {
+            unfinishedAssignedOrders.forEach(order => {
+                // Calculate completion percentage
+                const timeElapsed = order.timeLimit - order.timeRemaining;
+                const completionPercent = timeElapsed / order.timeLimit;
+                
+                // Penalty is for the incomplete portion
+                const incompletePercent = 1 - completionPercent;
+                const penalty = Math.floor(order.totalPrice * incompletePercent);
+                penaltyAmount += penalty;
+            });
+            
+            this.revenue -= penaltyAmount;
+            this.addFeedback(`⚠️ Lost $${penaltyAmount} for ${unfinishedAssignedOrders.length} unfinished assigned order(s)`, false);
+        }
+        
+        // Check for game over after penalties but before advancing day
+        if (this.revenue <= 0) {
+            this.revenue = 0; // Don't go negative
+            this.isGameOver = true;
+            this.isPaused = true;
+            this.showGameOver();
+            return; // Stop here, don't advance to next day
+        }
+        
         // Clear all orders at end of day
         this.orders = [];
         
