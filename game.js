@@ -59,6 +59,15 @@ class RestaurantGame {
         // Last day summary tracking
         this.lastDaySummary = null; // Store last completed day's summary
         
+        // Food statistics tracking (from day 1)
+        this.foodStatistics = {
+            ingredientsUsed: {}, // Track total ingredients used since day 1
+            ingredientsByDay: [], // Track ingredients used per day
+            categorySales: {}, // Track sales by food category
+            totalFoodCost: 0, // Total food cost spent
+            foodCostByDay: [] // Track food cost per day
+        };
+        
         // Initialize Audio Context for sound effects
         this.audioContext = null;
         this.initializeAudio();
@@ -263,9 +272,9 @@ class RestaurantGame {
         // Assign 2 random permanent traits
         const traits = this.getRandomTraits(2);
         
-        // Calculate base performance from traits
-        const traitsModifier = traits.reduce((acc, trait) => acc * trait.modifier, 1.0);
-        const basePerformance = Math.round(100 * traitsModifier);
+        // Calculate base performance from traits (additive, not multiplicative)
+        const traitsModifier = traits.reduce((acc, trait) => acc + trait.modifier, 0);
+        const basePerformance = 100 + traitsModifier; // Start at 100, add trait bonuses
 
         return {
             id: this.nextStaffId++,
@@ -317,7 +326,7 @@ class RestaurantGame {
         return shuffled.slice(0, count);
     }
     
-    getRandomMood() {
+    getRandomMood(currentMood = null, staff = null) {
         const moods = Array.isArray(this.moodsData) && this.moodsData.length ? this.moodsData : [
             { name: 'Happy', emoji: '😊', performanceModifier: 1.15, description: '+15% performance' },
             { name: 'Focused', emoji: '😎', performanceModifier: 1.10, description: '+10% performance' },
@@ -326,7 +335,35 @@ class RestaurantGame {
             { name: 'Stressed', emoji: '😰', performanceModifier: 0.85, description: '-15% performance' },
             { name: 'Energized', emoji: '🤩', performanceModifier: 1.20, description: '+20% performance' }
         ];
-        return moods[Math.floor(Math.random() * moods.length)];
+        
+        // Filter out logically inconsistent moods based on staff state
+        let availableMoods = [...moods];
+        if (staff) {
+            // Don't allow "Tired" mood if fatigue is low (< 40)
+            if (staff.fatigue < 40) {
+                availableMoods = availableMoods.filter(m => m.name !== 'Tired');
+            }
+            // Don't allow "Energized" mood if fatigue is very high (> 70)
+            if (staff.fatigue > 70) {
+                availableMoods = availableMoods.filter(m => m.name !== 'Energized');
+            }
+            // Don't allow "Stressed" mood if morale is high (> 80) and fatigue is low (< 30)
+            if (staff.morale > 80 && staff.fatigue < 30) {
+                availableMoods = availableMoods.filter(m => m.name !== 'Stressed');
+            }
+        }
+        
+        // Filter out current mood to ensure mood always changes
+        if (currentMood) {
+            availableMoods = availableMoods.filter(m => m.name !== currentMood.name);
+        }
+        
+        // If filtering resulted in no moods, use all moods except current
+        if (availableMoods.length === 0) {
+            availableMoods = currentMood ? moods.filter(m => m.name !== currentMood.name) : moods;
+        }
+        
+        return availableMoods[Math.floor(Math.random() * availableMoods.length)];
     }
     
     applyMoraleFactor(staff, factorId, eventData = {}) {
@@ -681,17 +718,35 @@ class RestaurantGame {
             return true;
         });
         
-        // Show new toasts if there's room
+        // Show new toasts if there's room, with slight delays between them
         while (this.toastQueue.length > 0 && this.activeToasts.length < this.maxVisibleToasts) {
             const toastData = this.toastQueue.shift();
-            this.displayToast(toastData);
+            // Add a small delay (200ms) between each toast for smoother stacking
+            const delay = this.activeToasts.length * 200;
+            setTimeout(() => this.displayToast(toastData), delay);
         }
     }
     
     displayToast({ icon, title, message, type, duration }) {
+        // Determine color variant based on title for variety within same category
+        let colorVariant = '';
+        if (type === 'info') {
+            if (title.includes('Mood')) {
+                colorVariant = 'mood';
+            } else if (title.includes('Resting')) {
+                colorVariant = 'rest';
+            }
+        } else if (type === 'success') {
+            if (title.includes('VIP')) {
+                colorVariant = 'vip';
+            } else if (title.includes('Tip')) {
+                colorVariant = 'tip';
+            }
+        }
+        
         // Create new toast element
         const toast = document.createElement('div');
-        toast.className = 'game-toast toast-' + type;
+        toast.className = `game-toast toast-${type}${colorVariant ? ' toast-' + type + '-' + colorVariant : ''}`;
         toast.innerHTML = `
             <div class="toast-icon">${icon}</div>
             <div class="toast-content">
@@ -916,16 +971,31 @@ class RestaurantGame {
                 winner.employeeOfMonthTitle = 'Reliable Star';
             }
             
-            // Add to Hall of Fame
-            this.hallOfFame.push({
-                name: winner.name,
-                month: Math.floor(this.day / this.monthDuration),
-                score: winner.monthlyScore,
-                title: winner.employeeOfMonthTitle,
-                orders: winner.monthlyOrders,
-                revenue: winner.monthlyRevenue,
-                tips: winner.monthlyTips
-            });
+            // Add to Hall of Fame or update existing entry
+            const existingEntry = this.hallOfFame.find(entry => entry.name === winner.name);
+            if (existingEntry) {
+                // Update existing entry
+                existingEntry.prestige++;
+                existingEntry.lastWinDay = this.day;
+                existingEntry.score = winner.monthlyScore;
+                existingEntry.title = winner.employeeOfMonthTitle;
+                existingEntry.orders = winner.monthlyOrders;
+                existingEntry.revenue = winner.monthlyRevenue;
+                existingEntry.tips = winner.monthlyTips;
+            } else {
+                // Create new entry
+                this.hallOfFame.push({
+                    name: winner.name,
+                    prestige: 1,
+                    lastWinDay: this.day,
+                    month: Math.floor(this.day / this.monthDuration),
+                    score: winner.monthlyScore,
+                    title: winner.employeeOfMonthTitle,
+                    orders: winner.monthlyOrders,
+                    revenue: winner.monthlyRevenue,
+                    tips: winner.monthlyTips
+                });
+            }
             
             this.currentMonthWinner = winner;
             
@@ -1448,6 +1518,20 @@ class RestaurantGame {
         this.dayStartVipCustomers = this.vipCustomers;
         this.dayStartStaffLevels = this.staff.reduce((sum, s) => sum + s.level, 0);
         
+        // Track food statistics for completed day
+        const dayIngredients = {};
+        Object.keys(this.foodStatistics.ingredientsUsed).forEach(ing => {
+            const prevTotal = this.foodStatistics.ingredientsByDay.length > 0 
+                ? this.foodStatistics.ingredientsByDay.reduce((sum, day) => sum + (day[ing] || 0), 0)
+                : 0;
+            dayIngredients[ing] = (this.foodStatistics.ingredientsUsed[ing] || 0) - prevTotal;
+        });
+        this.foodStatistics.ingredientsByDay.push(dayIngredients);
+        
+        const prevFoodCost = this.foodStatistics.foodCostByDay.reduce((sum, cost) => sum + cost, 0);
+        const todayFoodCost = this.foodStatistics.totalFoodCost - prevFoodCost;
+        this.foodStatistics.foodCostByDay.push(todayFoodCost);
+        
         // Increase difficulty gradually (keep for backward compatibility)
         this.orderGenerationChance = Math.min(0.8, 0.4 + (this.day - 1) * 0.05);
         
@@ -1625,8 +1709,25 @@ class RestaurantGame {
             }
             if (actualUsed > 0) {
                 ingredientsUsed[ingredient] = actualUsed;
+                // Track ingredients used in statistics
+                if (!this.foodStatistics.ingredientsUsed[ingredient]) {
+                    this.foodStatistics.ingredientsUsed[ingredient] = 0;
+                }
+                this.foodStatistics.ingredientsUsed[ingredient] += actualUsed;
             }
         }
+        
+        // Auto-replenish inventory (no purchase needed)
+        for (const ingredient in this.inventory) {
+            if (this.inventory[ingredient].current < this.inventory[ingredient].max * 0.3) {
+                this.inventory[ingredient].current = this.inventory[ingredient].max;
+            }
+        }
+        
+        // Calculate food cost (15% of order price) and deduct from revenue as expense
+        const foodCost = Math.floor(order.totalPrice * 0.15);
+        this.revenue -= foodCost;
+        this.foodStatistics.totalFoodCost += foodCost;
         
         // Show toast notification for ingredients used
         if (Object.keys(ingredientsUsed).length > 0) {
@@ -1636,7 +1737,7 @@ class RestaurantGame {
             this.showToast({
                 icon: '📦',
                 title: 'Ingredients Used',
-                message: ingredientsList,
+                message: `${ingredientsList} (Cost: $${foodCost})`,
                 type: 'info',
                 duration: 3000
             });
@@ -1895,14 +1996,14 @@ class RestaurantGame {
             // Initialize traits if not present (backward compatibility)
             if (!staff.traits || staff.traits.length === 0) {
                 staff.traits = this.getRandomTraits(2);
-                // Recalculate base performance from traits
-                const traitsModifier = staff.traits.reduce((acc, trait) => acc * trait.modifier, 1.0);
-                staff.basePerformance = Math.round(100 * traitsModifier);
+                // Recalculate base performance from traits (additive)
+                const traitsModifier = staff.traits.reduce((acc, trait) => acc + trait.modifier, 0);
+                staff.basePerformance = 100 + traitsModifier;
             }
             
             // Update mood timer
             if (!staff.mood) {
-                staff.mood = this.getRandomMood();
+                staff.mood = this.getRandomMood(null, staff);
             }
             if (!staff.moodChangeTimer) {
                 staff.moodChangeTimer = 0;
@@ -1916,7 +2017,7 @@ class RestaurantGame {
             // Change mood periodically
             if (staff.moodChangeTimer >= staff.moodChangeDuration) {
                 const oldMood = staff.mood.name;
-                staff.mood = this.getRandomMood();
+                staff.mood = this.getRandomMood(staff.mood, staff);
                 staff.moodChangeTimer = 0;
                 staff.moodChangeDuration = 60 + Math.floor(Math.random() * 60); // Next mood change in 60-120 seconds
                 
@@ -2190,10 +2291,20 @@ class RestaurantGame {
         document.getElementById('overview-staff-busy').textContent = busyStaff;
         document.getElementById('overview-staff-resting').textContent = restingStaff;
         
-        // Inventory card
-        document.getElementById('overview-inventory-total').textContent = totalInventoryItems;
-        document.getElementById('overview-inventory-low').textContent = lowStockItems;
-        document.getElementById('overview-inventory-empty').textContent = emptyStockItems;
+        // Food Statistics card
+        const totalFoodCost = this.foodStatistics.totalFoodCost;
+        const uniqueIngredients = Object.keys(this.foodStatistics.ingredientsUsed).length;
+        const categorySales = {};
+        this.completedOrders.forEach(order => {
+            order.items.forEach(item => {
+                categorySales[item.category] = true;
+            });
+        });
+        const categoriesCount = Object.keys(categorySales).length;
+        
+        document.getElementById('overview-inventory-total').textContent = `$${totalFoodCost}`;
+        document.getElementById('overview-inventory-low').textContent = uniqueIngredients;
+        document.getElementById('overview-inventory-empty').textContent = categoriesCount;
         
         // Satisfaction card
         document.getElementById('overview-satisfaction').textContent = `${Math.round(this.customerSatisfaction)}%`;
@@ -2558,8 +2669,8 @@ class RestaurantGame {
         this.staff.forEach(staff => {
             // Build detailed tooltip with math breakdown
             const traitsModifier = staff.traits && staff.traits.length > 0 
-                ? staff.traits.reduce((acc, trait) => acc * trait.modifier, 1.0) 
-                : 1.0;
+                ? staff.traits.reduce((acc, trait) => acc + trait.modifier, 0) 
+                : 0;
             const basePerf = staff.basePerformance || 100;
             
             // Calculate efficiency breakdown
@@ -2570,9 +2681,9 @@ class RestaurantGame {
             
             const tooltipContent = `
 <strong>Performance Breakdown:</strong>
-Base: 100% × Traits
-${staff.traits && staff.traits.length > 0 ? staff.traits.map(t => `  × ${(t.modifier * 100).toFixed(0)}% (${t.name})`).join('\n') : ''}
-= ${basePerf.toFixed(0)}% Base Performance
+Base: 100
+${staff.traits && staff.traits.length > 0 ? staff.traits.map(t => `  ${t.modifier >= 0 ? '+' : ''}${t.modifier} (${t.name})`).join('\n') : ''}
+= ${basePerf} Base Performance
 
 <strong>Efficiency Calculation:</strong>
 Base Efficiency: ${(staff.baseEfficiency * 100).toFixed(0)}%
@@ -2589,7 +2700,6 @@ Fatigue: ${staff.fatigue.toFixed(0)}%
             
             const staffCard = document.createElement('div');
             staffCard.className = 'staff-card';
-            staffCard.title = tooltipContent;
             
             const upgradeCost = 100 + (staff.upgradeLevel * 50);
             const canUpgrade = staff.upgradeLevel < staff.maxUpgradeLevel;
@@ -2658,7 +2768,7 @@ Fatigue: ${staff.fatigue.toFixed(0)}%
             if (staff.traits && staff.traits.length > 0) {
                 traitsDisplay = `<div class="staff-traits">
                     ${staff.traits.map(trait => 
-                        `<span class="trait-badge ${trait.modifier >= 1 ? 'trait-positive' : 'trait-negative'}" title="${trait.description}">
+                        `<span class="trait-badge ${trait.modifier >= 0 ? 'trait-positive' : 'trait-negative'}" title="${trait.description}">
                             ${trait.emoji} ${trait.name}
                         </span>`
                     ).join('')}
@@ -2671,7 +2781,7 @@ Fatigue: ${staff.fatigue.toFixed(0)}%
                 </button>
                 <div class="staff-header">
                     <div>
-                        <div class="staff-name">${staff.name} ${eotmBadge} ${upgradeStars} ${efficiencyBadge}</div>
+                        <div class="staff-name" title="${tooltipContent}">${staff.name} ${eotmBadge} ${upgradeStars} ${efficiencyBadge}</div>
                         <div class="staff-role">${staff.role} ${canUpgrade ? `(Level ${staff.upgradeLevel}/${staff.maxUpgradeLevel})` : '(MAX)'}</div>
                         ${staff.isEmployeeOfMonth ? `<div class="eotm-title">${staff.employeeOfMonthTitle} (+${staff.employeeOfMonthBonus}% bonus)</div>` : ''}
                         ${traitsDisplay}
@@ -2765,54 +2875,142 @@ Fatigue: ${staff.fatigue.toFixed(0)}%
     }
     
     renderInventory() {
-        const container = document.getElementById('inventory-container');
+        const container = document.getElementById('food-stats-container');
+        if (!container) return;
+        
         container.innerHTML = '';
         
-        // QOL2: Calculate ingredient usage in active orders
-        const ingredientUsage = {};
-        this.orders.forEach(order => {
-            Object.keys(order.requiredIngredients).forEach(ing => {
-                ingredientUsage[ing] = (ingredientUsage[ing] || 0) + 1;
+        // Default to ingredients view if no view set
+        if (!this.foodStatsCurrentView) {
+            this.foodStatsCurrentView = 'ingredients';
+        }
+        
+        if (this.foodStatsCurrentView === 'ingredients') {
+            this.renderFoodStatsIngredients(container);
+        } else if (this.foodStatsCurrentView === 'cost') {
+            this.renderFoodStatsCost(container);
+        } else if (this.foodStatsCurrentView === 'categories') {
+            this.renderFoodStatsCategories(container);
+        }
+    }
+    
+    setFoodStatsView(view) {
+        this.foodStatsCurrentView = view;
+        this.renderInventory();
+    }
+    
+    renderFoodStatsIngredients(container) {
+        const ingredients = this.foodStatistics.ingredientsUsed;
+        
+        if (Object.keys(ingredients).length === 0) {
+            container.innerHTML = '<div class="empty-state">No ingredients used yet. Start serving orders to see statistics!</div>';
+            return;
+        }
+        
+        // Find max for scaling
+        const maxUsage = Math.max(...Object.values(ingredients));
+        
+        container.innerHTML = '<h3 style="margin-bottom: 20px; color: #333;">📊 Ingredient Usage (All Time)</h3>';
+        
+        Object.entries(ingredients).sort((a, b) => b[1] - a[1]).forEach(([name, count]) => {
+            const percentage = maxUsage > 0 ? (count / maxUsage) * 100 : 0;
+            
+            const statCard = document.createElement('div');
+            statCard.className = 'food-stat-card';
+            statCard.innerHTML = `
+                <div class="stat-header">
+                    <span class="stat-name">${name}</span>
+                    <span class="stat-value">${count} used</span>
+                </div>
+                <div class="stat-bar-container">
+                    <div class="stat-bar" style="width: ${percentage}%; background: linear-gradient(90deg, #4CAF50, #45a049);"></div>
+                </div>
+            `;
+            container.appendChild(statCard);
+        });
+    }
+    
+    renderFoodStatsCost(container) {
+        const totalCost = this.foodStatistics.totalFoodCost;
+        const costByDay = this.foodStatistics.foodCostByDay;
+        
+        if (costByDay.length === 0) {
+            container.innerHTML = '<div class="empty-state">No food cost data yet. Complete your first day to see statistics!</div>';
+            return;
+        }
+        
+        const maxCost = Math.max(...costByDay);
+        
+        container.innerHTML = `
+            <h3 style="margin-bottom: 20px; color: #333;">💰 Food Cost Analysis</h3>
+            <div class="stat-summary">
+                <div class="summary-box">
+                    <div class="summary-label">Total Food Cost</div>
+                    <div class="summary-value">$${totalCost}</div>
+                </div>
+                <div class="summary-box">
+                    <div class="summary-label">Average Per Day</div>
+                    <div class="summary-value">$${Math.floor(totalCost / costByDay.length)}</div>
+                </div>
+            </div>
+            <h4 style="margin: 20px 0 10px 0; color: #666;">Food Cost by Day</h4>
+        `;
+        
+        costByDay.forEach((cost, index) => {
+            const percentage = maxCost > 0 ? (cost / maxCost) * 100 : 0;
+            
+            const statCard = document.createElement('div');
+            statCard.className = 'food-stat-card';
+            statCard.innerHTML = `
+                <div class="stat-header">
+                    <span class="stat-name">Day ${index + 1}</span>
+                    <span class="stat-value">$${cost}</span>
+                </div>
+                <div class="stat-bar-container">
+                    <div class="stat-bar" style="width: ${percentage}%; background: linear-gradient(90deg, #FF9800, #F57C00);"></div>
+                </div>
+            `;
+            container.appendChild(statCard);
+        });
+    }
+    
+    renderFoodStatsCategories(container) {
+        // Track completed orders by category
+        const categorySales = {};
+        this.completedOrders.forEach(order => {
+            order.items.forEach(item => {
+                if (!categorySales[item.category]) {
+                    categorySales[item.category] = 0;
+                }
+                categorySales[item.category] += item.price;
             });
         });
         
-        for (const [name, stock] of Object.entries(this.inventory)) {
-            const percentage = (stock.current / stock.max) * 100;
-            let levelClass = 'high';
-            if (percentage < 30) {
-                levelClass = 'low';
-            } else if (percentage < 60) {
-                levelClass = 'medium';
-            }
-            
-            const item = document.createElement('div');
-            item.className = 'inventory-item';
-            item.title = `${name}: ${stock.current}/${stock.max} (${percentage.toFixed(0)}%)`;
-            
-            const restockCost = 10;
-            const canRestock = this.revenue >= restockCost && stock.current < stock.max;
-            
-            // QOL2: Show usage badge
-            const usageCount = ingredientUsage[name] || 0;
-            const usageBadge = usageCount > 0 ? `<span class="usage-badge" title="Used in ${usageCount} active order(s)">🍽️ ${usageCount}</span>` : '';
-            
-            item.innerHTML = `
-                <div class="inventory-header">
-                    <span class="ingredient-name">${name}</span>
-                    <span class="stock-level ${levelClass}">${stock.current}/${stock.max}</span>
-                </div>
-                ${usageBadge}
-                <div class="stock-bar">
-                    <div class="stock-bar-fill ${levelClass}" style="width: ${percentage}%"></div>
-                </div>
-                <button class="restock-btn" onclick="game.restockSingleItem('${name}')" 
-                    ${!canRestock ? 'disabled' : ''}>
-                    📦 Restock ($${restockCost})
-                </button>
-            `;
-            
-            container.appendChild(item);
+        if (Object.keys(categorySales).length === 0) {
+            container.innerHTML = '<div class="empty-state">No category data yet. Complete orders to see statistics!</div>';
+            return;
         }
+        
+        const maxSales = Math.max(...Object.values(categorySales));
+        
+        container.innerHTML = '<h3 style="margin-bottom: 20px; color: #333;">🍽️ Sales by Category</h3>';
+        
+        Object.entries(categorySales).sort((a, b) => b[1] - a[1]).forEach(([category, sales]) => {
+            const percentage = maxSales > 0 ? (sales / maxSales) * 100 : 0;
+            
+            const statCard = document.createElement('div');
+            statCard.className = 'food-stat-card';
+            statCard.innerHTML = `
+                <div class="stat-header">
+                    <span class="stat-name">${category}</span>
+                    <span class="stat-value">$${sales}</span>
+                </div>
+                <div class="stat-bar-container">
+                    <div class="stat-bar" style="width: ${percentage}%; background: linear-gradient(90deg, #2196F3, #1976D2);"></div>
+                </div>
+            `;
+            container.appendChild(statCard);
+        });
     }
     
     renderSatisfaction() {
@@ -3313,22 +3511,31 @@ Fatigue: ${staff.fatigue.toFixed(0)}%
         hofContainer.innerHTML = '';
         
         if (this.hallOfFame.length === 0) {
-            hofContainer.innerHTML = '<div class="empty-state">No winners yet. Complete 30 days to see the first Employee of the Month!</div>';
+            hofContainer.innerHTML = '<div class="empty-state">No winners yet. Complete your first day to see the first Staff of the Day!</div>';
             return;
         }
         
-        // Show most recent winners first
-        const recentWinners = [...this.hallOfFame].reverse().slice(0, 5);
+        // Sort by prestige, then by last win day
+        const sortedWinners = [...this.hallOfFame].sort((a, b) => {
+            if (b.prestige !== a.prestige) {
+                return b.prestige - a.prestige;
+            }
+            return b.lastWinDay - a.lastWinDay;
+        });
         
-        recentWinners.forEach(winner => {
+        // Show top 5 winners
+        const topWinners = sortedWinners.slice(0, 5);
+        
+        topWinners.forEach(winner => {
             const hofCard = document.createElement('div');
             hofCard.className = 'hall-of-fame-card';
             
             hofCard.innerHTML = `
                 <div class="hof-header">
                     <span class="hof-icon">🌟</span>
-                    <span class="hof-month">Month ${winner.month}</span>
+                    <span class="hof-month">Day ${winner.lastWinDay}</span>
                 </div>
+                ${winner.prestige > 1 ? `<div class="hof-prestige">🏆 Prestige: ${winner.prestige}x Champion</div>` : ''}
                 <div class="hof-name">${winner.name}</div>
                 <div class="hof-title">${winner.title}</div>
                 <div class="hof-stats">
@@ -3386,10 +3593,6 @@ document.addEventListener('DOMContentLoaded', () => {
         game.generateOrder();
     });
     
-    document.getElementById('restock-btn').addEventListener('click', () => {
-        game.restockInventory();
-    });
-    
     document.getElementById('sound-toggle-btn').addEventListener('click', () => {
         game.toggleSound();
     });
@@ -3417,11 +3620,6 @@ document.addEventListener('DOMContentLoaded', () => {
             case 'o': // Generate Order
                 if (!game.isPaused) {
                     document.getElementById('new-order-btn').click();
-                }
-                break;
-            case 'r': // Restock
-                if (!game.isPaused) {
-                    document.getElementById('restock-btn').click();
                 }
                 break;
             case 'a': // Toggle Auto-assign

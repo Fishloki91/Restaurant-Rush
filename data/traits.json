@@ -3,140 +3,140 @@
         "id": "perfectionist",
         "name": "Perfectionist",
         "emoji": "✨",
-        "modifier": 1.20,
-        "description": "+20% performance"
+        "modifier": 20,
+        "description": "+20 performance"
     },
     {
         "id": "quick_learner",
         "name": "Quick Learner",
         "emoji": "🎓",
-        "modifier": 1.15,
-        "description": "+15% performance"
+        "modifier": 15,
+        "description": "+15 performance"
     },
     {
         "id": "team_player",
         "name": "Team Player",
         "emoji": "🤝",
-        "modifier": 1.25,
-        "description": "+25% performance"
+        "modifier": 25,
+        "description": "+25 performance"
     },
     {
         "id": "experienced",
         "name": "Experienced",
         "emoji": "⭐",
-        "modifier": 1.30,
-        "description": "+30% performance"
+        "modifier": 30,
+        "description": "+30 performance"
     },
     {
         "id": "energetic",
         "name": "Energetic",
         "emoji": "⚡",
-        "modifier": 1.15,
-        "description": "+15% performance"
+        "modifier": 15,
+        "description": "+15 performance"
     },
     {
         "id": "organized",
         "name": "Organized",
         "emoji": "📋",
-        "modifier": 1.20,
-        "description": "+20% performance"
+        "modifier": 20,
+        "description": "+20 performance"
     },
     {
         "id": "creative",
         "name": "Creative",
         "emoji": "🎨",
-        "modifier": 1.10,
-        "description": "+10% performance"
+        "modifier": 10,
+        "description": "+10 performance"
     },
     {
         "id": "multitasker",
         "name": "Multitasker",
         "emoji": "🎯",
-        "modifier": 1.25,
-        "description": "+25% performance"
+        "modifier": 25,
+        "description": "+25 performance"
     },
     {
         "id": "culinary_genius",
         "name": "Culinary Genius",
         "emoji": "👨‍🍳",
-        "modifier": 1.50,
-        "description": "+50% performance"
+        "modifier": 50,
+        "description": "+50 performance"
     },
     {
         "id": "efficient",
         "name": "Efficient",
         "emoji": "⚙️",
-        "modifier": 1.15,
-        "description": "+15% performance"
+        "modifier": 15,
+        "description": "+15 performance"
     },
     {
         "id": "lazy",
         "name": "Lazy",
         "emoji": "😴",
-        "modifier": 0.90,
-        "description": "-10% performance"
+        "modifier": -10,
+        "description": "-10 performance"
     },
     {
         "id": "clumsy",
         "name": "Clumsy",
         "emoji": "🤦",
-        "modifier": 0.85,
-        "description": "-15% performance"
+        "modifier": -15,
+        "description": "-15 performance"
     },
     {
         "id": "slow",
         "name": "Slow Worker",
         "emoji": "🐌",
-        "modifier": 0.80,
-        "description": "-20% performance"
+        "modifier": -20,
+        "description": "-20 performance"
     },
     {
         "id": "forgetful",
         "name": "Forgetful",
         "emoji": "🤔",
-        "modifier": 0.85,
-        "description": "-15% performance"
+        "modifier": -15,
+        "description": "-15 performance"
     },
     {
         "id": "easily_distracted",
         "name": "Easily Distracted",
         "emoji": "😵‍💫",
-        "modifier": 0.75,
-        "description": "-25% performance"
+        "modifier": -25,
+        "description": "-25 performance"
     },
     {
         "id": "impatient",
         "name": "Impatient",
         "emoji": "😤",
-        "modifier": 0.90,
-        "description": "-10% performance"
+        "modifier": -10,
+        "description": "-10 performance"
     },
     {
         "id": "pessimistic",
         "name": "Pessimistic",
         "emoji": "😞",
-        "modifier": 0.85,
-        "description": "-15% performance"
+        "modifier": -15,
+        "description": "-15 performance"
     },
     {
         "id": "unmotivated",
         "name": "Unmotivated",
         "emoji": "😑",
-        "modifier": 0.70,
-        "description": "-30% performance"
+        "modifier": -30,
+        "description": "-30 performance"
     },
     {
         "id": "inexperienced",
         "name": "Inexperienced",
         "emoji": "🆕",
-        "modifier": 0.80,
-        "description": "-20% performance"
+        "modifier": -20,
+        "description": "-20 performance"
     },
     {
         "id": "accident_prone",
         "name": "Accident Prone",
         "emoji": "🤕",
-        "modifier": 0.50,
-        "description": "-50% performance"
+        "modifier": -50,
+        "description": "-50 performance"
     }
 ]

@@ -408,20 +408,26 @@ body {
 
 .detail-view-header {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
     margin-bottom: 25px;
     padding-bottom: 15px;
     border-bottom: 3px solid #C17B5B;
+    position: relative;
 }
 
 .detail-view-header h2 {
     font-size: 1.8rem;
     color: #333;
     margin: 0;
+    text-align: center;
+    letter-spacing: 0.5px;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .back-btn {
+    position: absolute;
+    right: 0;
     padding: 10px 20px;
     background: #6c757d;
     color: white;
@@ -436,7 +442,7 @@ body {
 
 .back-btn:hover {
     background: #5a6268;
-    transform: translateX(-3px);
+    transform: translateX(3px);
 }
 
 /* Touch devices */
@@ -714,6 +720,7 @@ body {
 .staff-name {
     font-weight: bold;
     color: #333;
+    cursor: help;
 }
 
 .staff-role {
@@ -970,6 +977,83 @@ body {
 }
 
 /* Inventory Section */
+/* Food Statistics Container */
+.food-stats-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding: 20px 0;
+}
+
+.food-stat-card {
+    background: #FDFBF7;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 15px rgba(139, 90, 60, 0.15);
+    border: 1px solid rgba(193, 123, 91, 0.2);
+}
+
+.stat-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.stat-name {
+    font-weight: bold;
+    color: #333;
+    font-size: 1rem;
+}
+
+.stat-value {
+    font-weight: bold;
+    color: #C17B5B;
+    font-size: 1rem;
+}
+
+.stat-bar-container {
+    height: 20px;
+    background: #EDE6DF;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.stat-bar {
+    height: 100%;
+    transition: width 0.5s ease;
+    border-radius: 10px;
+}
+
+.stat-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.summary-box {
+    background: #FDFBF7;
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(139, 90, 60, 0.15);
+    border: 2px solid #C17B5B;
+}
+
+.summary-label {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 8px;
+}
+
+.summary-value {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #C17B5B;
+}
+
+/* Old Inventory Container - Keep for backward compatibility but rename */
 .inventory-container {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -1449,21 +1533,23 @@ body {
     }
     
     .detail-view-header {
-        flex-wrap: wrap;
-        gap: 10px;
+        flex-direction: column;
+        gap: 15px;
     }
     
     .detail-view-header h2 {
         font-size: 1.5rem;
         width: 100%;
         text-align: center;
-        order: 2;
+        order: 1;
     }
     
     .back-btn {
-        order: 1;
+        position: static;
+        order: 2;
         font-size: 0.9rem;
         padding: 8px 15px;
+        width: 100%;
     }
     
     .detail-view-header .badge,
@@ -2256,6 +2342,16 @@ body {
     color: white;
 }
 
+.game-toast.toast-success-vip {
+    background: linear-gradient(135deg, #FFD700, #FFA500);
+    color: #333;
+}
+
+.game-toast.toast-success-tip {
+    background: linear-gradient(135deg, #66BB6A, #4CAF50);
+    color: white;
+}
+
 .game-toast.toast-warning {
     background: linear-gradient(135deg, #FF9800, #F57C00);
     color: white;
@@ -2268,6 +2364,16 @@ body {
 
 .game-toast.toast-info {
     background: linear-gradient(135deg, #2196F3, #1976D2);
+    color: white;
+}
+
+.game-toast.toast-info-mood {
+    background: linear-gradient(135deg, #42A5F5, #2196F3);
+    color: white;
+}
+
+.game-toast.toast-info-rest {
+    background: linear-gradient(135deg, #667eea, #5a67d8);
     color: white;
 }
 
@@ -2642,6 +2748,17 @@ body {
 .hof-month {
     font-weight: bold;
     font-size: 0.9rem;
+}
+
+.hof-prestige {
+    font-size: 1rem;
+    font-weight: bold;
+    color: #FFD700;
+    text-align: center;
+    margin-bottom: 8px;
+    padding: 5px;
+    background: rgba(255, 215, 0, 0.1);
+    border-radius: 5px;
 }
 
 .hof-name {
