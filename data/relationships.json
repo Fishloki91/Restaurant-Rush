@@ -1,0 +1,119 @@
+{
+  "relationships": [
+    {
+      "type": "teamwork",
+      "name": "Great Team",
+      "icon": "🤝",
+      "description": "Works well together",
+      "requirements": {
+        "sharedOrdersMin": 5,
+        "positiveTraitsMatch": 1
+      },
+      "effects": {
+        "efficiencyBonus": 0.10,
+        "moraleBonus": 5,
+        "combinedOrderSpeed": 0.15
+      }
+    },
+    {
+      "type": "rivalry",
+      "name": "Friendly Rivalry",
+      "icon": "⚔️",
+      "description": "Competing to be the best",
+      "requirements": {
+        "similarPerformance": 10,
+        "sameSpecialty": true
+      },
+      "effects": {
+        "efficiencyBonus": 0.15,
+        "competitiveBonus": 0.20,
+        "moraleImpact": -3
+      }
+    },
+    {
+      "type": "mentor",
+      "name": "Mentor & Student",
+      "icon": "👨‍🏫",
+      "description": "Teaching and learning",
+      "requirements": {
+        "levelDifference": 3,
+        "loyaltyMin": 100
+      },
+      "effects": {
+        "studentExpBonus": 0.50,
+        "mentorMoraleBonus": 10,
+        "sharedEfficiency": 0.08
+      }
+    },
+    {
+      "type": "conflict",
+      "name": "Conflict",
+      "icon": "💢",
+      "description": "Not getting along",
+      "requirements": {
+        "negativeInteractions": 3,
+        "opposingTraits": 1
+      },
+      "effects": {
+        "efficiencyPenalty": -0.15,
+        "moralePenalty": -10,
+        "quitChanceIncrease": 0.1
+      }
+    },
+    {
+      "type": "friendship",
+      "name": "Best Friends",
+      "icon": "💖",
+      "description": "Close personal friends",
+      "requirements": {
+        "workTogetherDays": 10,
+        "teamworkRelationship": true
+      },
+      "effects": {
+        "efficiencyBonus": 0.20,
+        "moraleBonus": 15,
+        "loyaltyBonus": 20,
+        "coverForAbsence": true
+      }
+    }
+  ],
+  "interactions": [
+    {
+      "id": "collaborate",
+      "name": "Collaborate on Order",
+      "description": "Two staff work together on a complex order",
+      "relationshipImpact": {
+        "teamwork": 1,
+        "friendship": 0.5
+      }
+    },
+    {
+      "id": "teach_technique",
+      "name": "Teach Technique",
+      "description": "Senior staff teaches junior staff",
+      "requirements": {
+        "levelDifference": 2
+      },
+      "relationshipImpact": {
+        "mentor": 1
+      }
+    },
+    {
+      "id": "compete",
+      "name": "Friendly Competition",
+      "description": "Staff compete to complete orders faster",
+      "relationshipImpact": {
+        "rivalry": 1
+      }
+    },
+    {
+      "id": "disagree",
+      "name": "Disagreement",
+      "description": "Staff disagree on approach",
+      "relationshipImpact": {
+        "conflict": 1,
+        "teamwork": -0.5
+      }
+    }
+  ]
+}

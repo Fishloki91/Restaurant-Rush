@@ -1,0 +1,157 @@
+{
+  "regularCustomers": [
+    {
+      "id": "mr_business",
+      "name": "Mr. Thompson",
+      "type": "business",
+      "icon": "💼",
+      "visitFrequency": 0.3,
+      "preferences": {
+        "categories": ["Grill", "French"],
+        "speedPriority": "high",
+        "qualityPriority": "medium"
+      },
+      "customOrders": [
+        { "recipeId": 8, "modification": "Extra Vegetables", "tipBonus": 0.25 },
+        { "recipeId": 15, "modification": "Medium Rare", "tipBonus": 0.30 }
+      ],
+      "loyaltyTiers": [
+        { "visits": 5, "bonus": "Always tips 20%", "tipBonus": 0.20 },
+        { "visits": 15, "bonus": "Brings business partners", "revenueMultiplier": 1.5 },
+        { "visits": 30, "bonus": "Weekly reservation guarantee", "guaranteed": true }
+      ]
+    },
+    {
+      "id": "foodie_sarah",
+      "name": "Sarah the Foodie",
+      "type": "foodie",
+      "icon": "📸",
+      "visitFrequency": 0.2,
+      "preferences": {
+        "categories": ["Italian", "Seafood", "French"],
+        "speedPriority": "low",
+        "qualityPriority": "very_high",
+        "novelty": "high"
+      },
+      "customOrders": [
+        { "recipeId": 13, "modification": "Add Truffle Oil", "tipBonus": 0.40 },
+        { "recipeId": 16, "modification": "Extra Mushrooms", "tipBonus": 0.35 }
+      ],
+      "loyaltyTiers": [
+        { "visits": 3, "bonus": "Writes positive reviews", "reputationBonus": 25 },
+        { "visits": 10, "bonus": "Social media influencer", "reputationBonus": 100 },
+        { "visits": 20, "bonus": "Celebrity endorsement", "unlockVIP": true }
+      ]
+    },
+    {
+      "id": "family_jones",
+      "name": "The Jones Family",
+      "type": "family",
+      "icon": "👨‍👩‍👧‍👦",
+      "visitFrequency": 0.4,
+      "preferences": {
+        "categories": ["Italian", "Grill", "Appetizer"],
+        "speedPriority": "high",
+        "qualityPriority": "medium",
+        "valueConscious": true
+      },
+      "customOrders": [
+        { "recipeId": 6, "modification": "Kid-friendly portion", "tipBonus": 0.15 },
+        { "recipeId": 19, "modification": "Extra Bacon", "tipBonus": 0.20 }
+      ],
+      "loyaltyTiers": [
+        { "visits": 10, "bonus": "Weekly visits", "frequencyBonus": 1.5 },
+        { "visits": 25, "bonus": "Recommend to neighbors", "reputationBonus": 50 },
+        { "visits": 50, "bonus": "Community pillar", "guaranteed": true, "bonusRevenue": 100 }
+      ]
+    },
+    {
+      "id": "chef_antonio",
+      "name": "Chef Antonio",
+      "type": "critic",
+      "icon": "👨‍🍳",
+      "visitFrequency": 0.05,
+      "preferences": {
+        "categories": ["Italian", "French"],
+        "speedPriority": "medium",
+        "qualityPriority": "very_high",
+        "innovation": "high"
+      },
+      "customOrders": [
+        { "recipeId": 9, "modification": "Chef's Special Touch", "tipBonus": 0.50 },
+        { "recipeId": 16, "modification": "Signature Style", "tipBonus": 0.60 }
+      ],
+      "loyaltyTiers": [
+        { "visits": 2, "bonus": "Mentor opportunity", "unlockSkillPoints": 2 },
+        { "visits": 5, "bonus": "Recipe sharing", "unlockRecipes": 3 },
+        { "visits": 10, "bonus": "Culinary partnership", "allStaffExpBonus": 50 }
+      ]
+    },
+    {
+      "id": "student_mike",
+      "name": "Mike the Student",
+      "type": "student",
+      "icon": "🎒",
+      "visitFrequency": 0.5,
+      "preferences": {
+        "categories": ["Asian", "Italian", "Mexican"],
+        "speedPriority": "very_high",
+        "qualityPriority": "low",
+        "valueConscious": true
+      },
+      "customOrders": [
+        { "recipeId": 5, "modification": "Extra Portions", "tipBonus": 0.10 },
+        { "recipeId": 11, "modification": "Spicy", "tipBonus": 0.12 }
+      ],
+      "loyaltyTiers": [
+        { "visits": 20, "bonus": "Study group regular", "frequencyBonus": 2.0 },
+        { "visits": 40, "bonus": "Campus ambassador", "reputationBonus": 30 },
+        { "visits": 80, "bonus": "Graduate appreciation", "tipBonus": 0.50 }
+      ]
+    }
+  ],
+  "customerTypes": {
+    "business": {
+      "name": "Business Professional",
+      "patience": 0.8,
+      "tipMultiplier": 1.3,
+      "satisfactionWeight": 1.0
+    },
+    "tourist": {
+      "name": "Tourist",
+      "patience": 1.0,
+      "tipMultiplier": 1.5,
+      "satisfactionWeight": 1.2
+    },
+    "local": {
+      "name": "Local Resident",
+      "patience": 0.9,
+      "tipMultiplier": 1.0,
+      "satisfactionWeight": 1.1
+    },
+    "vip": {
+      "name": "VIP Guest",
+      "patience": 0.6,
+      "tipMultiplier": 2.5,
+      "satisfactionWeight": 2.0
+    },
+    "foodie": {
+      "name": "Food Enthusiast",
+      "patience": 1.2,
+      "tipMultiplier": 1.8,
+      "satisfactionWeight": 1.5
+    },
+    "family": {
+      "name": "Family",
+      "patience": 0.7,
+      "tipMultiplier": 1.1,
+      "satisfactionWeight": 1.0
+    },
+    "student": {
+      "name": "Student",
+      "patience": 1.0,
+      "tipMultiplier": 0.8,
+      "satisfactionWeight": 0.8
+    }
+  }
+}

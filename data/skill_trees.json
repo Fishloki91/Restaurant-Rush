@@ -1,0 +1,128 @@
+{
+  "skillTrees": {
+    "speed": {
+      "name": "Speed Master",
+      "icon": "⚡",
+      "description": "Faster cooking and order completion",
+      "skills": [
+        {
+          "id": "speed_1",
+          "name": "Quick Hands",
+          "description": "+5% cooking speed",
+          "cost": 100,
+          "requires": [],
+          "effect": { "cookingSpeed": 0.05 }
+        },
+        {
+          "id": "speed_2",
+          "name": "Efficiency Expert",
+          "description": "+10% cooking speed",
+          "cost": 250,
+          "requires": ["speed_1"],
+          "effect": { "cookingSpeed": 0.10 }
+        },
+        {
+          "id": "speed_3",
+          "name": "Lightning Chef",
+          "description": "+15% cooking speed, chance to double cook",
+          "cost": 500,
+          "requires": ["speed_2"],
+          "effect": { "cookingSpeed": 0.15, "doubleCookChance": 0.1 }
+        }
+      ]
+    },
+    "quality": {
+      "name": "Quality Craftsman",
+      "icon": "✨",
+      "description": "Higher customer satisfaction and tips",
+      "skills": [
+        {
+          "id": "quality_1",
+          "name": "Attention to Detail",
+          "description": "+10% customer satisfaction per order",
+          "cost": 100,
+          "requires": [],
+          "effect": { "satisfactionBonus": 0.10 }
+        },
+        {
+          "id": "quality_2",
+          "name": "Presentation Master",
+          "description": "+20% tips, +15% satisfaction",
+          "cost": 250,
+          "requires": ["quality_1"],
+          "effect": { "tipBonus": 0.20, "satisfactionBonus": 0.15 }
+        },
+        {
+          "id": "quality_3",
+          "name": "Perfectionist",
+          "description": "+50% tips, +25% satisfaction, chance for VIP customers",
+          "cost": 500,
+          "requires": ["quality_2"],
+          "effect": { "tipBonus": 0.50, "satisfactionBonus": 0.25, "vipChance": 0.15 }
+        }
+      ]
+    },
+    "versatility": {
+      "name": "Multi-Cuisine Expert",
+      "icon": "🌍",
+      "description": "Master multiple cuisines",
+      "skills": [
+        {
+          "id": "versatility_1",
+          "name": "Cultural Explorer",
+          "description": "Can cook any category at 80% efficiency",
+          "cost": 150,
+          "requires": [],
+          "effect": { "allCategoriesEfficiency": 0.80 }
+        },
+        {
+          "id": "versatility_2",
+          "name": "Global Citizen",
+          "description": "Can cook any category at 100% efficiency",
+          "cost": 300,
+          "requires": ["versatility_1"],
+          "effect": { "allCategoriesEfficiency": 1.0 }
+        },
+        {
+          "id": "versatility_3",
+          "name": "Master of All",
+          "description": "120% efficiency on all categories, unlock fusion recipes",
+          "cost": 600,
+          "requires": ["versatility_2"],
+          "effect": { "allCategoriesEfficiency": 1.2, "unlockFusionRecipes": true }
+        }
+      ]
+    },
+    "leadership": {
+      "name": "Team Leader",
+      "icon": "👑",
+      "description": "Boost team performance",
+      "skills": [
+        {
+          "id": "leadership_1",
+          "name": "Encouraging",
+          "description": "Nearby staff get +5% efficiency",
+          "cost": 200,
+          "requires": [],
+          "effect": { "teamEfficiencyBonus": 0.05, "range": 1 }
+        },
+        {
+          "id": "leadership_2",
+          "name": "Inspiring",
+          "description": "All staff get +10% efficiency",
+          "cost": 400,
+          "requires": ["leadership_1"],
+          "effect": { "teamEfficiencyBonus": 0.10, "range": "all" }
+        },
+        {
+          "id": "leadership_3",
+          "name": "Legendary Leader",
+          "description": "All staff get +20% efficiency, +10% morale gain",
+          "cost": 800,
+          "requires": ["leadership_2"],
+          "effect": { "teamEfficiencyBonus": 0.20, "teamMoraleBonus": 0.10, "range": "all" }
+        }
+      ]
+    }
+  }
+}

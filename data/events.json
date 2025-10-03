@@ -1,0 +1,180 @@
+{
+  "events": [
+    {
+      "id": "health_inspection",
+      "name": "Health Inspection",
+      "icon": "🏥",
+      "type": "challenge",
+      "triggerConditions": {
+        "minDay": 5,
+        "probability": 0.15
+      },
+      "description": "Health inspector is coming! Maintain high satisfaction and clean operations.",
+      "duration": 1,
+      "requirements": {
+        "customerSatisfaction": 80,
+        "ordersCompleted": 10
+      },
+      "rewards": {
+        "reputation": 50,
+        "revenue": 200
+      },
+      "penalties": {
+        "reputation": -100,
+        "revenue": -300
+      }
+    },
+    {
+      "id": "food_critic",
+      "name": "Food Critic Visit",
+      "icon": "📝",
+      "type": "challenge",
+      "triggerConditions": {
+        "minDay": 10,
+        "minReputation": 100,
+        "probability": 0.1
+      },
+      "description": "A renowned food critic is dining at your restaurant!",
+      "duration": 1,
+      "requirements": {
+        "perfectOrders": 5,
+        "averageOrderTime": 150
+      },
+      "rewards": {
+        "reputation": 150,
+        "revenue": 500,
+        "unlockRecipes": 2
+      },
+      "penalties": {
+        "reputation": -50
+      }
+    },
+    {
+      "id": "supply_shortage",
+      "name": "Supply Shortage",
+      "icon": "📦",
+      "type": "crisis",
+      "triggerConditions": {
+        "minDay": 3,
+        "probability": 0.2
+      },
+      "description": "A supply shortage has hit! Some ingredients are unavailable.",
+      "duration": 2,
+      "effects": {
+        "randomIngredientsUnavailable": 3,
+        "restockCostIncrease": 0.5
+      }
+    },
+    {
+      "id": "cooking_competition",
+      "name": "Cooking Competition",
+      "icon": "🏆",
+      "type": "opportunity",
+      "triggerConditions": {
+        "minDay": 15,
+        "minStaff": 3,
+        "probability": 0.12
+      },
+      "description": "Enter a cooking competition to gain fame and rewards!",
+      "duration": 1,
+      "entryCost": 300,
+      "requirements": {
+        "perfectOrders": 8,
+        "revenue": 500
+      },
+      "rewards": {
+        "reputation": 200,
+        "revenue": 800,
+        "staffExperience": 100,
+        "unlockRecipes": 1
+      }
+    },
+    {
+      "id": "rush_hour",
+      "name": "Rush Hour Madness",
+      "icon": "🏃",
+      "type": "challenge",
+      "triggerConditions": {
+        "minDay": 1,
+        "probability": 0.25
+      },
+      "description": "Extra busy! More orders coming in.",
+      "duration": 1,
+      "effects": {
+        "orderSpawnRate": 2.0,
+        "revenueMultiplier": 1.5
+      }
+    },
+    {
+      "id": "vip_reservation",
+      "name": "VIP Reservation",
+      "icon": "⭐",
+      "type": "opportunity",
+      "triggerConditions": {
+        "minDay": 7,
+        "minReputation": 150,
+        "probability": 0.15
+      },
+      "description": "A VIP has made a reservation. Impress them for huge rewards!",
+      "duration": 1,
+      "requirements": {
+        "vipOrderPerfect": true
+      },
+      "rewards": {
+        "reputation": 100,
+        "revenue": 1000,
+        "vipCustomer": true
+      }
+    },
+    {
+      "id": "staff_training_day",
+      "name": "Staff Training Day",
+      "icon": "📚",
+      "type": "opportunity",
+      "triggerConditions": {
+        "minDay": 5,
+        "probability": 0.1
+      },
+      "description": "Send staff to training to boost their skills.",
+      "duration": 1,
+      "cost": 250,
+      "rewards": {
+        "allStaffExperience": 50,
+        "unlockSkillPoints": 1
+      }
+    },
+    {
+      "id": "farmers_market",
+      "name": "Farmers Market",
+      "icon": "🌾",
+      "type": "opportunity",
+      "seasonalOnly": "spring",
+      "triggerConditions": {
+        "probability": 0.3
+      },
+      "description": "Local farmers market! Get fresh ingredients at discount.",
+      "duration": 1,
+      "effects": {
+        "restockDiscount": 0.3,
+        "ingredientQualityBonus": 0.1
+      }
+    },
+    {
+      "id": "holiday_rush",
+      "name": "Holiday Rush",
+      "icon": "🎄",
+      "type": "challenge",
+      "seasonalOnly": "winter",
+      "triggerConditions": {
+        "probability": 0.4
+      },
+      "description": "Holiday season brings extra customers!",
+      "duration": 2,
+      "effects": {
+        "orderSpawnRate": 2.5,
+        "revenueMultiplier": 2.0,
+        "customerDemand": 1.5
+      }
+    }
+  ]
+}
