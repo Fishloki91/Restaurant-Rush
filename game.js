@@ -2782,6 +2782,65 @@ class RestaurantGame {
             achievementsBadgeEl.textContent = `${this.achievements.length} / ${this.allAchievements.length} Unlocked`;
         }
         
+        // NEW: Update events overview
+        const eventsCountEl = document.getElementById('overview-events-count');
+        const eventsTypeEl = document.getElementById('overview-events-type');
+        const eventsListEl = document.getElementById('overview-events-list');
+        if (eventsCountEl && eventsTypeEl && eventsListEl) {
+            eventsCountEl.textContent = this.activeEvents.length;
+            if (this.activeEvents.length > 0) {
+                const firstEvent = this.activeEvents[0];
+                eventsTypeEl.textContent = firstEvent.type;
+                eventsListEl.innerHTML = this.activeEvents.map(e => 
+                    `<div style="font-size: 0.9em; margin: 0.3em 0;">${e.icon} ${e.name}</div>`
+                ).join('');
+            } else {
+                eventsTypeEl.textContent = 'None';
+                eventsListEl.textContent = 'No active events';
+            }
+        }
+        
+        // NEW: Update recipe mastery overview
+        const masteryExpertEl = document.getElementById('overview-mastery-expert');
+        const masteryAvgEl = document.getElementById('overview-mastery-avg');
+        const masteryBestEl = document.getElementById('overview-mastery-best');
+        if (masteryExpertEl && masteryAvgEl && masteryBestEl) {
+            const expertRecipes = Object.values(this.recipeMastery).filter(m => m.level >= 5).length;
+            const avgLevel = Object.values(this.recipeMastery).length > 0
+                ? (Object.values(this.recipeMastery).reduce((sum, m) => sum + m.level, 0) / Object.values(this.recipeMastery).length).toFixed(1)
+                : '1.0';
+            masteryExpertEl.textContent = expertRecipes;
+            masteryAvgEl.textContent = avgLevel;
+            
+            // Show best mastered recipe
+            const bestRecipe = Object.entries(this.recipeMastery).sort((a, b) => b[1].level - a[1].level)[0];
+            if (bestRecipe) {
+                const recipe = this.allRecipes.find(r => r.id == bestRecipe[0]);
+                if (recipe && this.recipeMasteryData) {
+                    const levelData = this.recipeMasteryData.mastery.levels[bestRecipe[1].level - 1];
+                    masteryBestEl.textContent = `${levelData.icon} ${recipe.name} (Lv ${bestRecipe[1].level})`;
+                }
+            } else {
+                masteryBestEl.textContent = 'Cook recipes to improve mastery!';
+            }
+        }
+        
+        // NEW: Update prestige overview (only show if prestige > 0)
+        const prestigeCard = document.getElementById('prestige-overview-card');
+        if (prestigeCard) {
+            if (this.prestigeLevel > 0 || this.currentRun > 1) {
+                prestigeCard.style.display = '';
+                const prestigeLevelEl = document.getElementById('overview-prestige-level');
+                const prestigeRunsEl = document.getElementById('overview-prestige-runs');
+                const prestigeLifetimeEl = document.getElementById('overview-prestige-lifetime');
+                if (prestigeLevelEl) prestigeLevelEl.textContent = this.prestigeLevel;
+                if (prestigeRunsEl) prestigeRunsEl.textContent = this.currentRun;
+                if (prestigeLifetimeEl) prestigeLifetimeEl.textContent = `$${this.totalLifetimeRevenue}`;
+            } else {
+                prestigeCard.style.display = 'none';
+            }
+        }
+        
         // Add notification badges
         const ordersCard = document.getElementById('orders-overview-card');
         const inventoryCard = document.getElementById('inventory-overview-card');
@@ -2822,6 +2881,75 @@ class RestaurantGame {
         const progressBar = document.getElementById('day-progress-bar');
         if (progressBar) {
             progressBar.style.width = `${dayProgress}%`;
+        }
+        
+        // NEW: Update season display
+        const seasonEl = document.getElementById('game-season');
+        if (seasonEl && this.currentSeason) {
+            seasonEl.textContent = `${this.currentSeason.icon} ${this.currentSeason.name}`;
+        }
+        
+        // NEW: Update season tooltip
+        const seasonTooltip = document.querySelector('#season-tooltip .tooltip-content');
+        if (seasonTooltip && this.currentSeason) {
+            seasonTooltip.innerHTML = `
+                <strong>${this.currentSeason.icon} ${this.currentSeason.name}</strong><br>
+                Day ${this.seasonDay + 1} of ${this.currentSeason.durationDays}<br>
+                <br>
+                <strong>Active Modifiers:</strong><br>
+                ${Object.entries(this.currentSeason.ingredientModifiers || {}).slice(0, 3).map(([ing, mod]) => 
+                    `${ing}: ${mod.availability > 1 ? '▲' : '▼'} ${(mod.availability * 100).toFixed(0)}%`
+                ).join('<br>')}
+            `;
+        }
+        
+        // NEW: Update reputation display
+        const reputationEl = document.getElementById('reputation');
+        if (reputationEl) {
+            reputationEl.textContent = `⭐ ${this.reputation}`;
+        }
+        
+        // NEW: Update reputation tooltip
+        const reputationTooltip = document.querySelector('#reputation-tooltip .tooltip-content');
+        if (reputationTooltip && this.resourcesData && this.resourcesData.reputation) {
+            const currentTier = this.resourcesData.reputation.tiers
+                .filter(t => this.reputation >= t.threshold)
+                .slice(-1)[0] || this.resourcesData.reputation.tiers[0];
+            
+            const nextTier = this.resourcesData.reputation.tiers
+                .find(t => this.reputation < t.threshold);
+            
+            reputationTooltip.innerHTML = `
+                <strong>${currentTier.icon} ${currentTier.name}</strong><br>
+                Reputation: ${this.reputation}<br>
+                ${currentTier.benefits ? `Benefits: ${currentTier.benefits.join(', ')}<br>` : ''}
+                ${nextTier ? `<br>Next: ${nextTier.name} (${nextTier.threshold - this.reputation} needed)` : '<br>Maximum tier reached!'}
+            `;
+        }
+        
+        // NEW: Update prestige stat (only show if prestige > 0)
+        const prestigeStat = document.getElementById('prestige-stat');
+        const prestigeLevelEl = document.getElementById('prestige-level');
+        if (prestigeStat && prestigeLevelEl) {
+            if (this.prestigeLevel > 0) {
+                prestigeStat.style.display = '';
+                prestigeLevelEl.textContent = `👑 ${this.prestigeLevel}`;
+            } else {
+                prestigeStat.style.display = 'none';
+            }
+        }
+        
+        // NEW: Update prestige tooltip
+        const prestigeTooltip = document.querySelector('#prestige-tooltip .tooltip-content');
+        if (prestigeTooltip && this.prestigeLevel > 0 && this.prestigeData) {
+            const currentPrestige = this.prestigeData.levels[this.prestigeLevel - 1];
+            prestigeTooltip.innerHTML = `
+                <strong>👑 ${currentPrestige.name}</strong><br>
+                Level: ${this.prestigeLevel}<br>
+                Run: ${this.currentRun}<br>
+                Lifetime Revenue: $${this.totalLifetimeRevenue}<br>
+                Lifetime Days: ${this.totalLifetimeDays}
+            `;
         }
         
         // Update day tooltip (QOL1)
