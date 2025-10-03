@@ -1,0 +1,118 @@
+{
+  "moraleFactors": {
+    "positiveFactors": [
+      {
+        "id": "completed_order",
+        "name": "Completed an Order",
+        "moraleChange": 2,
+        "description": "Successfully completing orders boosts morale"
+      },
+      {
+        "id": "specialty_match",
+        "name": "Working on Specialty",
+        "moraleChange": 3,
+        "description": "Working on orders matching their specialty"
+      },
+      {
+        "id": "low_fatigue",
+        "name": "Well-Rested",
+        "moraleChange": 1,
+        "fatigueThreshold": 20,
+        "description": "Being well-rested improves morale"
+      },
+      {
+        "id": "employee_of_day",
+        "name": "Staff of the Day",
+        "moraleChange": 5,
+        "description": "Being recognized as Staff of the Day"
+      },
+      {
+        "id": "upgrade",
+        "name": "Received Upgrade",
+        "moraleChange": 10,
+        "description": "Getting trained and upgraded"
+      },
+      {
+        "id": "rest_break",
+        "name": "Had a Rest",
+        "moraleChange": 5,
+        "description": "Taking a well-deserved break"
+      },
+      {
+        "id": "high_performance",
+        "name": "Peak Performance",
+        "moraleChange": 1,
+        "performanceThreshold": 90,
+        "description": "Performing exceptionally well"
+      }
+    ],
+    "negativeFactors": [
+      {
+        "id": "failed_order",
+        "name": "Failed Order",
+        "moraleChange": -5,
+        "description": "Failing to complete orders damages morale"
+      },
+      {
+        "id": "high_fatigue",
+        "name": "Exhausted",
+        "moraleChange": -2,
+        "fatigueThreshold": 80,
+        "description": "High fatigue decreases morale"
+      },
+      {
+        "id": "low_performance",
+        "name": "Poor Performance",
+        "moraleChange": -1,
+        "performanceThreshold": 40,
+        "description": "Struggling with performance"
+      },
+      {
+        "id": "fired_colleague",
+        "name": "Colleague Fired",
+        "moraleChange": -8,
+        "description": "Seeing a colleague get fired affects morale"
+      },
+      {
+        "id": "overworked",
+        "name": "Overworked",
+        "moraleChange": -3,
+        "consecutiveOrdersThreshold": 5,
+        "description": "Working too many orders in a row"
+      },
+      {
+        "id": "idle_too_long",
+        "name": "Bored/Idle",
+        "moraleChange": -1,
+        "idleTimeThreshold": 60,
+        "description": "Being idle for too long without orders"
+      }
+    ],
+    "moraleThresholds": {
+      "veryHigh": 90,
+      "high": 75,
+      "medium": 50,
+      "low": 25,
+      "veryLow": 0
+    },
+    "performanceModifiers": {
+      "veryHighMorale": 1.15,
+      "highMorale": 1.10,
+      "mediumMorale": 1.0,
+      "lowMorale": 0.85,
+      "veryLowMorale": 0.70
+    }
+  },
+  "orderComplexity": {
+    "baseComplexity": 1.0,
+    "itemCountMultiplier": 0.2,
+    "vipMultiplier": 1.3,
+    "description": "Base time = baseComplexity + (itemCount * itemCountMultiplier). If VIP, multiply by vipMultiplier"
+  },
+  "efficiencyImpact": {
+    "description": "Order completion time = (orderComplexity * baseTime) / staffEfficiency",
+    "baseTimePerComplexity": 50,
+    "minCompletionTime": 30,
+    "maxCompletionTime": 150
+  }
+}

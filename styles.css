@@ -2,6 +2,10 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
 }
 
 body {
@@ -702,6 +706,7 @@ body {
 }
 
 .staff-card {
+    position: relative;
     background: #FDFBF7;
     border-radius: 8px;
     padding: 15px;
@@ -903,28 +908,34 @@ body {
 }
 
 .fire-btn {
-    flex: 0 0 auto;
-    padding: 8px 12px;
-    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    background: #dc3545;
     color: white;
     border: none;
-    border-radius: 5px;
+    border-radius: 50%;
     cursor: pointer;
-    font-size: 0.85rem;
-    font-weight: bold;
+    font-size: 0.8rem;
     transition: all 0.3s ease;
-    min-height: 40px;
-    box-shadow: 0 2px 6px rgba(220, 53, 69, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(220, 53, 69, 0.4);
+    z-index: 10;
 }
 
 .fire-btn:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 10px rgba(220, 53, 69, 0.4);
-    background: linear-gradient(135deg, #e04b59 0%, #d63845 100%);
+    transform: scale(1.15);
+    box-shadow: 0 3px 8px rgba(220, 53, 69, 0.5);
+    background: #e04b59;
 }
 
 .fire-btn:disabled {
-    opacity: 0.5;
+    opacity: 0.3;
     cursor: not-allowed;
 }
 
