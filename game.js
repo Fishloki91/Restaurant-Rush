@@ -1349,8 +1349,9 @@ class RestaurantGame {
                     const effectiveEfficiency = this.applyEmployeeOfMonthBonus(staff);
                     
                     // Progress based on staff efficiency with specialty bonus and Employee of Month bonus
-                    // Increased from 1.5 to 3.0 to make orders complete faster with 4 staff members
-                    order.progress += effectiveEfficiency * 3.0 * efficiencyBonus;
+                    // Staff efficiency (0.6-0.9) provides the base speed modifier
+                    // Specialty bonus (1.15x) and Employee of Month bonus (1.2x) further enhance speed
+                    order.progress += effectiveEfficiency * 2.0 * efficiencyBonus;
                     
                     if (order.progress >= 100) {
                         this.completeOrder(order.id, true);
