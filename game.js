@@ -629,6 +629,40 @@ class RestaurantGame {
     }
     
     showToast({ icon = '💬', title = '', message = '', type = 'info', duration = 4000 }) {
+        // Don't show toasts if a modal is active (player is in a menu)
+        const activeModal = document.querySelector('.modal.modal-active');
+        if (activeModal) {
+            return; // Silently skip showing toast when in a menu
+        }
+        
+        // Context-aware notification filtering based on current view
+        // Don't show order-related notifications when viewing orders
+        if (this.currentView === 'orders') {
+            const orderRelatedToasts = [
+                'Order Started',
+                'Order Complete!',
+                'VIP Order Complete!',
+                'VIP Customer!'
+            ];
+            if (orderRelatedToasts.includes(title)) {
+                return; // Skip order-related notifications in orders view
+            }
+        }
+        
+        // Don't show staff-related notifications when viewing staff
+        if (this.currentView === 'staff') {
+            const staffRelatedToasts = [
+                'Mood Changed',
+                'Order Started',
+                'Order Complete!',
+                'VIP Order Complete!'
+            ];
+            // Check if title matches staff-related patterns
+            if (staffRelatedToasts.some(pattern => title.includes(pattern))) {
+                return; // Skip staff-related notifications in staff view
+            }
+        }
+        
         // Add toast to queue
         this.toastQueue.push({ icon, title, message, type, duration });
         
@@ -1928,7 +1962,7 @@ class RestaurantGame {
             }
             
             // Adjust efficiency based on fatigue, morale, and mood
-            const fatigueMultiplier = 1 - (staff.fatigue / 200); // Max 50% reduction
+            const fatigueMultiplier = 1 - (staff.fatigue / 500); // Max 20% reduction (1:5 ratio)
             const moraleMultiplier = this.getMoralePerformanceModifier(staff.morale); // Dynamic from morale factors
             const moodMultiplier = staff.mood ? staff.mood.performanceModifier : 1.0;
             
@@ -2530,7 +2564,7 @@ class RestaurantGame {
             
             // Calculate efficiency breakdown
             const upgradeBonus = staff.upgradeLevel * 0.05;
-            const fatigueMultiplier = 1 - (staff.fatigue / 200);
+            const fatigueMultiplier = 1 - (staff.fatigue / 500); // 1:5 ratio - max 20% reduction
             const moraleMultiplier = this.getMoralePerformanceModifier(staff.morale);
             const moodMultiplier = staff.mood ? staff.mood.performanceModifier : 1.0;
             
@@ -2783,25 +2817,106 @@ Fatigue: ${staff.fatigue.toFixed(0)}%
     
     renderSatisfaction() {
         const satisfactionBar = document.getElementById('satisfaction-bar');
+        const satisfactionPercentage = document.getElementById('satisfaction-percentage');
+        const satisfactionEmoji = document.getElementById('satisfaction-emoji');
         const happyCustomers = document.getElementById('happy-customers');
         const unhappyCustomers = document.getElementById('unhappy-customers');
         const vipCustomers = document.getElementById('vip-customers');
         const avgWaitTime = document.getElementById('avg-wait-time');
+        const successRate = document.getElementById('success-rate');
+        const todayOrders = document.getElementById('today-orders');
+        const avgOrderValue = document.getElementById('avg-order-value');
+        const performanceRating = document.getElementById('performance-rating');
         
-        satisfactionBar.style.width = `${this.customerSatisfaction}%`;
-        happyCustomers.textContent = this.happyCustomers;
-        unhappyCustomers.textContent = this.unhappyCustomers;
-        vipCustomers.textContent = this.vipCustomers;
+        // Update satisfaction bar and percentage
+        if (satisfactionBar) {
+            satisfactionBar.style.width = `${this.customerSatisfaction}%`;
+        }
+        if (satisfactionPercentage) {
+            satisfactionPercentage.textContent = `${Math.round(this.customerSatisfaction)}%`;
+        }
+        
+        // Update emoji based on satisfaction level
+        if (satisfactionEmoji) {
+            if (this.customerSatisfaction >= 90) {
+                satisfactionEmoji.textContent = '😄';
+            } else if (this.customerSatisfaction >= 70) {
+                satisfactionEmoji.textContent = '😊';
+            } else if (this.customerSatisfaction >= 50) {
+                satisfactionEmoji.textContent = '😐';
+            } else if (this.customerSatisfaction >= 30) {
+                satisfactionEmoji.textContent = '😟';
+            } else {
+                satisfactionEmoji.textContent = '😢';
+            }
+        }
+        
+        // Update basic stats
+        if (happyCustomers) happyCustomers.textContent = this.happyCustomers;
+        if (unhappyCustomers) unhappyCustomers.textContent = this.unhappyCustomers;
+        if (vipCustomers) vipCustomers.textContent = this.vipCustomers;
         
         // Calculate average wait time from completed orders
-        if (this.completedOrders.length > 0) {
-            const totalWaitTime = this.completedOrders.reduce((sum, order) => {
-                return sum + (order.timeLimit - order.timeRemaining);
-            }, 0);
-            const avgTime = Math.floor(totalWaitTime / this.completedOrders.length);
-            avgWaitTime.textContent = `${avgTime}s`;
-        } else {
-            avgWaitTime.textContent = '0s';
+        if (avgWaitTime) {
+            if (this.completedOrders.length > 0) {
+                const totalWaitTime = this.completedOrders.reduce((sum, order) => {
+                    return sum + (order.timeLimit - order.timeRemaining);
+                }, 0);
+                const avgTime = Math.floor(totalWaitTime / this.completedOrders.length);
+                avgWaitTime.textContent = `${avgTime}s`;
+            } else {
+                avgWaitTime.textContent = '0s';
+            }
+        }
+        
+        // Calculate success rate
+        if (successRate) {
+            const totalCustomers = this.happyCustomers + this.unhappyCustomers;
+            if (totalCustomers > 0) {
+                const rate = Math.round((this.happyCustomers / totalCustomers) * 100);
+                successRate.textContent = `${rate}%`;
+            } else {
+                successRate.textContent = '0%';
+            }
+        }
+        
+        // Today's orders (since day start)
+        if (todayOrders) {
+            const ordersToday = this.totalOrdersCompleted - this.dayStartOrdersCompleted;
+            todayOrders.textContent = ordersToday;
+        }
+        
+        // Average order value
+        if (avgOrderValue) {
+            if (this.completedOrders.length > 0) {
+                const totalValue = this.completedOrders.reduce((sum, order) => {
+                    return sum + (order.totalPrice || 0);
+                }, 0);
+                const avg = Math.floor(totalValue / this.completedOrders.length);
+                avgOrderValue.textContent = `$${avg}`;
+            } else {
+                avgOrderValue.textContent = '$0';
+            }
+        }
+        
+        // Performance rating based on multiple factors
+        if (performanceRating) {
+            const totalCustomers = this.happyCustomers + this.unhappyCustomers;
+            const successRateValue = totalCustomers > 0 ? (this.happyCustomers / totalCustomers) * 100 : 100;
+            
+            if (successRateValue >= 90 && this.customerSatisfaction >= 80) {
+                performanceRating.textContent = 'Excellent';
+                performanceRating.style.color = '#5A9E6F';
+            } else if (successRateValue >= 75 && this.customerSatisfaction >= 60) {
+                performanceRating.textContent = 'Good';
+                performanceRating.style.color = '#5A9E6F';
+            } else if (successRateValue >= 50 && this.customerSatisfaction >= 40) {
+                performanceRating.textContent = 'Average';
+                performanceRating.style.color = '#D89E54';
+            } else {
+                performanceRating.textContent = 'Poor';
+                performanceRating.style.color = '#B85450';
+            }
         }
     }
     
@@ -3034,8 +3149,7 @@ Fatigue: ${staff.fatigue.toFixed(0)}%
             monthBadge.textContent = `Day ${currentDay}`;
             daysLeft.textContent = daysUntilEnd;
             
-            this.updateMonthlyLeaderboard();
-            
+            // Don't recalculate scores during the day - just display existing leaderboard
             if (this.monthlyLeaderboard.length > 0) {
                 const leader = this.monthlyLeaderboard[0];
                 winnerName.textContent = leader.name.split(' ')[0]; // Just first name for space
