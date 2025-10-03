@@ -37,6 +37,7 @@ class RestaurantGame {
         this.totalRestocks = 0; // Track total inventory restocks
         this.perfectDays = 0; // Track days with 100% satisfaction
         this.recipeData = null; // Store loaded recipe data
+        this.ordersConfig = null; // Store orders configuration
         
         // Initialize Audio Context for sound effects
         this.audioContext = null;
@@ -50,6 +51,15 @@ class RestaurantGame {
         try {
             const response = await fetch('data/recipes.json');
             this.recipeData = await response.json();
+            
+            // Load orders configuration
+            try {
+                const ordersResponse = await fetch('data/orders.json');
+                this.ordersConfig = await ordersResponse.json();
+            } catch (e) {
+                console.warn('Orders config not found, using defaults');
+                this.ordersConfig = null;
+            }
             
             this.initializeInventory();
             this.initializeStaff();
@@ -124,6 +134,25 @@ class RestaurantGame {
         
         oscillator.start(now);
         oscillator.stop(now + 0.3);
+    }
+    
+    triggerHaptic(intensity = 'light') {
+        // Trigger haptic feedback on supported mobile devices
+        if (navigator.vibrate) {
+            switch(intensity) {
+                case 'light':
+                    navigator.vibrate(10);
+                    break;
+                case 'medium':
+                    navigator.vibrate(25);
+                    break;
+                case 'heavy':
+                    navigator.vibrate(50);
+                    break;
+                default:
+                    navigator.vibrate(10);
+            }
+        }
     }
     
     initializeInventory() {
@@ -376,6 +405,7 @@ class RestaurantGame {
         
         this.addFeedback(`${equipType.icon} ${equipType.name} upgraded to Level ${equipment.level}!`, true);
         this.checkAchievements();
+        this.triggerHaptic('medium');
         this.render();
     }
     
@@ -462,8 +492,40 @@ class RestaurantGame {
                 this.achievements.push(achievement);
                 this.addFeedback(`🎉 Achievement Unlocked: ${achievement.icon} ${achievement.name}!`, true);
                 this.playSuccessSound();
+                this.showAchievementToast(achievement);
             }
         });
+    }
+    
+    showAchievementToast(achievement) {
+        // Create toast element if it doesn't exist
+        let toast = document.getElementById('achievement-toast');
+        if (!toast) {
+            toast = document.createElement('div');
+            toast.id = 'achievement-toast';
+            toast.className = 'achievement-toast';
+            toast.innerHTML = `
+                <div class="achievement-toast-icon"></div>
+                <div class="achievement-toast-content">
+                    <div class="achievement-toast-title"></div>
+                    <div class="achievement-toast-description"></div>
+                </div>
+            `;
+            document.body.appendChild(toast);
+        }
+        
+        // Update content
+        toast.querySelector('.achievement-toast-icon').textContent = achievement.icon;
+        toast.querySelector('.achievement-toast-title').textContent = achievement.name;
+        toast.querySelector('.achievement-toast-description').textContent = achievement.description;
+        
+        // Show toast
+        setTimeout(() => toast.classList.add('show'), 100);
+        
+        // Hide after 4 seconds
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, 4000);
     }
     
     hireStaff() {
@@ -479,6 +541,7 @@ class RestaurantGame {
         this.totalStaffHired++;
         this.addFeedback(`✅ Hired ${newStaff.name} (${newStaff.role}) - Efficiency: ${(newStaff.efficiency * 100).toFixed(0)}%`, true);
         this.checkAchievements();
+        this.triggerHaptic('medium');
         this.render();
     }
     
@@ -508,14 +571,71 @@ class RestaurantGame {
             }
         }, 1000);
         
-        // Generate orders periodically
+        // Generate orders periodically with dynamic calculation
         this.orderInterval = setInterval(() => {
             if (!this.isPaused && this.isRunning) {
-                if (Math.random() < this.orderGenerationChance) {
+                const dynamicChance = this.calculateOrderSpawnChance();
+                if (Math.random() < dynamicChance) {
                     this.generateOrder();
                 }
             }
         }, 5000); // Check every 5 seconds
+    }
+    
+    calculateOrderSpawnChance() {
+        // Use default values if config not loaded
+        let baseChance = 0.4;
+        let maxChance = 0.8;
+        let dayMultiplier = 0.05;
+        
+        if (this.ordersConfig && this.ordersConfig.spawnRates) {
+            baseChance = this.ordersConfig.spawnRates.baseChance;
+            maxChance = this.ordersConfig.spawnRates.maxChance;
+            dayMultiplier = this.ordersConfig.spawnRates.dayMultiplier;
+        }
+        
+        // Calculate base chance with day scaling
+        let chance = Math.min(maxChance, baseChance + (this.day - 1) * dayMultiplier);
+        
+        // Apply day progression multiplier (early/middle/rush)
+        const dayProgress = this.dayTimer / this.dayDuration;
+        let progressMultiplier = 1.0;
+        
+        if (this.ordersConfig && this.ordersConfig.dayProgression) {
+            if (dayProgress < this.ordersConfig.dayProgression.early.timeRange[1]) {
+                progressMultiplier = this.ordersConfig.dayProgression.early.spawnMultiplier;
+            } else if (dayProgress < this.ordersConfig.dayProgression.middle.timeRange[1]) {
+                progressMultiplier = this.ordersConfig.dayProgression.middle.spawnMultiplier;
+            } else {
+                progressMultiplier = this.ordersConfig.dayProgression.rush.spawnMultiplier;
+            }
+        } else {
+            // Default behavior without config
+            if (dayProgress < 0.33) {
+                progressMultiplier = 0.6;
+            } else if (dayProgress < 0.66) {
+                progressMultiplier = 1.0;
+            } else {
+                progressMultiplier = 1.5;
+            }
+        }
+        
+        chance *= progressMultiplier;
+        
+        // Apply staff scaling bonus
+        if (this.ordersConfig && this.ordersConfig.staffScaling && this.ordersConfig.staffScaling.enabled) {
+            const availableStaff = this.staff.filter(s => s.status === 'available').length;
+            const staffBonus = Math.max(0, (availableStaff - this.ordersConfig.staffScaling.minStaff) * this.ordersConfig.staffScaling.bonusPerStaff);
+            chance *= (1 + staffBonus);
+        } else {
+            // Default staff scaling without config
+            const availableStaff = this.staff.filter(s => s.status === 'available').length;
+            const staffBonus = Math.max(0, (availableStaff - 1) * 0.08);
+            chance *= (1 + staffBonus);
+        }
+        
+        // Keep within reasonable bounds
+        return Math.min(maxChance * 1.5, Math.max(0.1, chance));
     }
     
     checkGameOver() {
@@ -622,6 +742,32 @@ class RestaurantGame {
     }
     
     continueToNextDay() {
+        // Apply penalties for unfinished assigned orders
+        let penaltyAmount = 0;
+        const unfinishedAssignedOrders = this.orders.filter(o => 
+            (o.status === 'in-progress' || o.status === 'paused') && o.assignedStaff !== null
+        );
+        
+        if (unfinishedAssignedOrders.length > 0) {
+            const penaltyRate = (this.ordersConfig && this.ordersConfig.penalties) 
+                ? this.ordersConfig.penalties.unfinishedAssignedOrder 
+                : 0.05;
+            
+            unfinishedAssignedOrders.forEach(order => {
+                const penalty = Math.floor(order.totalPrice * penaltyRate);
+                penaltyAmount += penalty;
+            });
+            
+            this.revenue -= penaltyAmount;
+            this.addFeedback(`⚠️ Lost $${penaltyAmount} for ${unfinishedAssignedOrders.length} unfinished assigned order(s)`, false);
+        }
+        
+        // Clear only unassigned pending orders (assigned orders carry over)
+        const carryOverOrders = this.orders.filter(o => 
+            (o.status === 'in-progress' || o.status === 'paused') && o.assignedStaff !== null
+        );
+        this.orders = carryOverOrders;
+        
         // Check if day was perfect (100% satisfaction maintained)
         if (this.customerSatisfaction === 100) {
             this.perfectDays++;
@@ -657,7 +803,7 @@ class RestaurantGame {
         this.dayStartHappyCustomers = this.happyCustomers;
         this.dayStartUnhappyCustomers = this.unhappyCustomers;
         
-        // Increase difficulty gradually
+        // Increase difficulty gradually (keep for backward compatibility)
         this.orderGenerationChance = Math.min(0.8, 0.4 + (this.day - 1) * 0.05);
         
         // Hide modal
@@ -822,6 +968,7 @@ class RestaurantGame {
         staffMember.status = 'busy';
         staffMember.currentOrder = orderId;
         
+        this.triggerHaptic('light');
         this.render();
     }
     
@@ -963,8 +1110,9 @@ class RestaurantGame {
             const vipLabel = order.isVIP ? ' ⭐ VIP' : '';
             this.addFeedback(`✅ Order #${order.id}${vipLabel} completed! Customer is happy! +$${order.totalPrice}`, true);
             
-            // Play success sound
+            // Play success sound and haptic feedback
             this.playSuccessSound();
+            this.triggerHaptic('medium');
         } else {
             order.status = 'failed';
             this.unhappyCustomers++;
@@ -1001,8 +1149,9 @@ class RestaurantGame {
             const vipLabel = order.isVIP ? ' ⭐ VIP' : '';
             this.addFeedback(`❌ Order #${order.id}${vipLabel} failed! Customer is unhappy!`, false);
             
-            // Play fail sound
+            // Play fail sound and haptic feedback
             this.playFailSound();
+            this.triggerHaptic('heavy');
         }
         
         this.completedOrders.push(order);
@@ -1133,6 +1282,7 @@ class RestaurantGame {
         staff.efficiency = staff.baseEfficiency + (staff.upgradeLevel * 0.05); // +5% per level
         
         this.addFeedback(`⭐ ${staff.name} upgraded to Level ${staff.upgradeLevel}! Efficiency: ${(staff.efficiency * 100).toFixed(0)}%`, true);
+        this.triggerHaptic('medium');
         this.render();
     }
     
@@ -2022,6 +2172,50 @@ document.addEventListener('DOMContentLoaded', () => {
             game.switchView(backView);
         });
     });
+    
+    // Mobile tooltip tap functionality
+    function setupTooltipTapHandlers() {
+        document.querySelectorAll('.tooltip-container, .stat-tooltip-container').forEach(container => {
+            container.addEventListener('click', (e) => {
+                // Only on touch devices
+                if ('ontouchstart' in window) {
+                    e.stopPropagation();
+                    
+                    // Toggle tap-active class
+                    const wasActive = container.classList.contains('tap-active');
+                    
+                    // Remove active from all others
+                    document.querySelectorAll('.tap-active').forEach(el => {
+                        el.classList.remove('tap-active');
+                    });
+                    
+                    // Toggle current
+                    if (!wasActive) {
+                        container.classList.add('tap-active');
+                    }
+                }
+            });
+        });
+    }
+    
+    // Close tooltips when clicking outside
+    document.addEventListener('click', (e) => {
+        if ('ontouchstart' in window) {
+            if (!e.target.closest('.tooltip-container') && !e.target.closest('.stat-tooltip-container')) {
+                document.querySelectorAll('.tap-active').forEach(el => {
+                    el.classList.remove('tap-active');
+                });
+            }
+        }
+    });
+    
+    // Setup tooltip handlers initially and after any render
+    setupTooltipTapHandlers();
+    const originalRender = game.render.bind(game);
+    game.render = function() {
+        originalRender();
+        setupTooltipTapHandlers();
+    };
     
     // Initial render is now handled in loadRecipeData()
 });
