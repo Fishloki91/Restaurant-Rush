@@ -902,6 +902,63 @@ body {
     background: linear-gradient(135deg, #7e94ff 0%, #8d61be 100%);
 }
 
+.fire-btn {
+    flex: 0 0 auto;
+    padding: 8px 12px;
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    min-height: 40px;
+    box-shadow: 0 2px 6px rgba(220, 53, 69, 0.3);
+}
+
+.fire-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(220, 53, 69, 0.4);
+    background: linear-gradient(135deg, #e04b59 0%, #d63845 100%);
+}
+
+.fire-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Staff Traits Display */
+.staff-traits {
+    display: flex;
+    gap: 6px;
+    margin-top: 8px;
+    flex-wrap: wrap;
+}
+
+.trait-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    border: 1px solid;
+}
+
+.trait-positive {
+    background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+    border-color: #28a745;
+    color: #155724;
+}
+
+.trait-negative {
+    background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+    border-color: #dc3545;
+    color: #721c24;
+}
+
 .staff-status.resting {
     background: #667eea;
     color: white;
@@ -2044,7 +2101,6 @@ body {
 /* Toast Notification System */
 .game-toast {
     position: fixed;
-    top: 80px;
     right: 20px;
     color: #333;
     padding: 16px 20px;
