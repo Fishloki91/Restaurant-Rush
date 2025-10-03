@@ -5,7 +5,7 @@
 ## 🎯 Core Gameplay
 - **Real-time management**: Handle incoming orders with countdown timers
 - **Staff coordination**: Hire and manage staff members with random efficiency levels (60-90%)
-- **Resource management**: Monitor and restock 8 ingredient types when supplies run low
+- **Resource management**: Monitor and restock 18 ingredient types when supplies run low
 - **Customer satisfaction**: Maintain high ratings by completing orders on time
 - **Daily progression**: Complete 3-minute business days with performance summaries
 
@@ -25,13 +25,15 @@
 ## 🎲 Game Mechanics
 - Starting revenue of $200 to begin your restaurant journey
 - Orders auto-generate every 5 seconds (40% base chance, increases with each day)
-- 7 different dishes ranging from $14-$25 with varying completion times
+- 50+ different recipes across appetizers, mains, desserts, and drinks ranging from $6-$45
+- 18 unique ingredients including premium items like shrimp, avocado, and chocolate
 - Staff efficiency affects order speed; performance changes based on success/failure
 - Failed orders hurt satisfaction (-10 points), completed orders boost it (+2 points)
 - Ingredients are consumed when orders are assigned, requiring strategic restocking ($50 cost)
 - Hire new staff members for $150 with random efficiency stats (60-90%)
 - Upgrade staff up to Level 3 for increased efficiency
 - Upgrade equipment (Stove, Fridge, Counter, Dishwasher) to boost restaurant performance
+- Auto-assign mode with smart auto-rest for fatigued staff
 - Each day lasts 3 minutes with 10% end-of-day revenue bonus
 - Game over occurs when revenue reaches $0 or below
 
@@ -45,6 +47,15 @@ Balance quick order fulfillment, staff workload, inventory management, and custo
 ## Updates
 
 ///
+### v2.0.0 - Expanded Menu & Recipe System
+**Major Feature:** Expanded menu & recipe system - Your restaurant just got a massive upgrade! Discover 10 new premium ingredients (mushrooms, spinach, shrimp, bacon, avocado, berries, chocolate, beans, chilies, cream) and unlock 40+ new dishes across appetizers, mains, desserts, and drinks. New categories include smoothies, specialty coffees, bubble tea, milkshakes, and mocktails. All recipes and ingredients now managed through a centralized data/recipes.json file for easier updates.
+
+**Quality of Life Improvements:**
+- **Smooth dashboard cards** - Replaced bouncing hover animation with elegant glow effect for a calmer, more professional feel
+- **Smart auto-rest system** - Staff with high fatigue (>70%) automatically rest after completing orders when auto-assign mode is enabled
+- **Enhanced dashboard stats** - Overview cards now display multiple stats at a glance (total/urgent/VIP orders, available/busy/resting staff, total/low/empty inventory) with detailed tooltips explaining each section
+///
+
 ### v1.9.1 - Bugfix Release
 Fixed staff order history tracking for initial employees and corrected achievement count display. Starting staff members now properly show their recent completed orders, and the achievements screen accurately displays 18 total achievements.
 ///

@@ -42,55 +42,119 @@
         <div id="overview-view" class="dashboard-content view-active">
             <div class="overview-cards">
                 <!-- Orders Overview Card -->
-                <div class="overview-card" id="orders-overview-card">
+                <div class="overview-card tooltip-container" id="orders-overview-card">
                     <div class="card-icon">📋</div>
                     <div class="card-content">
                         <h3>Active Orders</h3>
-                        <div class="card-stats">
-                            <span id="overview-orders-count" class="big-stat">0</span>
-                            <span id="overview-orders-urgent" class="urgent-badge">0 Urgent</span>
+                        <div class="card-stats-multi">
+                            <div class="stat-item">
+                                <span id="overview-orders-count" class="stat-number">0</span>
+                                <span class="stat-label-small">Total</span>
+                            </div>
+                            <div class="stat-item">
+                                <span id="overview-orders-urgent-count" class="stat-number urgent">0</span>
+                                <span class="stat-label-small">Urgent</span>
+                            </div>
+                            <div class="stat-item">
+                                <span id="overview-orders-vip-count" class="stat-number vip">0</span>
+                                <span class="stat-label-small">VIP</span>
+                            </div>
                         </div>
                     </div>
                     <button class="view-details-btn" data-view="orders">View Details →</button>
+                    <div class="card-tooltip">
+                        <div class="tooltip-content">
+                            <strong>Orders Dashboard</strong><br>
+                            Track all active customer orders. Urgent orders need immediate attention (time &lt; 30%). VIP orders have stricter deadlines but offer 50% higher rewards.
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Staff Overview Card -->
-                <div class="overview-card" id="staff-overview-card">
+                <div class="overview-card tooltip-container" id="staff-overview-card">
                     <div class="card-icon">👨‍🍳</div>
                     <div class="card-content">
                         <h3>Staff Status</h3>
-                        <div class="card-stats">
-                            <span id="overview-staff-available" class="big-stat">4</span>
-                            <span class="stat-sublabel">Available</span>
+                        <div class="card-stats-multi">
+                            <div class="stat-item">
+                                <span id="overview-staff-available" class="stat-number">4</span>
+                                <span class="stat-label-small">Available</span>
+                            </div>
+                            <div class="stat-item">
+                                <span id="overview-staff-busy" class="stat-number">0</span>
+                                <span class="stat-label-small">Busy</span>
+                            </div>
+                            <div class="stat-item">
+                                <span id="overview-staff-resting" class="stat-number">0</span>
+                                <span class="stat-label-small">Resting</span>
+                            </div>
                         </div>
                     </div>
                     <button class="view-details-btn" data-view="staff">View Details →</button>
+                    <div class="card-tooltip">
+                        <div class="tooltip-content">
+                            <strong>Staff Management</strong><br>
+                            Monitor your team's status. Available staff can take orders. Busy staff are working. Resting staff recover from fatigue. Keep staff rested for peak performance!
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Inventory Overview Card -->
-                <div class="overview-card" id="inventory-overview-card">
+                <div class="overview-card tooltip-container" id="inventory-overview-card">
                     <div class="card-icon">📦</div>
                     <div class="card-content">
                         <h3>Inventory</h3>
-                        <div class="card-stats">
-                            <span id="overview-inventory-low" class="big-stat">0</span>
-                            <span class="warning-badge">Low Stock Items</span>
+                        <div class="card-stats-multi">
+                            <div class="stat-item">
+                                <span id="overview-inventory-total" class="stat-number">18</span>
+                                <span class="stat-label-small">Items</span>
+                            </div>
+                            <div class="stat-item">
+                                <span id="overview-inventory-low" class="stat-number warning">0</span>
+                                <span class="stat-label-small">Low</span>
+                            </div>
+                            <div class="stat-item">
+                                <span id="overview-inventory-empty" class="stat-number danger">0</span>
+                                <span class="stat-label-small">Empty</span>
+                            </div>
                         </div>
                     </div>
                     <button class="view-details-btn" data-view="inventory">View Details →</button>
+                    <div class="card-tooltip">
+                        <div class="tooltip-content">
+                            <strong>Inventory Management</strong><br>
+                            Track ingredient levels. Low items (&lt;30%) need restocking soon. Empty items (0%) block orders. Restock all for $50 or individual items for $10.
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Satisfaction Overview Card -->
-                <div class="overview-card" id="satisfaction-overview-card">
+                <div class="overview-card tooltip-container" id="satisfaction-overview-card">
                     <div class="card-icon">😊</div>
                     <div class="card-content">
                         <h3>Customer Satisfaction</h3>
-                        <div class="card-stats">
-                            <span id="overview-satisfaction" class="big-stat">100%</span>
-                            <span class="stat-sublabel">Rating</span>
+                        <div class="card-stats-multi">
+                            <div class="stat-item">
+                                <span id="overview-satisfaction" class="stat-number">100%</span>
+                                <span class="stat-label-small">Rating</span>
+                            </div>
+                            <div class="stat-item">
+                                <span id="overview-happy-customers" class="stat-number success">0</span>
+                                <span class="stat-label-small">Happy</span>
+                            </div>
+                            <div class="stat-item">
+                                <span id="overview-unhappy-customers" class="stat-number danger">0</span>
+                                <span class="stat-label-small">Unhappy</span>
+                            </div>
                         </div>
                     </div>
                     <button class="view-details-btn" data-view="satisfaction">View Details →</button>
+                    <div class="card-tooltip">
+                        <div class="tooltip-content">
+                            <strong>Customer Feedback</strong><br>
+                            Monitor customer satisfaction. Successful orders increase happiness. Failed orders decrease it. Keep satisfaction high to maintain your restaurant's reputation!
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Recipes Overview Card -->

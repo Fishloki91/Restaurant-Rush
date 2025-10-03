@@ -36,16 +36,41 @@ class RestaurantGame {
         this.highestRevenue = 200; // Track highest revenue reached
         this.totalRestocks = 0; // Track total inventory restocks
         this.perfectDays = 0; // Track days with 100% satisfaction
+        this.recipeData = null; // Store loaded recipe data
         
         // Initialize Audio Context for sound effects
         this.audioContext = null;
         this.initializeAudio();
         
-        this.initializeInventory();
-        this.initializeStaff();
-        this.initializeRecipes();
-        this.initializeEquipment();
-        this.initializeAchievements();
+        // Load recipe data and initialize game
+        this.loadRecipeData();
+    }
+    
+    async loadRecipeData() {
+        try {
+            const response = await fetch('data/recipes.json');
+            this.recipeData = await response.json();
+            
+            this.initializeInventory();
+            this.initializeStaff();
+            this.initializeRecipes();
+            this.initializeEquipment();
+            this.initializeAchievements();
+            
+            // Render after initialization is complete
+            this.render();
+        } catch (error) {
+            console.error('Error loading recipe data:', error);
+            // Fallback to original initialization if file not found
+            this.initializeInventoryLegacy();
+            this.initializeStaff();
+            this.initializeRecipesLegacy();
+            this.initializeEquipment();
+            this.initializeAchievements();
+            
+            // Render after initialization is complete
+            this.render();
+        }
     }
     
     initializeAudio() {
@@ -102,6 +127,19 @@ class RestaurantGame {
     }
     
     initializeInventory() {
+        if (!this.recipeData) {
+            return this.initializeInventoryLegacy();
+        }
+        
+        this.recipeData.ingredients.forEach(ingredient => {
+            this.inventory[ingredient.name] = {
+                current: ingredient.current,
+                max: ingredient.max
+            };
+        });
+    }
+    
+    initializeInventoryLegacy() {
         const ingredients = [
             { name: 'Beef', max: 100, current: 100 },
             { name: 'Chicken', max: 100, current: 100 },
@@ -185,6 +223,40 @@ class RestaurantGame {
     }
     
     initializeRecipes() {
+        if (!this.recipeData) {
+            return this.initializeRecipesLegacy();
+        }
+        
+        // Combine all food and drink recipes
+        this.allRecipes = [];
+        
+        // Add appetizers
+        if (this.recipeData.foods.appetizers) {
+            this.allRecipes = this.allRecipes.concat(this.recipeData.foods.appetizers);
+        }
+        
+        // Add mains
+        if (this.recipeData.foods.mains) {
+            this.allRecipes = this.allRecipes.concat(this.recipeData.foods.mains);
+        }
+        
+        // Add desserts
+        if (this.recipeData.foods.desserts) {
+            this.allRecipes = this.allRecipes.concat(this.recipeData.foods.desserts);
+        }
+        
+        // Add drinks
+        if (this.recipeData.drinks) {
+            Object.keys(this.recipeData.drinks).forEach(category => {
+                this.allRecipes = this.allRecipes.concat(this.recipeData.drinks[category]);
+            });
+        }
+        
+        // Start with basic recipes unlocked
+        this.unlockedRecipes = this.allRecipes.filter(r => r.unlockAt === 0).map(r => r.id);
+    }
+    
+    initializeRecipesLegacy() {
         // Define all recipes with unlock requirements
         this.allRecipes = [
             // Starting recipes (unlocked by default)
@@ -496,11 +568,8 @@ class RestaurantGame {
         this.totalRestocks = 0;
         this.perfectDays = 0;
         
-        this.initializeInventory();
-        this.initializeStaff();
-        this.initializeRecipes();
-        this.initializeEquipment();
-        this.initializeAchievements();
+        // Re-initialize with loaded data
+        this.loadRecipeData();
         
         // Hide modal
         const modal = document.getElementById('game-over-modal');
@@ -512,7 +581,6 @@ class RestaurantGame {
         document.getElementById('new-order-btn').disabled = true;
         
         this.switchView('overview');
-        this.render();
     }
     
     updateDayProgression() {
@@ -866,7 +934,16 @@ class RestaurantGame {
             if (staff) {
                 staff.ordersCompleted++;
                 staff.performance = Math.min(100, staff.performance + 2);
-                staff.status = 'available';
+                
+                // QoL 2: Auto-rest if fatigued in auto mode
+                if (this.autoAssignEnabled && staff.fatigue > 70) {
+                    staff.status = 'resting';
+                    staff.lastRestTime = this.dayTimer;
+                    this.addFeedback(`😴 ${staff.name} is auto-resting due to high fatigue...`, true);
+                } else {
+                    staff.status = 'available';
+                }
+                
                 staff.currentOrder = null;
                 
                 // QOL3: Add to order history (keep last 5)
@@ -894,7 +971,16 @@ class RestaurantGame {
             
             if (staff) {
                 staff.performance = Math.max(0, staff.performance - 5);
-                staff.status = 'available';
+                
+                // QoL 2: Auto-rest if fatigued in auto mode
+                if (this.autoAssignEnabled && staff.fatigue > 70) {
+                    staff.status = 'resting';
+                    staff.lastRestTime = this.dayTimer;
+                    this.addFeedback(`😴 ${staff.name} is auto-resting due to high fatigue...`, true);
+                } else {
+                    staff.status = 'available';
+                }
+                
                 staff.currentOrder = null;
                 
                 // QOL3: Add to order history (keep last 5)
@@ -1092,6 +1178,11 @@ class RestaurantGame {
     }
     
     render() {
+        // Skip rendering if not fully initialized
+        if (!this.staff || this.staff.length === 0) {
+            return;
+        }
+        
         this.renderOrders();
         this.renderStaff();
         this.renderInventory();
@@ -1109,14 +1200,38 @@ class RestaurantGame {
         const urgentOrders = this.orders.filter(o => o.timeRemaining <= 30 && o.status === 'pending').length;
         const availableStaff = this.staff.filter(s => s.status === 'available').length;
         const lowStockItems = Object.values(this.inventory).filter(item => 
-            (item.current / item.max) < 0.3
+            (item.current / item.max) < 0.3 && item.current > 0
         ).length;
         
+        const emptyStockItems = Object.values(this.inventory).filter(item => 
+            item.current === 0
+        ).length;
+        
+        const totalInventoryItems = Object.keys(this.inventory).length;
+        
+        const vipOrders = this.orders.filter(o => o.isVIP).length;
+        const busyStaff = this.staff.filter(s => s.status === 'busy').length;
+        const restingStaff = this.staff.filter(s => s.status === 'resting').length;
+        
+        // Orders card
         document.getElementById('overview-orders-count').textContent = ordersCount;
-        document.getElementById('overview-orders-urgent').textContent = `${urgentOrders} Urgent`;
+        document.getElementById('overview-orders-urgent-count').textContent = urgentOrders;
+        document.getElementById('overview-orders-vip-count').textContent = vipOrders;
+        
+        // Staff card
         document.getElementById('overview-staff-available').textContent = availableStaff;
+        document.getElementById('overview-staff-busy').textContent = busyStaff;
+        document.getElementById('overview-staff-resting').textContent = restingStaff;
+        
+        // Inventory card
+        document.getElementById('overview-inventory-total').textContent = totalInventoryItems;
         document.getElementById('overview-inventory-low').textContent = lowStockItems;
+        document.getElementById('overview-inventory-empty').textContent = emptyStockItems;
+        
+        // Satisfaction card
         document.getElementById('overview-satisfaction').textContent = `${Math.round(this.customerSatisfaction)}%`;
+        document.getElementById('overview-happy-customers').textContent = this.happyCustomers;
+        document.getElementById('overview-unhappy-customers').textContent = this.unhappyCustomers;
         
         // Update recipes overview
         const recipesUnlockedEl = document.getElementById('overview-recipes-unlocked');
@@ -1908,6 +2023,5 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
     
-    // Initial render
-    game.render();
+    // Initial render is now handled in loadRecipeData()
 });

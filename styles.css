@@ -189,7 +189,7 @@ body {
     border-radius: 12px;
     padding: 30px;
     box-shadow: 0 4px 15px rgba(139, 90, 60, 0.15);
-    transition: all 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     display: flex;
     flex-direction: column;
     gap: 15px;
@@ -198,9 +198,9 @@ body {
 }
 
 .overview-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 24px rgba(139, 90, 60, 0.25);
-    border-color: rgba(193, 123, 91, 0.4);
+    box-shadow: 0 8px 24px rgba(193, 123, 91, 0.35), 0 0 30px rgba(193, 123, 91, 0.2);
+    border-color: rgba(193, 123, 91, 0.6);
+    background: #FFFFFF;
 }
 
 .overview-card .card-icon {
@@ -226,6 +226,57 @@ body {
     gap: 5px;
 }
 
+.overview-card .card-stats-multi {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    width: 100%;
+    gap: 15px;
+}
+
+.overview-card .stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    flex: 1;
+}
+
+.overview-card .stat-number {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #C17B5B;
+    line-height: 1;
+}
+
+.overview-card .stat-number.urgent {
+    color: #B85450;
+}
+
+.overview-card .stat-number.vip {
+    color: #D4AF37;
+}
+
+.overview-card .stat-number.warning {
+    color: #D89E54;
+}
+
+.overview-card .stat-number.danger {
+    color: #B85450;
+}
+
+.overview-card .stat-number.success {
+    color: #5A9E6F;
+}
+
+.overview-card .stat-label-small {
+    font-size: 0.75rem;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 500;
+}
+
 .overview-card .big-stat {
     font-size: 3rem;
     font-weight: bold;
@@ -238,6 +289,58 @@ body {
     color: #666;
     text-transform: uppercase;
     letter-spacing: 1px;
+}
+
+.card-tooltip {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-bottom: 10px;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    z-index: 100;
+    pointer-events: none;
+}
+
+.overview-card:hover .card-tooltip {
+    opacity: 1;
+    visibility: visible;
+}
+
+.card-tooltip .tooltip-content {
+    background: #2C2416;
+    color: #EDE6DF;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    white-space: nowrap;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    border: 1px solid #D4A574;
+}
+
+.card-tooltip .tooltip-content::before {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-top: 8px solid #D4A574;
+}
+
+.card-tooltip .tooltip-content::after {
+    content: '';
+    position: absolute;
+    bottom: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-left: 7px solid transparent;
+    border-right: 7px solid transparent;
+    border-top: 7px solid #2C2416;
 }
 
 .overview-card .urgent-badge {
